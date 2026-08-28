@@ -185,3 +185,14 @@ DxlAprs Manager is an independent management interface.
 It is not the official dxlAPRS user interface and is not affiliated with
 or endorsed by the original dxlAPRS project unless explicitly stated
 otherwise.
+
+## License
+
+DxlAprs Manager is free software licensed under the
+GNU General Public License version 2 or, at your option, any later version
+(GPL-2.0-or-later).
+
+See the `LICENSE` file for the complete license text.
+
+The dxlAPRS toolchain is a separate upstream project and retains its own
+copyright and licensing terms.
