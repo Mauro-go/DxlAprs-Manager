@@ -1,0 +1,8 @@
+[Unit]
+Description=Watch DxlAprs active web configuration
+
+[Path]
+PathChanged=/opt/dxlaprs-manager/data/active_config.json
+
+[Install]
+WantedBy=multi-user.target

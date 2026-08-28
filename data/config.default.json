@@ -1,0 +1,186 @@
+{
+  "project": {
+    "name": "DxlAprs Manager",
+    "version": "0.5"
+  },
+  "dxlaprs": {
+    "binary": "",
+    "web_interface": "manager"
+  },
+  "manager": {
+    "listen_address": "127.0.0.1",
+    "port": 8085,
+    "apply_changes": false
+  },
+  "web": {
+    "mode": "manager",
+    "manager_path": "/",
+    "manager_port": 8085,
+    "public_port": 14501,
+    "original_backend_port": 14502
+  },
+  "aprsis": {
+    "mode": "servers",
+    "server_file": "",
+    "servers": []
+  },
+  "admin": {
+    "username": "admin",
+    "password_hash": ""
+  },
+  "udpgate4_options": {
+    "-0": {
+      "enabled": false
+    },
+    "-A": {
+      "enabled": false,
+      "value": ""
+    },
+    "-a": {
+      "enabled": false,
+      "value": ""
+    },
+    "-B": {
+      "enabled": false,
+      "value": ""
+    },
+    "-C": {
+      "enabled": false,
+      "value": ""
+    },
+    "-c": {
+      "enabled": false
+    },
+    "-D": {
+      "enabled": false,
+      "value": "/opt/dxlaprs/www"
+    },
+    "-d": {
+      "enabled": false,
+      "value": ""
+    },
+    "-E": {
+      "enabled": false
+    },
+    "-e": {
+      "enabled": false,
+      "value": ""
+    },
+    "-F": {
+      "enabled": false,
+      "value": ""
+    },
+    "-f": {
+      "enabled": false,
+      "value": ""
+    },
+    "-g": {
+      "enabled": false,
+      "values": []
+    },
+    "-H": {
+      "enabled": false,
+      "value": ""
+    },
+    "-I": {
+      "enabled": false,
+      "value": ""
+    },
+    "-K": {
+      "enabled": false
+    },
+    "-k": {
+      "enabled": false,
+      "value": ""
+    },
+    "-l": {
+      "enabled": false,
+      "value": ""
+    },
+    "-M": {
+      "enabled": false,
+      "values": []
+    },
+    "-m": {
+      "enabled": false,
+      "value": ""
+    },
+    "-n": {
+      "enabled": false,
+      "values": []
+    },
+    "-O": {
+      "enabled": false
+    },
+    "-o": {
+      "enabled": false,
+      "value": ""
+    },
+    "-p": {
+      "enabled": false,
+      "value": ""
+    },
+    "-Q": {
+      "enabled": false,
+      "value": ""
+    },
+    "-q": {
+      "enabled": false,
+      "value": ""
+    },
+    "-R": {
+      "enabled": false,
+      "values": []
+    },
+    "-r": {
+      "enabled": false,
+      "value": ""
+    },
+    "-S": {
+      "enabled": false,
+      "value": ""
+    },
+    "-s": {
+      "enabled": false,
+      "value": ""
+    },
+    "-T": {
+      "enabled": false,
+      "value": ""
+    },
+    "-t": {
+      "enabled": false,
+      "value": ""
+    },
+    "-u": {
+      "enabled": false,
+      "value": ""
+    },
+    "-V": {
+      "enabled": false,
+      "value": ""
+    },
+    "-v": {
+      "enabled": true
+    },
+    "-W": {
+      "enabled": false,
+      "value": "4000"
+    },
+    "-w": {
+      "enabled": false,
+      "value": "14502"
+    },
+    "-x": {
+      "enabled": false,
+      "value": ""
+    },
+    "-Y": {
+      "enabled": false
+    },
+    "-X": {
+      "enabled": false,
+      "value": ""
+    }
+  }
+}

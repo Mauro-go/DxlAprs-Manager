@@ -1,0 +1,349 @@
+<!doctype html>
+
+<html lang="it">
+
+<head>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Admin - DxlAprs Manager</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background:
+        linear-gradient(
+            145deg,
+            #0d3b78,
+            #082d5d
+        );
+
+    font-family: Arial, Helvetica, sans-serif;
+
+    color: #173957;
+}
+
+.login-box {
+    width: min(420px, calc(100% - 30px));
+
+    background: #dcebf6;
+
+    border: 1px solid #a7c7df;
+    border-radius: 12px;
+
+    box-shadow:
+        0 15px 45px rgba(0,20,50,.28);
+
+    overflow: hidden;
+}
+
+.login-header {
+    background: #9fc5e3;
+
+    padding: 25px;
+
+    text-align: center;
+
+    border-bottom: 1px solid #7faaca;
+}
+
+.login-icon {
+    width: 52px;
+    height: 52px;
+
+    margin: auto auto 10px;
+
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #315f89;
+
+    color: white;
+
+    font-size: 25px;
+}
+
+.login-title {
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.login-subtitle {
+    margin-top: 5px;
+
+    color: #476b8c;
+    font-size: 12px;
+}
+
+.login-body {
+    padding: 25px;
+}
+
+label {
+    display: block;
+
+    margin-bottom: 6px;
+
+    color: #345979;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+input {
+    width: 100%;
+
+    padding: 12px 13px;
+
+    margin-bottom: 17px;
+
+    background: #f5faff;
+
+    border: 1px solid #9ebbd0;
+    border-radius: 6px;
+
+    color: #173957;
+
+    font-size: 15px;
+}
+
+input:focus {
+    outline: none;
+    border-color: #4386b7;
+}
+
+.login-button {
+    width: 100%;
+
+    padding: 12px;
+
+    border: 0;
+    border-radius: 6px;
+
+    background: #315f89;
+
+    color: white;
+
+    font-weight: 800;
+    font-size: 14px;
+
+    cursor: pointer;
+}
+
+.login-button:hover {
+    background: #284f73;
+}
+
+.login-error {
+    margin-bottom: 18px;
+
+    padding: 11px 12px;
+
+    background: #f5dede;
+    border: 1px solid #dfa9a9;
+
+    border-radius: 6px;
+
+    color: #923b3b;
+
+    font-size: 12px;
+}
+
+.back {
+    margin-top: 18px;
+
+    text-align: center;
+}
+
+.back a {
+    color: #315f89;
+    text-decoration: none;
+
+    font-size: 12px;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+<div class="login-box">
+
+<div class="login-header">
+
+<div class="login-icon">
+⚙
+</div>
+
+<div class="login-title">
+DxlAprs Manager
+</div>
+
+<div class="login-subtitle">
+
+<span
+ data-it="Accesso amministrazione"
+ data-en="Administration login"
+>
+Accesso amministrazione
+</span>
+
+</div>
+
+</div>
+
+
+<div class="login-body">
+
+{% if error %}
+
+<div class="login-error">
+
+<span
+ data-it="Nome utente o password non corretti."
+ data-en="Incorrect username or password."
+>
+Nome utente o password non corretti.
+</span>
+
+</div>
+
+{% endif %}
+
+
+<form method="post">
+
+<input
+ type="hidden"
+ name="next"
+ value="{{ session.get('admin_next', '/config/general') }}"
+>
+
+
+<label>
+
+<span
+ data-it="Nome utente"
+ data-en="Username"
+>
+Nome utente
+</span>
+
+</label>
+
+<input
+ type="text"
+ name="username"
+ autocomplete="username"
+ autofocus
+ required
+>
+
+
+<label>
+
+<span
+ data-it="Password"
+ data-en="Password"
+>
+Password
+</span>
+
+</label>
+
+<input
+ type="password"
+ name="password"
+ autocomplete="current-password"
+ required
+>
+
+
+<button
+ type="submit"
+ class="login-button"
+>
+
+<span
+ data-it="Accedi"
+ data-en="Login"
+>
+Accedi
+</span>
+
+</button>
+
+</form>
+
+
+<div class="back">
+
+<a href="/">
+
+←
+
+<span
+ data-it="Torna al monitor"
+ data-en="Back to monitor"
+>
+Torna al monitor
+</span>
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+
+<script>
+
+function setLanguage(lang) {
+
+    localStorage.setItem(
+        "dxlaprs-language",
+        lang
+    );
+
+    document.documentElement.lang = lang;
+
+    document.querySelectorAll(
+        "[data-it][data-en]"
+    ).forEach(function(el) {
+
+        el.textContent =
+            lang === "en"
+            ? el.dataset.en
+            : el.dataset.it;
+    });
+}
+
+setLanguage(
+    localStorage.getItem(
+        "dxlaprs-language"
+    ) || "it"
+);
+
+</script>
+
+</body>
+</html>

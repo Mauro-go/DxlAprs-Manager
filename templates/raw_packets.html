@@ -1,0 +1,760 @@
+<!doctype html>
+
+<html lang="it">
+
+<head>
+
+<meta charset="utf-8">
+
+<meta
+ name="viewport"
+ content="width=device-width,initial-scale=1"
+>
+
+<title>
+RAW {{ data.callsign }} - DxlAprs Manager
+</title>
+
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+
+body {
+    margin: 0;
+
+    min-height: 100vh;
+
+    background:
+        linear-gradient(
+            180deg,
+            #174a82 0%,
+            #0d3970 100%
+        );
+
+    color: #173b60;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+}
+
+
+/* ============================================================
+   PAGINA
+   ============================================================ */
+
+.raw-page {
+    width: 100%;
+
+    padding: 18px;
+}
+
+
+/* ============================================================
+   TESTATA
+   ============================================================ */
+
+.raw-top {
+    display: flex;
+
+    align-items: center;
+
+    gap: 24px;
+
+    margin-bottom: 18px;
+}
+
+
+.back-button {
+    flex: 0 0 auto;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 11px 18px;
+
+    background: #dcecf8;
+
+    border: 1px solid #a7c7dd;
+
+    border-radius: 7px;
+
+    color: #164e80;
+
+    text-decoration: none;
+
+    font-size: 13px;
+
+    font-weight: 800;
+}
+
+
+.back-button:hover {
+    background: #ffffff;
+}
+
+
+.raw-title {
+    color: white;
+
+    font-size: 28px;
+
+    font-weight: 800;
+}
+
+
+.raw-title-call {
+    color: #91ceff;
+
+    font-family:
+        Consolas,
+        "Courier New",
+        monospace;
+}
+
+
+.raw-subtitle {
+    margin-top: 5px;
+
+    color: #c8ddf0;
+
+    font-size: 12px;
+}
+
+
+/* ============================================================
+   PANNELLO
+   ============================================================ */
+
+.raw-panel {
+    width: 100%;
+
+    background: #d7e9f5;
+
+    border: 1px solid #9ebfd8;
+
+    border-radius: 9px;
+
+    box-shadow:
+        0 4px 18px
+        rgba(0, 20, 50, .15);
+
+    overflow: hidden;
+}
+
+
+/* contenitore scrollabile:
+   il packet NON viene tagliato e NON va a capo */
+
+.raw-scroll {
+    width: 100%;
+
+    overflow-x: auto;
+}
+
+
+/* ============================================================
+   TABELLA
+   ============================================================ */
+
+.raw-table {
+    width: 100%;
+
+    min-width: max-content;
+
+    border-collapse: collapse;
+
+    table-layout: auto;
+}
+
+
+/* ------------------------------------------------------------
+   Header
+   ------------------------------------------------------------ */
+
+.raw-table th {
+    background: #82afd0;
+
+    color: #12395d;
+
+    border-bottom:
+        1px solid #6799be;
+
+    padding: 8px 17px;
+
+    text-align: left;
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    white-space: nowrap;
+}
+
+
+.raw-table th.raw-th-time {
+    width: 210px;
+}
+
+
+.raw-table th.raw-th-packet {
+    min-width: 850px;
+}
+
+
+.raw-table th.raw-th-position {
+    width: 310px;
+}
+
+
+/* ------------------------------------------------------------
+   Righe
+   ------------------------------------------------------------ */
+
+.raw-table td {
+    background: #dcebf6;
+
+    border-bottom:
+        1px solid #bfd4e4;
+
+    padding: 4px 17px;
+
+    height: 27px;
+
+    vertical-align: middle;
+
+    font-size: 12px;
+
+    line-height: 17px;
+
+    white-space: nowrap;
+}
+
+
+.raw-table tbody tr:nth-child(even) td {
+    background: #d5e7f3;
+}
+
+
+.raw-table tbody tr:hover td {
+    background: #c9dfef;
+}
+
+
+/* ============================================================
+   TIMESTAMP
+   ============================================================ */
+
+.raw-time {
+    color: #0067c7;
+
+    font-family:
+        Consolas,
+        "Courier New",
+        monospace;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+
+/* ============================================================
+   PACCHETTO COMPLETO
+   ============================================================ */
+
+.raw-packet {
+    color: #163b5e;
+
+    font-family:
+        Consolas,
+        "Courier New",
+        monospace;
+
+    /*
+     * IMPORTANTE:
+     * nessun ellipsis
+     * nessun overflow hidden
+     * nessun wrap
+     *
+     * Se il packet è lungo si allarga la tabella
+     * e compare lo scroll orizzontale.
+     */
+    white-space: pre;
+
+    overflow: visible;
+
+    text-overflow: clip;
+}
+
+
+/* ============================================================
+   DISTANZA / POSIZIONE
+   ============================================================ */
+
+.raw-position {
+    color: #416985;
+
+    font-family:
+        Consolas,
+        "Courier New",
+        monospace;
+
+    white-space: nowrap;
+}
+
+
+.raw-position a {
+    color: #0067c7;
+
+    text-decoration: underline;
+
+    text-underline-offset: 2px;
+
+    font-weight: 600;
+}
+
+
+.raw-position a:hover {
+    color: #004a91;
+}
+
+
+.external {
+    margin-left: 4px;
+
+    color: #0067c7;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+}
+
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+
+.raw-footer {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 20px;
+
+    padding: 9px 15px;
+
+    background: #b6d2e6;
+
+    color: #345a7c;
+
+    border-top:
+        1px solid #9cbfd7;
+
+    font-size: 11px;
+}
+
+
+/* ============================================================
+   EMPTY / ERROR
+   ============================================================ */
+
+.raw-empty {
+    padding: 25px;
+
+    text-align: center;
+
+    color: #4d6f8c;
+}
+
+
+.raw-error {
+    padding: 18px;
+
+    background: #f8dddd;
+
+    color: #8e3333;
+}
+
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media(max-width:700px) {
+
+    .raw-page {
+        padding: 12px;
+    }
+
+
+    .raw-top {
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        gap: 12px;
+    }
+
+
+    .raw-title {
+        font-size: 21px;
+    }
+
+
+    .raw-table td {
+        padding-top: 4px;
+        padding-bottom: 4px;
+    }
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<main class="raw-page">
+
+
+<!-- ========================================================
+     TESTATA
+     ======================================================== -->
+
+<div class="raw-top">
+
+
+<a
+ href="/heard"
+ class="back-button"
+ onclick="
+    if (history.length > 1) {
+        event.preventDefault();
+        history.back();
+    }
+ "
+>
+
+←
+
+<span
+ data-it="Torna indietro"
+ data-en="Back"
+>
+Torna indietro
+</span>
+
+</a>
+
+
+<div>
+
+
+<div class="raw-title">
+
+<span
+ data-it="Pacchetti ricevuti"
+ data-en="Received packets"
+>
+Pacchetti ricevuti
+</span>
+
+—
+
+<span class="raw-title-call">
+{{ data.callsign }}
+</span>
+
+</div>
+
+
+<div class="raw-subtitle">
+
+<span
+ data-it="Dati RAW forniti direttamente da udpgate4"
+ data-en="RAW data provided directly by udpgate4"
+>
+Dati RAW forniti direttamente da udpgate4
+</span>
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<!-- ========================================================
+     ERRORE
+     ======================================================== -->
+
+{% if not data.ok %}
+
+
+<div class="raw-panel">
+
+<div class="raw-error">
+
+<span
+ data-it="Impossibile leggere i pacchetti RAW."
+ data-en="Unable to read RAW packets."
+>
+Impossibile leggere i pacchetti RAW.
+</span>
+
+{{ data.error }}
+
+</div>
+
+</div>
+
+
+
+<!-- ========================================================
+     NESSUN PACCHETTO
+     ======================================================== -->
+
+{% elif not data.rows %}
+
+
+<div class="raw-panel">
+
+<div class="raw-empty">
+
+<span
+ data-it="Nessun pacchetto disponibile per questa stazione."
+ data-en="No packets available for this station."
+>
+Nessun pacchetto disponibile per questa stazione.
+</span>
+
+</div>
+
+</div>
+
+
+
+<!-- ========================================================
+     PACCHETTI
+     ======================================================== -->
+
+{% else %}
+
+
+<div class="raw-panel">
+
+
+<div class="raw-scroll">
+
+
+<table class="raw-table">
+
+
+<thead>
+
+<tr>
+
+<th class="raw-th-time">
+Timestamp
+</th>
+
+
+<th class="raw-th-packet">
+
+<span
+ data-it="Pacchetto APRS"
+ data-en="APRS packet"
+>
+Pacchetto APRS
+</span>
+
+</th>
+
+
+<th class="raw-th-position">
+
+<span
+ data-it="Distanza / Posizione"
+ data-en="Distance / Position"
+>
+Distanza / Posizione
+</span>
+
+</th>
+
+</tr>
+
+</thead>
+
+
+
+<tbody>
+
+
+{% for row in data.rows %}
+
+<tr>
+
+
+<td class="raw-time">
+
+{{ row.timestamp }}
+
+</td>
+
+
+
+<td class="raw-packet">{{ row.packet }}</td>
+
+
+
+<td class="raw-position">
+
+
+{% if row.distance %}
+
+{{ row.distance }}
+
+{% endif %}
+
+
+{% if row.position %}
+
+&nbsp;
+
+{% if row.map_url %}
+
+<a
+ href="{{ row.map_url }}"
+ target="_blank"
+ rel="noopener noreferrer"
+ title="OpenStreetMap"
+>
+{{ row.position }}
+</a>
+
+<span class="external">
+↗
+</span>
+
+
+{% else %}
+
+{{ row.position }}
+
+{% endif %}
+
+
+{% endif %}
+
+
+</td>
+
+
+</tr>
+
+{% endfor %}
+
+
+</tbody>
+
+
+</table>
+
+
+</div>
+
+
+<div class="raw-footer">
+
+
+<div>
+
+<span
+ data-it="Pacchetti visualizzati:"
+ data-en="Displayed packets:"
+>
+Pacchetti visualizzati:
+</span>
+
+<strong>
+{{ data.count }}
+</strong>
+
+</div>
+
+
+<div>
+
+{{ data.callsign }}
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+{% endif %}
+
+
+</main>
+
+
+
+<script>
+
+function setLanguage(lang) {
+
+    localStorage.setItem(
+        "dxlaprs-language",
+        lang
+    );
+
+
+    document.documentElement.lang =
+        lang;
+
+
+    document.querySelectorAll(
+        "[data-it][data-en]"
+    ).forEach(function(el) {
+
+        el.textContent =
+            lang === "en"
+            ? el.dataset.en
+            : el.dataset.it;
+    });
+}
+
+
+setLanguage(
+    localStorage.getItem(
+        "dxlaprs-language"
+    ) || "it"
+);
+
+</script>
+
+
+</body>
+
+</html>

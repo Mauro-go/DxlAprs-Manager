@@ -1,0 +1,628 @@
+{% extends "public_base.html" %}
+
+{% block content %}
+
+
+<div class="traffic-page-title">
+
+<h1>
+
+<span
+ data-it="Traffico in tempo reale"
+ data-en="Real-time traffic"
+>
+Traffico in tempo reale
+</span>
+
+</h1>
+
+
+<p>
+
+<span
+ data-it="Stream APRS ricevuto direttamente da udpgate4"
+ data-en="APRS stream received directly from udpgate4"
+>
+Stream APRS ricevuto direttamente da udpgate4
+</span>
+
+</p>
+
+</div>
+
+
+
+<div class="traffic-toolbar">
+
+
+<div class="traffic-live-state">
+
+<span
+ class="traffic-live-dot off"
+ id="traffic-live-dot"
+>
+</span>
+
+<span id="traffic-live-text">
+
+<span
+ data-it="CONNESSIONE..."
+ data-en="CONNECTING..."
+>
+CONNESSIONE...
+</span>
+
+</span>
+
+</div>
+
+
+
+<button
+ type="button"
+ class="traffic-button"
+ id="pause-button"
+ onclick="togglePause()"
+>
+
+<span
+ data-it="Pausa"
+ data-en="Pause"
+>
+Pausa
+</span>
+
+</button>
+
+
+
+<button
+ type="button"
+ class="traffic-button"
+ onclick="clearTerminal()"
+>
+
+<span
+ data-it="Pulisci"
+ data-en="Clear"
+>
+Pulisci
+</span>
+
+</button>
+
+
+
+<input
+ type="text"
+ class="traffic-filter"
+ id="traffic-filter"
+
+ data-placeholder-it="Filtra callsign o testo..."
+ data-placeholder-en="Filter callsign or text..."
+
+ placeholder="Filtra callsign o testo..."
+
+ oninput="applyFilter()"
+>
+
+
+<label
+ style="
+    display:flex;
+    align-items:center;
+    gap:6px;
+    margin:0;
+    color:#3a5f7d;
+    font-size:11px;
+ "
+>
+
+<input
+ type="checkbox"
+ id="autoscroll"
+ checked
+ style="width:auto"
+>
+
+<span
+ data-it="Autoscroll"
+ data-en="Autoscroll"
+>
+Autoscroll
+</span>
+
+</label>
+
+
+<div class="traffic-toolbar-spacer"></div>
+
+
+<div class="traffic-counter">
+
+<span id="traffic-lines">
+0
+</span>
+
+<span
+ data-it=" righe"
+ data-en=" lines"
+>
+ righe
+</span>
+
+</div>
+
+
+</div>
+
+
+
+<div
+ class="traffic-terminal"
+ id="traffic-terminal"
+>
+
+<div class="traffic-status-line">
+
+<span
+ data-it="Connessione allo stream udpgate4..."
+ data-en="Connecting to udpgate4 stream..."
+>
+Connessione allo stream udpgate4...
+</span>
+
+</div>
+
+</div>
+
+
+
+<script>
+
+const terminal =
+    document.getElementById(
+        "traffic-terminal"
+    );
+
+
+let source = null;
+
+let paused = false;
+
+let totalLines = 0;
+
+let pendingLines = [];
+
+const MAX_LINES = 3000;
+
+
+
+function escTraffic(v) {
+
+    return String(v ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+
+
+function setStreamState(
+    connected,
+    error = ""
+) {
+
+    const dot =
+        document.getElementById(
+            "traffic-live-dot"
+        );
+
+
+    const text =
+        document.getElementById(
+            "traffic-live-text"
+        );
+
+
+    if (connected) {
+
+        dot.classList.remove(
+            "off"
+        );
+
+        text.textContent =
+            "LIVE";
+
+    }
+
+    else {
+
+        dot.classList.add(
+            "off"
+        );
+
+        text.textContent =
+            error
+            ? "OFFLINE"
+            : "CONNECTING...";
+    }
+}
+
+
+
+function classifyFrame(text) {
+
+    if (
+        text.startsWith("#")
+        || text.startsWith("server ")
+    ) {
+        return "comment";
+    }
+
+
+    if (
+        text.includes("::")
+        || text.includes(":}")
+    ) {
+        return "message";
+    }
+
+
+    return "";
+}
+
+
+
+function addFrame(
+    timestamp,
+    text
+) {
+
+    if (paused) {
+
+        pendingLines.push({
+            timestamp,
+            text
+        });
+
+        return;
+    }
+
+
+    const row =
+        document.createElement(
+            "div"
+        );
+
+
+    row.className =
+        "traffic-line";
+
+
+    row.dataset.raw =
+        text.toLowerCase();
+
+
+    const type =
+        classifyFrame(
+            text
+        );
+
+
+    row.innerHTML = `
+
+        <span class="traffic-time">
+            ${escTraffic(timestamp)}
+        </span>
+
+        <span class="traffic-frame ${type}">
+            ${escTraffic(text)}
+        </span>
+    `;
+
+
+    terminal.appendChild(
+        row
+    );
+
+
+    totalLines++;
+
+
+    while (
+        terminal.querySelectorAll(
+            ".traffic-line"
+        ).length > MAX_LINES
+    ) {
+
+        const first =
+            terminal.querySelector(
+                ".traffic-line"
+            );
+
+        if (!first) {
+            break;
+        }
+
+        first.remove();
+    }
+
+
+    document.getElementById(
+        "traffic-lines"
+    ).textContent =
+        totalLines;
+
+
+    applyFilter();
+
+
+    if (
+        document.getElementById(
+            "autoscroll"
+        ).checked
+    ) {
+
+        terminal.scrollTop =
+            terminal.scrollHeight;
+    }
+}
+
+
+
+function addStatusLine(text) {
+
+    const row =
+        document.createElement(
+            "div"
+        );
+
+    row.className =
+        "traffic-status-line";
+
+    row.textContent =
+        text;
+
+    terminal.appendChild(
+        row
+    );
+}
+
+
+
+function togglePause() {
+
+    paused =
+        !paused;
+
+
+    const button =
+        document.getElementById(
+            "pause-button"
+        );
+
+
+    if (paused) {
+
+        button.classList.add(
+            "traffic-paused"
+        );
+
+        button.textContent =
+            (
+                localStorage.getItem(
+                    "dxlaprs-language"
+                ) || "it"
+            ) === "en"
+            ? "Resume"
+            : "Riprendi";
+
+    }
+
+    else {
+
+        button.classList.remove(
+            "traffic-paused"
+        );
+
+        button.textContent =
+            (
+                localStorage.getItem(
+                    "dxlaprs-language"
+                ) || "it"
+            ) === "en"
+            ? "Pause"
+            : "Pausa";
+
+
+        const backlog =
+            pendingLines;
+
+        pendingLines = [];
+
+
+        backlog.forEach(
+            item => {
+
+                addFrame(
+                    item.timestamp,
+                    item.text
+                );
+            }
+        );
+    }
+}
+
+
+
+function clearTerminal() {
+
+    terminal.innerHTML =
+        "";
+
+    totalLines = 0;
+
+    pendingLines = [];
+
+
+    document.getElementById(
+        "traffic-lines"
+    ).textContent =
+        "0";
+}
+
+
+
+function applyFilter() {
+
+    const filter =
+        document.getElementById(
+            "traffic-filter"
+        )
+        .value
+        .trim()
+        .toLowerCase();
+
+
+    terminal
+        .querySelectorAll(
+            ".traffic-line"
+        )
+        .forEach(function(row) {
+
+            row.style.display =
+                !filter
+                || row.dataset.raw.includes(
+                    filter
+                )
+                ? "flex"
+                : "none";
+        });
+}
+
+
+
+function connectStream() {
+
+    if (source) {
+
+        source.close();
+    }
+
+
+    source =
+        new EventSource(
+            "/api/monitor/traffic/stream"
+        );
+
+
+    source.onopen =
+        function() {
+
+            setStreamState(
+                true
+            );
+        };
+
+
+    source.onmessage =
+        function(event) {
+
+            let data;
+
+            try {
+
+                data =
+                    JSON.parse(
+                        event.data
+                    );
+
+            }
+
+            catch {
+
+                return;
+            }
+
+
+            if (
+                data.type ===
+                "frame"
+            ) {
+
+                addFrame(
+                    data.timestamp,
+                    data.data
+                );
+
+                return;
+            }
+
+
+            if (
+                data.type ===
+                "status"
+            ) {
+
+                setStreamState(
+                    !!data.connected,
+                    data.error || ""
+                );
+
+
+                if (
+                    !data.connected
+                    && data.error
+                ) {
+
+                    addStatusLine(
+                        "udpgate4: " +
+                        data.error
+                    );
+                }
+            }
+        };
+
+
+    source.onerror =
+        function() {
+
+            setStreamState(
+                false
+            );
+
+            /*
+             * EventSource tenta automaticamente
+             * la riconnessione.
+             */
+        };
+}
+
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        connectStream();
+    }
+);
+
+
+
+window.addEventListener(
+    "beforeunload",
+    function() {
+
+        if (source) {
+            source.close();
+        }
+    }
+);
+
+</script>
+
+{% endblock %}

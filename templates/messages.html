@@ -1,0 +1,553 @@
+{% extends "public_base.html" %}
+
+{% block content %}
+
+
+<div class="messages-page-title">
+
+<h1>
+
+<span
+ data-it="Messaggi"
+ data-en="Messages"
+>
+Messaggi
+</span>
+
+</h1>
+
+
+<p>
+
+<span
+ data-it="Messaggi APRS osservati dal monitor nativo"
+ data-en="APRS messages observed by the native monitor"
+>
+Messaggi APRS osservati dal monitor nativo
+</span>
+
+</p>
+
+</div>
+
+
+
+<div
+ id="messages-error"
+ class="messages-error"
+>
+
+<span
+ data-it="Impossibile leggere i messaggi dal monitor."
+ data-en="Unable to read messages from the monitor."
+>
+Impossibile leggere i messaggi dal monitor.
+</span>
+
+<span id="messages-error-detail"></span>
+
+</div>
+
+
+
+<!-- ========================================================
+     HEARD MESSAGES
+     ======================================================== -->
+
+<section class="messages-panel">
+
+<div class="messages-panel-header">
+
+<div class="messages-header-left">
+
+<div class="messages-section-icon">
+✉
+</div>
+
+<div>
+
+<div class="messages-section-title">
+
+<span
+ data-it="Messaggi Heard"
+ data-en="Heard Messages"
+>
+Messaggi Heard
+</span>
+
+</div>
+
+
+<div class="messages-section-subtitle">
+
+<span
+ data-it="Inoltrati alle stazioni sentite direttamente e alla rete"
+ data-en="Relayed to directly heard stations and to the network"
+>
+Inoltrati alle stazioni sentite direttamente e alla rete
+</span>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div
+ class="messages-count"
+ id="heard-message-count"
+>
+0
+</div>
+
+</div>
+
+
+<div
+ id="heard-message-content"
+ class="messages-empty"
+>
+
+<span
+ data-it="Caricamento..."
+ data-en="Loading..."
+>
+Caricamento...
+</span>
+
+</div>
+
+</section>
+
+
+
+<!-- ========================================================
+     VIA DIGI
+     ======================================================== -->
+
+<section class="messages-panel">
+
+<div class="messages-panel-header">
+
+<div class="messages-header-left">
+
+<div class="messages-section-icon">
+⇄
+</div>
+
+<div>
+
+<div class="messages-section-title">
+
+<span
+ data-it="Messaggi Heard via Digi"
+ data-en="Via Digi Heard Messages"
+>
+Messaggi Heard via Digi
+</span>
+
+</div>
+
+
+<div class="messages-section-subtitle">
+
+<span
+ data-it="Inoltrati alle stazioni sentite direttamente"
+ data-en="Relayed to directly heard stations"
+>
+Inoltrati alle stazioni sentite direttamente
+</span>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div
+ class="messages-count"
+ id="digi-message-count"
+>
+0
+</div>
+
+</div>
+
+
+<div
+ id="digi-message-content"
+ class="messages-empty"
+>
+
+<span
+ data-it="Caricamento..."
+ data-en="Loading..."
+>
+Caricamento...
+</span>
+
+</div>
+
+</section>
+
+
+
+<!-- ========================================================
+     VIA NET
+     ======================================================== -->
+
+<section class="messages-panel">
+
+<div class="messages-panel-header">
+
+<div class="messages-header-left">
+
+<div class="messages-section-icon">
+◎
+</div>
+
+<div>
+
+<div class="messages-section-title">
+
+<span
+ data-it="Messaggi Heard via rete"
+ data-en="Via Net Heard Messages"
+>
+Messaggi Heard via rete
+</span>
+
+</div>
+
+
+<div class="messages-section-subtitle">
+
+<span
+ data-it="Ricevuti dalla rete e inoltrati alle stazioni sentite direttamente"
+ data-en="Received from the network and relayed to directly heard stations"
+>
+Ricevuti dalla rete e inoltrati alle stazioni sentite direttamente
+</span>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div
+ class="messages-count"
+ id="net-message-count"
+>
+0
+</div>
+
+</div>
+
+
+<div
+ id="net-message-content"
+ class="messages-empty"
+>
+
+<span
+ data-it="Caricamento..."
+ data-en="Loading..."
+>
+Caricamento...
+</span>
+
+</div>
+
+</section>
+
+
+
+<div class="messages-footer">
+
+<span
+ data-it="Ultimo aggiornamento:"
+ data-en="Last update:"
+>
+Ultimo aggiornamento:
+</span>
+
+<span id="messages-last-update">
+—
+</span>
+
+&nbsp; · &nbsp;
+
+<span
+ data-it="aggiornamento automatico ogni 5 secondi"
+ data-en="automatic refresh every 5 seconds"
+>
+aggiornamento automatico ogni 5 secondi
+</span>
+
+</div>
+
+
+
+<script>
+
+function mEsc(v) {
+
+    return String(v ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+
+function mLang() {
+
+    return (
+        localStorage.getItem(
+            "dxlaprs-language"
+        ) || "it"
+    );
+}
+
+
+function renderMessageSection(
+    data,
+    contentId,
+    countId
+) {
+
+    const container =
+        document.getElementById(
+            contentId
+        );
+
+
+    const rows =
+        data.rows || [];
+
+
+    const headers =
+        data.headers || [];
+
+
+    document.getElementById(
+        countId
+    ).textContent =
+        rows.length;
+
+
+    if (!rows.length) {
+
+        container.innerHTML = `
+
+            <div class="messages-empty">
+
+                <strong>
+                    ${
+                        mLang() === "en"
+                        ? "No messages"
+                        : "Nessun messaggio"
+                    }
+                </strong>
+
+            </div>
+        `;
+
+        return;
+    }
+
+
+    let maxColumns = 0;
+
+    rows.forEach(function(row) {
+
+        maxColumns =
+            Math.max(
+                maxColumns,
+                row.length
+            );
+    });
+
+
+    const finalHeaders =
+        headers.length
+        ? headers
+        : Array.from(
+            {
+                length:
+                    maxColumns
+            },
+            (_, i) =>
+                "COL " + (i + 1)
+        );
+
+
+    const headHtml =
+        finalHeaders
+        .map(
+            h =>
+                `<th>${mEsc(h)}</th>`
+        )
+        .join("");
+
+
+    const rowsHtml =
+        rows.map(function(row) {
+
+            return `
+
+                <tr>
+
+                    ${
+                        Array.from(
+                            {
+                                length:
+                                    finalHeaders.length
+                            },
+                            (_, i) =>
+                                `<td>${mEsc(row[i] || "")}</td>`
+                        ).join("")
+                    }
+
+                </tr>
+            `;
+
+        }).join("");
+
+
+    container.innerHTML = `
+
+        <div class="messages-table-wrap">
+
+            <table class="messages-table">
+
+                <thead>
+                    <tr>
+                        ${headHtml}
+                    </tr>
+                </thead>
+
+                <tbody>
+                    ${rowsHtml}
+                </tbody>
+
+            </table>
+
+        </div>
+    `;
+}
+
+
+async function refreshMessages() {
+
+    const error =
+        document.getElementById(
+            "messages-error"
+        );
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/monitor/messages",
+                {
+                    cache:
+                        "no-store"
+                }
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "HTTP " +
+                response.status
+            );
+        }
+
+
+        const data =
+            await response.json();
+
+
+        if (!data.ok) {
+
+            throw new Error(
+                data.error ||
+                "unknown error"
+            );
+        }
+
+
+        error.style.display =
+            "none";
+
+
+        renderMessageSection(
+            data.heard || {},
+            "heard-message-content",
+            "heard-message-count"
+        );
+
+
+        renderMessageSection(
+            data.digi || {},
+            "digi-message-content",
+            "digi-message-count"
+        );
+
+
+        renderMessageSection(
+            data.net || {},
+            "net-message-content",
+            "net-message-count"
+        );
+
+
+        document.getElementById(
+            "messages-last-update"
+        ).textContent =
+            new Date()
+                .toLocaleTimeString();
+
+    }
+
+    catch (err) {
+
+        error.style.display =
+            "block";
+
+
+        document.getElementById(
+            "messages-error-detail"
+        ).textContent =
+            " (" +
+            err.message +
+            ")";
+    }
+}
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        refreshMessages();
+
+
+        setInterval(
+            refreshMessages,
+            5000
+        );
+    }
+);
+
+</script>
+
+{% endblock %}

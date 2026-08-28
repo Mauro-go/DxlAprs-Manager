@@ -1,0 +1,7 @@
+[Unit]
+Description=DxlAprs Web Frontend Router
+After=apache2.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /opt/dxlaprs-manager/web_router.py

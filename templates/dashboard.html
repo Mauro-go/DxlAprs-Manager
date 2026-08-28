@@ -1,0 +1,836 @@
+{% extends "public_base.html" %}
+
+{% block content %}
+
+
+<!-- ========================================================
+     STATO + METRICHE
+     ======================================================== -->
+
+<section class="status-panel">
+
+
+<div class="connection-block">
+
+<div class="connection-label">
+
+<span
+ data-it="STATO COLLEGAMENTO APRS-IS"
+ data-en="APRS-IS CONNECTION STATUS"
+>
+STATO COLLEGAMENTO APRS-IS
+</span>
+
+</div>
+
+
+<div class="connection-status">
+
+<div
+ class="connection-check"
+ id="connection-check"
+>
+✓
+</div>
+
+
+<div
+ class="connection-main"
+ id="connection-status"
+>
+—
+</div>
+
+</div>
+
+
+<div
+ class="connection-server"
+ id="connection-server"
+>
+—
+</div>
+
+<div class="connection-update">
+<span
+ data-it="Filtro:"
+ data-en="Filter:"
+>
+Filtro:
+</span>
+
+<span id="connection-filter">
+—
+</span>
+</div>
+
+
+<div class="connection-update">
+
+<span
+ data-it="Ultimo aggiornamento:"
+ data-en="Last update:"
+>
+Ultimo aggiornamento:
+</span>
+
+<span id="last-update">
+—
+</span>
+
+</div>
+
+</div>
+
+
+
+<div class="metric">
+
+<div class="metric-top">
+
+<div class="metric-icon icon-tx">
+↑
+</div>
+
+<div>
+TX Frames
+</div>
+
+</div>
+
+<div
+ class="metric-value"
+ id="tx-frames"
+>
+—
+</div>
+
+<div class="metric-unit">
+frames
+</div>
+
+</div>
+
+
+
+<div class="metric">
+
+<div class="metric-top">
+
+<div class="metric-icon icon-rx">
+↓
+</div>
+
+<div>
+RX Frames
+</div>
+
+</div>
+
+<div
+ class="metric-value"
+ id="rx-frames"
+>
+—
+</div>
+
+<div class="metric-unit">
+frames
+</div>
+
+</div>
+
+
+
+<div class="metric">
+
+<div class="metric-top">
+
+<div class="metric-icon icon-txrate">
+⇄
+</div>
+
+<div>
+TX Rate
+</div>
+
+</div>
+
+<div
+ class="metric-value"
+ id="tx-rate"
+>
+—
+</div>
+
+<div class="metric-unit">
+bit/s
+</div>
+
+</div>
+
+
+
+<div class="metric">
+
+<div class="metric-top">
+
+<div class="metric-icon icon-rxrate">
+⌁
+</div>
+
+<div>
+RX Rate
+</div>
+
+</div>
+
+<div
+ class="metric-value"
+ id="rx-rate"
+>
+—
+</div>
+
+<div class="metric-unit">
+bit/s
+</div>
+
+</div>
+
+
+
+<div class="metric">
+
+<div class="metric-top">
+
+<div class="metric-icon icon-up">
+◷
+</div>
+
+<div>
+Uptime
+</div>
+
+</div>
+
+<div
+ class="metric-value"
+ id="udpgate-uptime"
+>
+—
+</div>
+
+<div class="metric-unit">
+udpgate4
+</div>
+
+</div>
+
+
+</section>
+
+
+
+<!-- ========================================================
+     CLIENT CONNESSI
+     ======================================================== -->
+
+<section class="clients-panel">
+
+
+<div class="clients-header">
+
+<div class="clients-title-wrap">
+
+<div class="clients-icon">
+♧
+</div>
+
+<div>
+
+<div class="clients-title">
+
+<span
+ data-it="Client Connessi"
+ data-en="Connected Clients"
+>
+Client Connessi
+</span>
+
+</div>
+
+<div class="clients-subtitle">
+
+<span
+ data-it="Stazioni attualmente collegate a udpgate4"
+ data-en="Stations currently connected to udpgate4"
+>
+Stazioni attualmente collegate a udpgate4
+</span>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+
+</div>
+
+
+
+<div class="table-wrap">
+
+<table class="clients-table">
+
+<thead>
+
+<tr>
+
+<th>
+
+<span
+ data-it="STATO"
+ data-en="STATUS"
+>
+STATO
+</span>
+
+</th>
+
+<th>CALLSIGN</th>
+
+<th>IP</th>
+
+<th>SOFTWARE</th>
+
+<th>
+<span
+ data-it="FILTRO"
+ data-en="FILTER"
+>
+FILTRO
+</span>
+</th>
+
+<th>TX FRAMES</th>
+
+<th>RX FRAMES</th>
+
+<th>TX RATE</th>
+
+<th>RX RATE</th>
+
+<th>UPTIME</th>
+
+</tr>
+
+</thead>
+
+
+<tbody id="clients-body">
+
+<tr>
+
+<td
+ colspan="10"
+ class="empty"
+>
+
+<span
+ data-it="Caricamento dati..."
+ data-en="Loading data..."
+>
+Caricamento dati...
+</span>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+
+<div
+ class="public-error"
+ id="dashboard-error"
+>
+
+<span
+ data-it="Impossibile leggere i dati da udpgate4."
+ data-en="Unable to read data from udpgate4."
+>
+Impossibile leggere i dati da udpgate4.
+</span>
+
+<span id="dashboard-error-detail">
+</span>
+
+</div>
+
+</section>
+
+
+
+<script>
+
+function escapeValue(v) {
+
+    return String(v ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+
+function currentLanguage() {
+
+    return (
+        localStorage.getItem(
+            "dxlaprs-language"
+        ) || "it"
+    );
+}
+
+
+function formatInteger(value) {
+
+    if (
+        value === null
+        || value === undefined
+        || value === ""
+    ) {
+        return "—";
+    }
+
+    const n =
+        Number(value);
+
+    if (!Number.isFinite(n)) {
+
+        return "—";
+    }
+
+    return new Intl.NumberFormat(
+        currentLanguage() === "it"
+            ? "it-IT"
+            : "en-US"
+    ).format(n);
+}
+
+
+function renderClients(rows) {
+
+    const body =
+        document.getElementById(
+            "clients-body"
+        );
+
+
+    if (!rows.length) {
+
+        body.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="10"
+                    class="empty"
+                >
+
+                    ${
+                        currentLanguage() === "en"
+                            ? "No connected clients"
+                            : "Nessun client collegato"
+                    }
+
+                </td>
+
+            </tr>
+        `;
+
+        return;
+    }
+
+
+    body.innerHTML =
+        rows.map(function(row) {
+
+            return `
+
+                <tr>
+
+                    <td>
+
+                        <span class="client-online">
+
+                            <span class="client-online-dot">
+                            </span>
+
+                            Online
+
+                        </span>
+
+                    </td>
+
+
+                    <td class="callsign">
+
+                        ${escapeValue(
+                            row.callsign || "—"
+                        )}
+
+                    </td>
+
+
+                    <td class="mono">
+
+                        ${
+                            row.ip
+                            ? `
+                                <a
+                                    class="ip-link"
+                                    href="http://${escapeValue(row.ip)}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    ${escapeValue(row.ip)}
+                                </a>
+                              `
+                            : "—"
+                        }
+
+                    </td>
+
+
+                    <td class="software">
+
+                        ${escapeValue(
+                            row.software || "—"
+                        )}
+
+                    </td>
+
+
+                    <td class="mono">
+
+                        ${escapeValue(
+                            row.filter || "—"
+                        )}
+
+                    </td>
+
+
+                    <td class="number">
+
+                        ${formatInteger(
+                            row.tx_frames
+                        )}
+
+                    </td>
+
+
+                    <td class="number">
+
+                        ${formatInteger(
+                            row.rx_frames
+                        )}
+
+                    </td>
+
+
+                    <td class="number">
+
+                        ${
+                            row.tx_bps === null
+                            || row.tx_bps === undefined
+                                ? "—"
+                                : escapeValue(
+                                    row.tx_bps
+                                  ) + " bit/s"
+                        }
+
+                    </td>
+
+
+                    <td class="number">
+
+                        ${escapeValue(
+                            row.rx_bps
+                        )} bit/s
+
+                    </td>
+
+
+                    <td class="mono">
+
+                        ${escapeValue(
+                            row.uptime
+                        )}
+
+                    </td>
+
+                </tr>
+            `;
+
+        }).join("");
+}
+
+
+async function refreshDashboard() {
+
+    const error =
+        document.getElementById(
+            "dashboard-error"
+        );
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/monitor/connections",
+                {
+                    cache: "no-store"
+                }
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "HTTP " +
+                response.status
+            );
+        }
+
+
+        const data =
+            await response.json();
+
+
+        if (!data.ok) {
+
+            throw new Error(
+                data.error ||
+                "unknown error"
+            );
+        }
+
+
+        error.style.display =
+            "none";
+
+
+        const connections =
+            data.connections || [];
+
+
+        const outgoing =
+            connections.filter(
+                row =>
+                    row.direction === "out"
+            );
+
+
+        const incoming =
+            connections.filter(
+                row =>
+                    row.direction === "in"
+            );
+
+
+        const aprs =
+            outgoing.length
+                ? outgoing[0]
+                : null;
+
+
+        if (aprs) {
+
+            document.getElementById(
+                "connection-status"
+            ).textContent =
+                currentLanguage() === "en"
+                    ? "Connected"
+                    : "Connesso";
+
+
+            document.getElementById(
+                "connection-server"
+            ).textContent =
+                aprs.ip +
+                ":" +
+                aprs.port;
+
+            document.getElementById(
+                "connection-filter"
+            ).textContent =
+                aprs.filter || "—";
+
+
+            document.getElementById(
+                "tx-frames"
+            ).textContent =
+                formatInteger(
+                    aprs.tx_frames
+                );
+
+
+            document.getElementById(
+                "rx-frames"
+            ).textContent =
+                formatInteger(
+                    aprs.rx_frames
+                );
+
+
+            document.getElementById(
+                "tx-rate"
+            ).textContent =
+                aprs.tx_bps;
+
+
+            document.getElementById(
+                "rx-rate"
+            ).textContent =
+                aprs.rx_bps;
+
+
+            document.getElementById(
+                "connection-check"
+            ).textContent =
+                "✓";
+
+
+            document.getElementById(
+                "connection-check"
+            ).style.background =
+                "#16a563";
+
+        }
+
+        else {
+
+            document.getElementById(
+                "connection-status"
+            ).textContent =
+                currentLanguage() === "en"
+                    ? "Disconnected"
+                    : "Disconnesso";
+
+
+            document.getElementById(
+                "connection-server"
+            ).textContent =
+                "—";
+
+            document.getElementById(
+                "connection-filter"
+            ).textContent =
+                "—";
+
+
+            document.getElementById(
+                "tx-frames"
+            ).textContent =
+                "0";
+
+
+            document.getElementById(
+                "rx-frames"
+            ).textContent =
+                "0";
+
+
+            document.getElementById(
+                "tx-rate"
+            ).textContent =
+                "0";
+
+
+            document.getElementById(
+                "rx-rate"
+            ).textContent =
+                "0";
+
+
+            document.getElementById(
+                "connection-check"
+            ).textContent =
+                "!";
+
+
+            document.getElementById(
+                "connection-check"
+            ).style.background =
+                "#c84f55";
+        }
+
+
+        const server =
+            data.server || {};
+
+
+        document.getElementById(
+            "udpgate-uptime"
+        ).textContent =
+            server.uptime || "—";
+
+
+        renderClients(
+            incoming
+        );
+
+
+        document.getElementById(
+            "last-update"
+        ).textContent =
+            new Date()
+                .toLocaleTimeString();
+
+
+    }
+
+    catch (err) {
+
+        error.style.display =
+            "block";
+
+
+        document.getElementById(
+            "dashboard-error-detail"
+        ).textContent =
+            " (" +
+            err.message +
+            ")";
+    }
+}
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        refreshDashboard();
+
+
+        setInterval(
+            refreshDashboard,
+            5000
+        );
+    }
+);
+
+</script>
+
+{% endblock %}

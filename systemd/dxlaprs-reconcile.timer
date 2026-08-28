@@ -1,0 +1,11 @@
+[Unit]
+Description=DxlAprs Manager - Periodic TCP reconcile
+
+[Timer]
+OnBootSec=20s
+OnUnitActiveSec=20s
+AccuracySec=2s
+Unit=dxlaprs-reconcile.service
+
+[Install]
+WantedBy=timers.target

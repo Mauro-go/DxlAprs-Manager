@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Runtime database
+data/*.db
+data/*.db-shm
+data/*.db-wal
+
+# Configurazione locale
+data/config.json
+data/active_config.json
+
+# Backup / temporanei
+backup/
+*.bak
+*.bak-*
+*.tmp
+*~
+
+# Runtime / log
+*.log
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

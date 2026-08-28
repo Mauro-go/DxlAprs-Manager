@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="notice">
+DxlAprs Manager è in modalità sviluppo.
+La configurazione attuale di udpgate4 non viene modificata automaticamente.
+</div>
+
+<div class="card">
+
+    <div class="card-title">Stato sistema</div>
+
+    <div class="card-body">
+
+        <div class="readonly-row">
+            <div class="readonly-label">udpgate4</div>
+            <div>
+                {% if running %}
+                    Attivo
+                {% else %}
+                    Fermo
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="readonly-row">
+            <div class="readonly-label">Callsign server</div>
+            <div>{{ cfg.udpgate4.server_call }}</div>
+        </div>
+
+        <div class="readonly-row">
+            <div class="readonly-label">APRS-IS</div>
+            <div>
+            {% for s in cfg.udpgate4.aprsis_servers %}
+                {{ s.host }}:{{ s.port }}
+            {% endfor %}
+            </div>
+        </div>
+
+        <div class="readonly-row">
+            <div class="readonly-label">TCP client locale</div>
+            <div>porta {{ cfg.udpgate4.local_tcp_port }}</div>
+        </div>
+
+        <div class="readonly-row">
+            <div class="readonly-label">Manager</div>
+            <div>porta {{ cfg.manager.port }}</div>
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="card">
+
+    <div class="card-title">
+        Comando generato dalla configurazione
+    </div>
+
+    <pre>{{ command }}</pre>
+
+</div>
+
+{% endblock %}

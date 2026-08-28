@@ -1,0 +1,637 @@
+{% extends "base.html" %}
+
+{% block title %}
+
+<span class="page-icon">
+<svg viewBox="0 0 24 24">
+<rect x="3" y="4" width="18" height="14" rx="1"/>
+<path d="M8 21h8"/>
+<path d="M12 18v3"/>
+</svg>
+</span>
+
+<span>Web</span>
+
+{% endblock %}
+
+
+{% block content %}
+
+<form method="post" id="web-form">
+
+<div class="card">
+
+<div class="card-title">Web</div>
+
+<div class="card-body">
+
+
+<div class="web-info">
+
+<div class="web-info-icon">ⓘ</div>
+
+<div>
+
+<span
+ data-it="Puoi utilizzare il server web originale di udpgate4 oppure la nostra interfaccia DxlAprs Manager."
+ data-en="You can use the original udpgate4 web server or our DxlAprs Manager interface."
+>
+Puoi utilizzare il server web originale di udpgate4 oppure
+la nostra interfaccia DxlAprs Manager.
+</span>
+
+<br>
+
+<strong>
+<span
+ data-it="Le due opzioni sono mutuamente esclusive: selezionandone una, l'altra viene disabilitata automaticamente."
+ data-en="The two options are mutually exclusive: selecting one automatically disables the other."
+>
+Le due opzioni sono mutuamente esclusive:
+selezionandone una, l'altra viene disabilitata automaticamente.
+</span>
+</strong>
+
+</div>
+
+</div>
+
+
+<div class="web-info">
+
+<div class="web-info-icon">🌐</div>
+
+<div>
+
+<strong>
+<span
+ data-it="Porta pubblica unica: 14501"
+ data-en="Single public port: 14501"
+>
+Porta pubblica unica: 14501
+</span>
+</strong>
+
+<br>
+
+<span
+ data-it="La porta 14501 mostra automaticamente l'interfaccia selezionata. La configurazione DxlAprs Manager rimane sempre raggiungibile tramite /manager/."
+ data-en="Port 14501 automatically shows the selected interface. DxlAprs Manager configuration always remains accessible through /manager/."
+>
+La porta 14501 mostra automaticamente l'interfaccia selezionata.
+La configurazione DxlAprs Manager rimane sempre raggiungibile
+tramite /manager/.
+</span>
+
+</div>
+
+</div>
+
+<div class="web-choice-grid">
+
+
+<!-- ========================================================
+     WEB ORIGINALE UDPGATE4
+     ======================================================== -->
+
+<div
+ class="web-choice-card"
+ id="original-card"
+ onclick="selectWebMode('original')"
+>
+
+<div class="web-choice-header">
+
+<label class="web-radio-line">
+
+<input
+ type="radio"
+ name="web_mode"
+ value="original"
+ id="web-original"
+ {% if web.mode == 'original' %}checked{% endif %}
+ onchange="updateWebMode()"
+>
+
+<span class="web-choice-title">
+<span
+ data-it="Usa pagina web originale di udpgate4"
+ data-en="Use original udpgate4 web page"
+>
+Usa pagina web originale di udpgate4
+</span>
+</span>
+
+</label>
+
+
+<div
+ class="web-mode-badge"
+ id="original-badge"
+></div>
+
+</div>
+
+
+<div class="web-choice-description">
+
+<span
+ data-it="Abilita l'interfaccia web integrata e originale del progetto udpgate4."
+ data-en="Enables the original integrated web interface provided by udpgate4."
+>
+Abilita l'interfaccia web integrata e originale del progetto udpgate4.
+</span>
+
+</div>
+
+
+<div class="field">
+
+<label>
+
+<span
+ data-it="Directory WWW dxlAPRS"
+ data-en="dxlAPRS WWW directory"
+>
+Directory WWW dxlAPRS
+</span>
+
+<span class="param">-D</span>
+
+</label>
+
+<input
+ type="text"
+ name="original_web_root"
+ id="original_web_root"
+ value="{{ values.get('-D', {}).get('value', '') }}"
+ onclick="event.stopPropagation()"
+>
+
+<div class="help">
+
+<span
+ data-it="Directory utilizzata dal server web originale di udpgate4."
+ data-en="Directory used by the original udpgate4 web server."
+>
+Directory utilizzata dal server web originale di udpgate4.
+</span>
+
+</div>
+
+</div>
+
+
+<div class="field">
+
+<label>
+
+<span
+ data-it="Dimensione massima file WWW"
+ data-en="Maximum WWW file size"
+>
+Dimensione massima file WWW
+</span>
+
+<span class="param">-W</span>
+
+</label>
+
+
+<div class="web-inline-field">
+
+<label
+ class="mini-switch"
+ onclick="event.stopPropagation()"
+ title="-W"
+>
+
+<input
+ type="checkbox"
+ name="original_web_max_file_enabled"
+ id="original_web_max_file_enabled"
+ {% if values.get('-W', {}).get('enabled') %}checked{% endif %}
+>
+
+<span class="mini-slider"></span>
+
+</label>
+
+
+<input
+ type="number"
+ min="1"
+ name="original_web_max_file"
+ id="original_web_max_file"
+ value="{{ values.get('-W', {}).get('value', '4000') }}"
+ onclick="event.stopPropagation()"
+>
+
+</div>
+
+
+<div class="help">
+
+<span
+ data-it="Dimensione massima dei file serviti, espressa in blocchi da 1024 byte."
+ data-en="Maximum size of served files, expressed in 1024-byte blocks."
+>
+Dimensione massima dei file serviti, espressa in blocchi da 1024 byte.
+</span>
+
+<br>
+
+<span
+ data-it="Default udpgate4:"
+ data-en="udpgate4 default:"
+>
+Default udpgate4:
+</span>
+
+<span class="param">4000</span>
+
+</div>
+
+</div>
+
+
+<div class="field">
+
+<label>
+
+<span
+ data-it="Porta interna web originale dxlAPRS"
+ data-en="Internal original dxlAPRS web port"
+>
+Porta web originale dxlAPRS
+</span>
+
+<span class="param">-w</span>
+
+</label>
+
+<input
+ type="number"
+ min="1"
+ max="65535"
+ name="original_web_port"
+ id="original_web_port"
+ value="14502"
+ readonly
+ onclick="event.stopPropagation()"
+>
+
+<div class="help">
+
+<span
+ data-it="Porta HTTP dell'interfaccia web originale di udpgate4."
+ data-en="HTTP port of the original udpgate4 web interface."
+>
+Porta HTTP dell'interfaccia web originale di udpgate4.
+</span>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- ========================================================
+     DXLAPRS MANAGER
+     ======================================================== -->
+
+<div
+ class="web-choice-card"
+ id="manager-card"
+ onclick="selectWebMode('manager')"
+>
+
+<div class="web-choice-header">
+
+<label class="web-radio-line">
+
+<input
+ type="radio"
+ name="web_mode"
+ value="manager"
+ id="web-manager"
+ {% if web.mode == 'manager' %}checked{% endif %}
+ onchange="updateWebMode()"
+>
+
+<span class="web-choice-title">
+
+<span
+ data-it="Usa la nostra interfaccia web (DxlAprs Manager)"
+ data-en="Use our web interface (DxlAprs Manager)"
+>
+Usa la nostra interfaccia web (DxlAprs Manager)
+</span>
+
+</span>
+
+</label>
+
+
+<div
+ class="web-mode-badge"
+ id="manager-badge"
+></div>
+
+</div>
+
+
+<div class="web-choice-description">
+
+<span
+ data-it="Disabilita il server web originale di udpgate4 e utilizza DxlAprs Manager."
+ data-en="Disables the original udpgate4 web server and uses DxlAprs Manager."
+>
+Disabilita il server web originale di udpgate4
+e utilizza DxlAprs Manager.
+</span>
+
+</div>
+
+
+<div class="field">
+
+<label>
+
+<span
+ data-it="Percorso DxlAprs Manager"
+ data-en="DxlAprs Manager path"
+>
+Percorso DxlAprs Manager
+</span>
+
+</label>
+
+<input
+ type="text"
+ name="manager_path"
+ id="manager_path"
+ value="{{ web.manager_path }}"
+ onclick="event.stopPropagation()"
+>
+
+<div class="help">
+
+<span
+ data-it="Percorso base della nostra interfaccia web."
+ data-en="Base path of our web interface."
+>
+Percorso base della nostra interfaccia web.
+</span>
+
+</div>
+
+</div>
+
+
+<div class="field">
+
+<label>
+
+<span
+ data-it="Porta DxlAprs Manager"
+ data-en="DxlAprs Manager port"
+>
+Porta DxlAprs Manager
+</span>
+
+</label>
+
+<input
+ type="number"
+ min="1"
+ max="65535"
+ name="manager_port"
+ id="manager_port"
+ value="8085"
+ readonly
+ onclick="event.stopPropagation()"
+>
+
+<div class="help">
+
+<span
+ data-it="Porta interna utilizzata da DxlAprs Manager. La porta pubblica rimane sempre 14501."
+ data-en="Internal port used by DxlAprs Manager. The public port always remains 14501."
+>
+Porta interna utilizzata da DxlAprs Manager. La porta pubblica rimane sempre 14501.
+</span>
+
+</div>
+
+</div>
+
+
+<div class="manager-running">
+
+<div class="manager-running-icon">✓</div>
+
+<div>
+
+<strong>DxlAprs Manager</strong>
+
+<span
+ data-it=" è attualmente in esecuzione sulla porta "
+ data-en=" is currently running on port "
+>
+ è attualmente in esecuzione sulla porta
+</span>
+
+<strong>{{ cfg.manager.port }}</strong>.
+
+<br>
+
+<span
+ data-it="La porta 8085 è riservata al backend DxlAprs Manager e non è modificabile."
+ data-en="Port 8085 is reserved for the DxlAprs Manager backend and cannot be changed."
+>
+La porta 8085 è riservata al backend DxlAprs Manager
+e non è modificabile.
+</span>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<div class="actions config-actions">
+
+<button
+ type="submit"
+ class="save"
+ name="action"
+ value="save"
+>
+
+<span
+ data-it="Salva configurazione"
+ data-en="Save configuration"
+>
+Salva configurazione
+</span>
+
+</button>
+
+
+<button
+ type="submit"
+ class="apply-config"
+ name="action"
+ value="apply"
+>
+
+<span
+ data-it="Applica configurazione"
+ data-en="Apply configuration"
+>
+Applica configurazione
+</span>
+
+</button>
+
+
+<button
+ type="submit"
+ class="restart-udpgate"
+ name="action"
+ value="restart"
+ formnovalidate
+ onclick="
+    return confirm(
+        document.documentElement.lang === 'en'
+        ? 'Restart udpgate4 using the currently saved configuration?'
+        : 'Riavviare udpgate4 usando la configurazione attualmente salvata?'
+    );
+ "
+>
+
+<span
+ data-it="Riavvia udpgate4"
+ data-en="Restart udpgate4"
+>
+Riavvia udpgate4
+</span>
+
+</button>
+
+</div>
+
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-title">
+
+<span
+ data-it="Anteprima comando udpgate4"
+ data-en="udpgate4 command preview"
+>
+Anteprima comando udpgate4
+</span>
+
+</div>
+
+<pre>{{ command }}</pre>
+
+</div>
+
+</form>
+
+
+<script>
+
+function selectWebMode(mode) {
+
+    const el = document.getElementById(
+        mode === "original"
+        ? "web-original"
+        : "web-manager"
+    );
+
+    el.checked = true;
+
+    updateWebMode();
+}
+
+
+function updateWebMode() {
+
+    const original =
+        document.getElementById("web-original").checked;
+
+    const originalCard =
+        document.getElementById("original-card");
+
+    const managerCard =
+        document.getElementById("manager-card");
+
+    originalCard.classList.toggle(
+        "web-selected",
+        original
+    );
+
+    managerCard.classList.toggle(
+        "web-selected",
+        !original
+    );
+
+
+    document.getElementById(
+        "original-badge"
+    ).innerHTML = original
+        ? '<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>'
+        : '<span data-it="DISATTIVATO" data-en="DISABLED">DISATTIVATO</span>';
+
+    document.getElementById(
+        "manager-badge"
+    ).innerHTML = !original
+        ? '<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>'
+        : '<span data-it="DISATTIVATO" data-en="DISABLED">DISATTIVATO</span>';
+
+
+    document.getElementById(
+        "original-badge"
+    ).className =
+        "web-mode-badge " +
+        (original ? "web-badge-active" : "web-badge-off");
+
+    document.getElementById(
+        "manager-badge"
+    ).className =
+        "web-mode-badge " +
+        (!original ? "web-badge-active" : "web-badge-off");
+
+
+    const lang =
+        localStorage.getItem(
+            "dxlaprs-language"
+        ) || "it";
+
+    setLanguage(lang);
+}
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    updateWebMode
+);
+
+</script>
+
+{% endblock %}

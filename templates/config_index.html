@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}
+<span
+ data-it="Configurazione"
+ data-en="Configuration"
+>Configurazione</span>
+{% endblock %}
+
+{% block content %}
+
+<div class="notice">
+<span
+ data-it="Ogni gruppo di impostazioni ha una pagina dedicata. Seleziona la sezione che vuoi configurare."
+ data-en="Each settings group has its own page. Select the section you want to configure."
+>
+Ogni gruppo di impostazioni ha una pagina dedicata.
+Seleziona la sezione che vuoi configurare.
+</span>
+</div>
+
+
+<div class="config-list">
+
+<a class="config-link" href="/config/general">
+<div class="config-name">
+<span data-it="Generale" data-en="General">Generale</span>
+</div>
+<div class="config-description">
+<span
+ data-it="Callsign e passcode APRS-IS."
+ data-en="Callsign and APRS-IS passcode."
+>Callsign e passcode APRS-IS.</span>
+</div>
+</a>
+
+
+<a class="config-link" href="/config/aprsis">
+<div class="config-name">APRS-IS</div>
+<div class="config-description">
+<span
+ data-it="Server, porte, filtri e connessioni APRS-IS."
+ data-en="APRS-IS servers, ports, filters and connections."
+>
+Server, porte, filtri e connessioni APRS-IS.
+</span>
+</div>
+</a>
+
+
+<a class="config-link" href="/config/radio">
+<div class="config-name">
+<span
+ data-it="Porte radio / AXUDP"
+ data-en="Radio ports / AXUDP"
+>Porte radio / AXUDP</span>
+</div>
+<div class="config-description">
+<span
+ data-it="Configurazione delle porte -R e -M."
+ data-en="Configuration of -R and -M ports."
+>
+Configurazione delle porte -R e -M.
+</span>
+</div>
+</a>
+
+
+<a class="config-link" href="/config/beacon">
+<div class="config-name">Beacon</div>
+<div class="config-description">
+<span
+ data-it="Net beacon e file beacon."
+ data-en="Net beacon and beacon files."
+>
+Net beacon e file beacon.
+</span>
+</div>
+</a>
+
+
+<a class="config-link" href="/config/heard">
+<div class="config-name">Heard / Objects</div>
+<div class="config-description">
+<span
+ data-it="Direct heard, indirect heard, Items e Objects."
+ data-en="Direct heard, indirect heard, Items and Objects."
+>
+Direct heard, indirect heard, Items e Objects.
+</span>
+</div>
+</a>
+
+
+
+
+
+<a class="config-link" href="/config/tcp">
+<div class="config-name">
+<span data-it="TCP locale" data-en="Local TCP">TCP locale</span>
+</div>
+<div class="config-description">
+<span
+ data-it="Server APRS locale e connessioni client."
+ data-en="Local APRS server and client connections."
+>
+Server APRS locale e connessioni client.
+</span>
+</div>
+</a>
+
+
+<a class="config-link" href="/config/web">
+<div class="config-name">Web</div>
+<div class="config-description">
+<span
+ data-it="DxlAprs Manager e pagina web originale dxlAPRS."
+ data-en="DxlAprs Manager and original dxlAPRS web page."
+>
+DxlAprs Manager e pagina web originale dxlAPRS.
+</span>
+</div>
+</a>
+
+
+<a class="config-link" href="/config/srtm">
+<div class="config-name">SRTM</div>
+<div class="config-description">
+<span
+ data-it="Altitudine e calcolo elevazione."
+ data-en="Altitude and elevation calculation."
+>
+Altitudine e calcolo elevazione.
+</span>
+</div>
+</a>
+
+
+<a class="config-link" href="/config/logging">
+<div class="config-name">Logging</div>
+<div class="config-description">
+<span
+ data-it="Log, file giornalieri e diagnostica."
+ data-en="Logs, daily files and diagnostics."
+>
+Log, file giornalieri e diagnostica.
+</span>
+</div>
+</a>
+
+
+<a class="config-link" href="/config/advanced">
+<div class="config-name">
+<span data-it="Avanzate" data-en="Advanced">Avanzate</span>
+</div>
+<div class="config-description">
+<span
+ data-it="Tutte le altre opzioni di udpgate4 0.80."
+ data-en="All remaining udpgate4 0.80 options."
+>
+Tutte le altre opzioni di udpgate4 0.80.
+</span>
+</div>
+</a>
+
+</div>
+
+{% endblock %}

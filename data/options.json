@@ -1,0 +1,434 @@
+{
+  "general": {
+    "it": "Generale",
+    "en": "General",
+    "icon": "gear",
+    "options": [
+      {
+        "flag": "-s",
+        "syntax": "<call>",
+        "it": "Callsign del server",
+        "en": "Server callsign",
+        "help_it": "Callsign principale utilizzato dal server udpgate4.",
+        "help_en": "Main callsign used by the udpgate4 server.",
+        "default": "",
+        "required_hint": true
+      },
+      {
+        "flag": "-S",
+        "syntax": "<call>",
+        "it": "Callsign server alternativo",
+        "en": "Alternative server callsign",
+        "help_it": "Parametro alternativo per il server call. Normalmente non necessario se viene utilizzato -s.",
+        "help_en": "Alternative server-call parameter. Normally not required when -s is used.",
+        "default": ""
+      },
+      {
+        "flag": "-p",
+        "syntax": "<password|file>",
+        "it": "Passcode APRS-IS",
+        "en": "APRS-IS passcode",
+        "help_it": "Passcode APRS-IS oppure nome del file che lo contiene.",
+        "help_en": "APRS-IS passcode or filename containing it.",
+        "default": "",
+        "required_hint": true
+      }
+    ]
+  },
+  "aprsis": {
+    "it": "APRS-IS",
+    "en": "APRS-IS",
+    "icon": "globe",
+    "options": [
+      {
+        "flag": "-g",
+        "syntax": "<url>:<port>[#<filters>] oppure :<filename>",
+        "it": "Server APRS-IS",
+        "en": "APRS-IS servers",
+        "help_it": "Ripetibile. I server vengono provati nell'ordine indicato. È possibile usare anche :nomefile per leggere l'elenco da file.",
+        "help_en": "Repeatable. Servers are tried in the listed order. :filename may also be used to read servers from a file.",
+        "repeat": true
+      },
+      {
+        "flag": "-f",
+        "syntax": "<filters>",
+        "it": "Filtro backstream globale",
+        "en": "Global backstream filter",
+        "help_it": "Filtro inviato al server APRS-IS quando il singolo -g non specifica un proprio filtro.",
+        "help_en": "Filter sent to APRS-IS when an individual -g does not specify its own filter.",
+        "default": ""
+      },
+      {
+        "flag": "-e",
+        "syntax": "<seconds>",
+        "it": "Attesa prima della riconnessione",
+        "en": "Reconnect delay",
+        "help_it": "Tempo di attesa prima di collegarsi o ricollegarsi al prossimo gateway.",
+        "help_en": "Delay before connecting or reconnecting to the next gateway.",
+        "default": "30"
+      },
+      {
+        "flag": "-k",
+        "syntax": "<seconds>",
+        "it": "Connessione APRS-IS su richiesta",
+        "en": "On-demand APRS-IS connection",
+        "help_it": "0 = sempre connesso. Un valore maggiore mantiene la connessione per quel numero di secondi dopo l'ultimo traffico valido.",
+        "help_en": "0 = always connected. A higher value keeps the connection for that many seconds after the last valid traffic.",
+        "default": "0"
+      },
+      {
+        "flag": "-T",
+        "syntax": "<seconds>",
+        "it": "Timeout coda TCP",
+        "en": "TCP queue timeout",
+        "help_it": "Chiude il link se i byte TCP non confermati restano troppo a lungo in coda. 0 disabilita.",
+        "help_en": "Kills the link if unacknowledged TCP bytes remain queued too long. 0 disables it.",
+        "default": "15"
+      },
+      {
+        "flag": "-0",
+        "syntax": "",
+        "it": "Niente dati agli utenti senza filtro",
+        "en": "No data to users without filter",
+        "help_it": "Agli utenti senza filtro vengono inviati solo messaggi e ACK.",
+        "help_en": "Users without a filter receive only messages and ACKs.",
+        "boolean": true
+      },
+      {
+        "flag": "-c",
+        "syntax": "",
+        "it": "Scarta sorgenti APRS non valide",
+        "en": "Drop invalid APRS sources",
+        "help_it": "Elimina dallo stream APRS-IS i frame senza un source callsign valido.",
+        "help_en": "Deletes frames from the APRS-IS stream that do not have a valid source callsign.",
+        "boolean": true
+      }
+    ]
+  },
+  "radio": {
+    "it": "Porte radio / AXUDP",
+    "en": "Radio ports / AXUDP",
+    "icon": "radio",
+    "options": [
+      {
+        "flag": "-R",
+        "syntax": "<ip>:<dport>/<lport>[+<byte/s>[:<radius>]][#<portname>]",
+        "it": "Porte radio AXUDP monitor",
+        "en": "AXUDP monitor radio ports",
+        "help_it": "Ripetibile. Configura le porte RF UDP nel formato monitor. dport=0 disabilita la trasmissione.",
+        "help_en": "Repeatable. Configures UDP RF ports in monitor format. dport=0 disables transmission.",
+        "repeat": true
+      },
+      {
+        "flag": "-M",
+        "syntax": "<ip>:<dport>/<lport>[+<byte/s>[:<radius>]][#<portname>]",
+        "it": "Porte radio TNC text",
+        "en": "TNC text radio ports",
+        "help_it": "Come -R, ma utilizza il formato testo TNC.",
+        "help_en": "Same as -R, but uses TNC text format.",
+        "repeat": true
+      },
+      {
+        "flag": "-E",
+        "syntax": "",
+        "it": "Elimina frame con caratteri di controllo",
+        "en": "Erase frames containing control characters",
+        "help_it": "Elimina i frame AXUDP con caratteri di controllo nei callsign.",
+        "help_en": "Deletes AXUDP frames containing control characters in callsigns.",
+        "boolean": true
+      },
+      {
+        "flag": "-K",
+        "syntax": "",
+        "it": "Blocca RF → NET senza callsign valido",
+        "en": "Block RF → NET without valid callsign",
+        "help_it": "Non inoltra alla rete i frame RF il cui mittente non ha un callsign valido.",
+        "help_en": "Does not gate RF frames to the network when the sender has no valid callsign.",
+        "boolean": true
+      },
+      {
+        "flag": "-O",
+        "syntax": "",
+        "it": "Heard separato per porta",
+        "en": "Separate Heard entries per port",
+        "help_it": "Crea entry MH separate per lo stesso callsign ricevuto su porte differenti.",
+        "help_en": "Creates separate MH entries for the same callsign heard on different ports.",
+        "boolean": true
+      },
+      {
+        "flag": "-o",
+        "syntax": "<seconds>",
+        "it": "Timeout ping-pong",
+        "en": "Ping-pong timeout",
+        "help_it": "Interrompe l'inoltro dati dopo il tempo indicato dall'ultimo ping.",
+        "help_en": "Stops data forwarding after the specified time since the last ping.",
+        "default": ""
+      },
+      {
+        "flag": "-q",
+        "syntax": "<seconds>",
+        "it": "Quiet time dopo TX RF",
+        "en": "Quiet time after RF TX",
+        "help_it": "Tempo minimo di silenzio dopo una trasmissione RF.",
+        "help_en": "Minimum quiet time after an RF transmission.",
+        "default": "10"
+      },
+      {
+        "flag": "-V",
+        "syntax": "<path>",
+        "it": "Via path NET → RF",
+        "en": "NET → RF via path",
+        "help_it": "Path utilizzato per i frame inoltrati dalla rete verso RF. -1 usa l'SSID del callsign destinazione.",
+        "help_en": "Path used for frames gated from network to RF. -1 uses the destination callsign SSID.",
+        "default": ""
+      },
+      {
+        "flag": "-x",
+        "syntax": "<call>",
+        "it": "Callsign via per messaggi verso RF",
+        "en": "Via callsign for messages to RF",
+        "help_it": "Callsign via utilizzato per inviare messaggi verso RF. '-' disabilita il TX.",
+        "help_en": "Via callsign used to send messages to RF. '-' disables TX.",
+        "default": ""
+      }
+    ]
+  },
+  "beacon": {
+    "it": "Beacon",
+    "en": "Beacon",
+    "icon": "beacon",
+    "options": [
+      {
+        "flag": "-n",
+        "syntax": "<minutes>:<file>",
+        "it": "Net beacon",
+        "en": "Net beacon",
+        "help_it": "Ripetibile. Indica intervallo in minuti e file contenente il beacon.",
+        "help_en": "Repeatable. Defines the interval in minutes and the beacon file.",
+        "repeat": true
+      },
+      {
+        "flag": "-Q",
+        "syntax": "<n>",
+        "it": "Gestione qAS / qAI del beacon",
+        "en": "Beacon qAS / qAI handling",
+        "help_it": "0=mai qAI, 1=sempre qAI, altri valori inviano un beacon qAI ogni n beacon.",
+        "help_en": "0=never qAI, 1=always qAI, other values send one qAI beacon every n beacons.",
+        "default": ""
+      }
+    ]
+  },
+  "heard": {
+    "it": "Heard / Objects",
+    "en": "Heard / Objects",
+    "icon": "users",
+    "options": [
+      {
+        "flag": "-B",
+        "syntax": "[+]<minutes>",
+        "it": "Tempo Items / Objects",
+        "en": "Items / Objects time",
+        "help_it": "Tempo di visualizzazione. Con + include anche Items e Objects provenienti da APRS-IS.",
+        "help_en": "Display time. With + it also includes Items and Objects received from APRS-IS.",
+        "default": ""
+      },
+      {
+        "flag": "-C",
+        "syntax": "<minutes>",
+        "it": "Memoria posizione client TCP",
+        "en": "TCP client position memory",
+        "help_it": "Per quanto tempo viene ricordata la posizione dei client TCP collegati.",
+        "help_en": "How long the position of connected TCP clients is remembered.",
+        "default": "1440"
+      },
+      {
+        "flag": "-F",
+        "syntax": "<lines>:<file>",
+        "it": "File Direct Heard",
+        "en": "Direct Heard file",
+        "help_it": "Scrive su file la lista delle stazioni sentite direttamente.",
+        "help_en": "Writes the direct-heard station list to a file.",
+        "default": ""
+      },
+      {
+        "flag": "-H",
+        "syntax": "<minutes>",
+        "it": "Memoria Direct Heard",
+        "en": "Direct Heard retention",
+        "help_it": "Tempo di permanenza delle stazioni sentite direttamente.",
+        "help_en": "Retention time for directly heard stations.",
+        "default": "1440"
+      },
+      {
+        "flag": "-I",
+        "syntax": "<minutes>",
+        "it": "Memoria Indirect Heard",
+        "en": "Indirect Heard retention",
+        "help_it": "Tempo di permanenza delle stazioni sentite indirettamente.",
+        "help_en": "Retention time for indirectly heard stations.",
+        "default": "30"
+      },
+      {
+        "flag": "-u",
+        "syntax": "<maxlines>",
+        "it": "Righe frame raw",
+        "en": "Raw frame lines",
+        "help_it": "Numero massimo di frame raw mostrati cliccando il contatore Heard. 0 disabilita.",
+        "help_en": "Maximum raw frames shown when clicking the Heard counter. 0 disables it.",
+        "default": "50"
+      }
+    ]
+  },
+  "tcp": {
+    "it": "TCP locale",
+    "en": "Local TCP",
+    "icon": "network",
+    "options": [
+      {
+        "flag": "-t",
+        "syntax": "<localport>",
+        "it": "Porta TCP APRS locale",
+        "en": "Local APRS TCP port",
+        "help_it": "Porta utilizzata dai client APRS che si collegano a udpgate4.",
+        "help_en": "Port used by APRS clients connecting to udpgate4.",
+        "default": ""
+      },
+      {
+        "flag": "-m",
+        "syntax": "<maxconnects>",
+        "it": "Numero massimo connessioni inbound",
+        "en": "Maximum inbound connections",
+        "help_it": "Numero massimo di connessioni TCP client contemporanee.",
+        "help_en": "Maximum number of simultaneous TCP client connections.",
+        "default": "200"
+      }
+    ]
+  },
+  "web": {
+    "it": "Web",
+    "en": "Web",
+    "icon": "monitor",
+    "options": [
+      {
+        "flag": "-D",
+        "syntax": "<path>",
+        "it": "Directory WWW dxlAPRS",
+        "en": "dxlAPRS WWW directory",
+        "help_it": "Directory utilizzata dal server web originale di udpgate4.",
+        "help_en": "Directory used by the original udpgate4 web server.",
+        "default": ""
+      },
+      {
+        "flag": "-W",
+        "syntax": "<filesize>",
+        "it": "Dimensione massima file WWW",
+        "en": "Maximum WWW file size",
+        "help_it": "Dimensione massima dei file serviti, espressa in blocchi da 1024 byte.",
+        "help_en": "Maximum size of served files, expressed in 1024-byte blocks.",
+        "default": "4000"
+      },
+      {
+        "flag": "-w",
+        "syntax": "<port>",
+        "it": "Porta web originale dxlAPRS",
+        "en": "Original dxlAPRS web port",
+        "help_it": "Porta HTTP dell'interfaccia web originale di udpgate4.",
+        "help_en": "HTTP port of the original udpgate4 web interface.",
+        "default": ""
+      }
+    ]
+  },
+  "srtm": {
+    "it": "SRTM",
+    "en": "SRTM",
+    "icon": "mountain",
+    "options": [
+      {
+        "flag": "-A",
+        "syntax": "<path>",
+        "it": "Directory SRTM",
+        "en": "SRTM directory",
+        "help_it": "Directory contenente i dati SRTM per il calcolo dell'elevazione.",
+        "help_en": "Directory containing SRTM data used for elevation calculations.",
+        "default": ""
+      },
+      {
+        "flag": "-a",
+        "syntax": "<meters>",
+        "it": "Altitudine dell'iGate",
+        "en": "iGate altitude",
+        "help_it": "Altitudine dell'iGate in metri. Sovrascrive il valore ricavato da SRTM.",
+        "help_en": "iGate altitude in meters. Overrides the value obtained from SRTM.",
+        "default": ""
+      },
+      {
+        "flag": "-Y",
+        "syntax": "",
+        "it": "Completa altitudine MH tramite SRTM",
+        "en": "Fill missing MH altitude from SRTM",
+        "help_it": "Ricava da SRTM l'altitudine mancante nelle entry Heard.",
+        "help_en": "Gets missing altitude in Heard entries from SRTM.",
+        "boolean": true
+      }
+    ]
+  },
+  "logging": {
+    "it": "Logging",
+    "en": "Logging",
+    "icon": "file",
+    "options": [
+      {
+        "flag": "-l",
+        "syntax": "<level>:<file>",
+        "it": "Logfile udpgate4",
+        "en": "udpgate4 logfile",
+        "help_it": "Log con livello: 0 tutti i frame, 1 duplicati, valori superiori errori e stato.",
+        "help_en": "Log with level: 0 all frames, 1 duplicates, higher values errors and status.",
+        "default": ""
+      },
+      {
+        "flag": "-r",
+        "syntax": "<filename>",
+        "it": "Log giornaliero",
+        "en": "Daily log",
+        "help_it": "Scrive un logfile giornaliero con data, ora e dati.",
+        "help_en": "Writes a daily logfile containing date, time and data.",
+        "default": ""
+      },
+      {
+        "flag": "-v",
+        "syntax": "",
+        "it": "Output verbose",
+        "en": "Verbose output",
+        "help_it": "Mostra frame e analisi sullo standard output.",
+        "help_en": "Shows frames and analytics on standard output.",
+        "boolean": true
+      }
+    ]
+  },
+  "advanced": {
+    "it": "Avanzate",
+    "en": "Advanced",
+    "icon": "tools",
+    "options": [
+      {
+        "flag": "-d",
+        "syntax": "<seconds>",
+        "it": "Filtro duplicati",
+        "en": "Duplicate filter",
+        "help_it": "Tempo del filtro duplicati. Non deve essere inferiore a 27 secondi.",
+        "help_en": "Duplicate-filter time. Must not be below 27 seconds.",
+        "default": "60"
+      },
+      {
+        "flag": "-X",
+        "syntax": "<qXX>",
+        "it": "Identificatore q per RF verso APRS-IS",
+        "en": "q identifier for RF to APRS-IS",
+        "help_it": "Modifica qAR usato per l'inoltro dei frame RF verso APRS-IS sulle porte radio abilitate alla trasmissione.",
+        "help_en": "Changes qAR used when gating RF frames to APRS-IS on radio ports enabled for transmission.",
+        "default": "qAR"
+      }
+    ]
+  }
+}

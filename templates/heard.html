@@ -1,0 +1,946 @@
+{% extends "public_base.html" %}
+
+{% block content %}
+
+
+<div class="heard-page-title">
+
+<h1>Heard</h1>
+
+<p>
+
+<span
+ data-it="Stazioni e oggetti osservati dal monitor nativo"
+ data-en="Stations and objects observed by the native monitor"
+>
+Stazioni e oggetti osservati dal monitor nativo
+</span>
+
+</p>
+
+</div>
+
+
+
+<div
+ id="heard-error"
+ class="heard-error"
+>
+
+<span
+ data-it="Impossibile leggere i dati Heard dal monitor."
+ data-en="Unable to read Heard data from the monitor."
+>
+Impossibile leggere i dati Heard dal monitor.
+</span>
+
+<span id="heard-error-detail">
+</span>
+
+</div>
+
+
+
+<!-- ========================================================
+     TCP
+     ======================================================== -->
+
+<section class="heard-panel">
+
+<div class="heard-panel-header">
+
+<div class="heard-header-left">
+
+<div class="heard-section-icon">
+⇄
+</div>
+
+<div>
+
+<div class="heard-section-title">
+
+<span
+ data-it="Stazioni via TCP"
+ data-en="Stations via TCP"
+>
+Stazioni via TCP
+</span>
+
+</div>
+
+
+<div class="heard-section-subtitle">
+
+<span
+ data-it="Stazioni collegate e riconosciute tramite TCP"
+ data-en="Stations connected and known through TCP"
+>
+Stazioni collegate e riconosciute tramite TCP
+</span>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div
+ class="heard-count"
+ id="tcp-count"
+>
+—
+</div>
+
+</div>
+
+
+<div
+ id="tcp-content"
+ class="heard-empty"
+>
+
+<span
+ data-it="Caricamento..."
+ data-en="Loading..."
+>
+Caricamento...
+</span>
+
+</div>
+
+</section>
+
+
+<!-- ========================================================
+     RADIO / RF
+     ======================================================== -->
+
+<section class="heard-panel">
+
+<div class="heard-panel-header">
+
+<div class="heard-header-left">
+
+<div class="heard-section-icon">
+⌁
+</div>
+
+<div>
+
+<div class="heard-section-title">
+
+<span
+ data-it="Stazioni ricevute"
+ data-en="Received stations"
+>
+Stazioni ricevute
+</span>
+
+</div>
+
+
+<div class="heard-section-subtitle">
+
+<span
+ data-it="Pacchetti APRS osservati dai ricevitori collegati"
+ data-en="APRS packets observed by connected receivers"
+>
+Pacchetti APRS osservati dai ricevitori collegati
+</span>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div
+ class="heard-count"
+ id="radio-count"
+>
+—
+</div>
+
+</div>
+
+
+<div
+ id="radio-content"
+ class="heard-empty"
+>
+
+<span
+ data-it="Caricamento..."
+ data-en="Loading..."
+>
+Caricamento...
+</span>
+
+</div>
+
+</section>
+
+
+<!-- ========================================================
+     OBJECTS
+     ======================================================== -->
+
+<section class="heard-panel">
+
+<div class="heard-panel-header">
+
+<div class="heard-header-left">
+
+<div class="heard-section-icon">
+◇
+</div>
+
+<div>
+
+<div class="heard-section-title">
+
+<span
+ data-it="Oggetti APRS"
+ data-en="APRS Objects"
+>
+Oggetti APRS
+</span>
+
+</div>
+
+
+<div class="heard-section-subtitle">
+
+<span
+ data-it="Objects APRS osservati dal monitor nativo"
+ data-en="APRS Objects observed by the native monitor"
+>
+Objects APRS osservati dal monitor nativo
+</span>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div
+ class="heard-count"
+ id="objects-count"
+>
+—
+</div>
+
+</div>
+
+
+<div
+ id="objects-content"
+ class="heard-empty"
+>
+
+<span
+ data-it="Caricamento..."
+ data-en="Loading..."
+>
+Caricamento...
+</span>
+
+</div>
+
+</section>
+
+
+<div class="heard-footer">
+
+<span
+ data-it="Ultimo aggiornamento:"
+ data-en="Last update:"
+>
+Ultimo aggiornamento:
+</span>
+
+<span id="heard-last-update">
+—
+</span>
+
+&nbsp; · &nbsp;
+
+<span
+ data-it="aggiornamento automatico ogni 5 secondi"
+ data-en="automatic refresh every 5 seconds"
+>
+aggiornamento automatico ogni 5 secondi
+</span>
+
+</div>
+
+
+
+<script>
+
+function hEsc(v) {
+
+    return String(
+        v ?? ""
+    )
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+
+function hLang() {
+
+    return (
+        localStorage.getItem(
+            "dxlaprs-language"
+        ) || "it"
+    );
+}
+
+
+function symbolHtml(row) {
+
+    if (!row.icon) {
+
+        return `
+            <div class="heard-symbol">
+                ${
+                    hEsc(
+                        row.overlay || "—"
+                    )
+                }
+            </div>
+        `;
+    }
+
+
+    return `
+        <div class="heard-symbol">
+
+            <img
+                src="/dxl-icon/${encodeURIComponent(row.icon)}"
+                alt=""
+            >
+
+            ${
+                row.overlay
+                ? `
+                    <span class="heard-symbol-overlay">
+                        ${hEsc(row.overlay)}
+                    </span>
+                `
+                : ""
+            }
+
+        </div>
+    `;
+}
+
+
+function emptyMessage(type) {
+
+    const en =
+        hLang() === "en";
+
+
+    if (type === "radio") {
+
+        return `
+            <div class="heard-empty">
+
+                <strong>
+                    ${
+                        en
+                        ? "No stations heard via radio"
+                        : "Nessuna stazione ascoltata via radio"
+                    }
+                </strong>
+
+                ${
+                    en
+                    ? "This section will automatically populate when RF/SDR reception is active."
+                    : "Questa sezione si popolerà automaticamente quando sarà attiva una ricezione RF/SDR."
+                }
+
+            </div>
+        `;
+    }
+
+
+    if (type === "tcp") {
+
+        return `
+            <div class="heard-empty">
+
+                <strong>
+                    ${
+                        en
+                        ? "No TCP stations"
+                        : "Nessuna stazione via TCP"
+                    }
+                </strong>
+
+            </div>
+        `;
+    }
+
+
+    return `
+        <div class="heard-empty">
+
+            <strong>
+                ${
+                    en
+                    ? "No APRS Objects"
+                    : "Nessun Object APRS"
+                }
+            </strong>
+
+        </div>
+    `;
+}
+
+
+
+
+
+function packLink(row) {
+
+    if (!row.call) {
+
+        return hEsc(
+            row.pack || ""
+        );
+    }
+
+    return `
+        <a
+            class="heard-pack-link"
+            href="/raw/${encodeURIComponent(row.call)}"
+            title="${
+                hLang() === "en"
+                ? "View received raw packets"
+                : "Visualizza i pacchetti RAW ricevuti"
+            }"
+        >
+            ${hEsc(row.pack || "0")}
+        </a>
+    `;
+}
+
+function renderRadio(data) {
+
+    document.getElementById(
+        "radio-count"
+    ).textContent =
+        data.count ?? 0;
+
+    const radioPanel =
+        document.getElementById("radio-content").closest(".heard-panel");
+
+    radioPanel.classList.toggle(
+        "heard-is-empty",
+        !data.rows.length
+    );
+
+
+    if (!data.rows.length) {
+
+        document.getElementById(
+            "radio-content"
+        ).innerHTML =
+            emptyMessage(
+                "radio"
+            );
+
+        return;
+    }
+
+
+    const rows =
+        data.rows.map(
+            row => `
+
+            <tr>
+
+                <td class="heard-call">
+                    ${hEsc(row.call)}
+                </td>
+
+                <td>
+                    ${symbolHtml(row)}
+                </td>
+
+                <td>
+                    ${hEsc(row.ago)}
+                </td>
+
+                <td class="heard-number">
+                    ${packLink(row)}
+                </td>
+
+                <td class="heard-number">
+                    ${hEsc(row.junk)}
+                </td>
+
+                <td class="heard-number">
+                    ${hEsc(row.qrb)}
+                </td>
+
+                <td class="heard-number">
+                    ${hEsc(row.az)}
+                </td>
+
+                <td class="heard-number">
+                    ${hEsc(row.alt)}
+                </td>
+
+                <td>
+                    ${hEsc(row.data)}
+                </td>
+
+                <td class="heard-path">
+                    ${hEsc(row.path)}
+                </td>
+
+            </tr>
+
+        `
+        ).join("");
+
+
+    document.getElementById(
+        "radio-content"
+    ).innerHTML = `
+
+        <div class="heard-table-wrap">
+
+        <table class="heard-table">
+
+        <thead>
+        <tr>
+
+            <th>CALL</th>
+            <th>ICON</th>
+            <th>AGO</th>
+            <th>PACK</th>
+            <th>JUNK</th>
+            <th>QRB km</th>
+            <th>AZ</th>
+            <th>ALT</th>
+            <th>DATA</th>
+            <th>PATH</th>
+
+        </tr>
+        </thead>
+
+        <tbody>
+        ${rows}
+        </tbody>
+
+        </table>
+
+        </div>
+    `;
+}
+
+
+
+function renderTcp(data) {
+
+    document.getElementById(
+        "tcp-count"
+    ).textContent =
+        data.count ?? 0;
+
+    const tcpPanel =
+        document.getElementById("tcp-content").closest(".heard-panel");
+
+    tcpPanel.classList.toggle(
+        "heard-is-empty",
+        !data.rows.length
+    );
+
+
+    if (!data.rows.length) {
+
+        document.getElementById(
+            "tcp-content"
+        ).innerHTML =
+            emptyMessage(
+                "tcp"
+            );
+
+        return;
+    }
+
+
+    const rows =
+        data.rows.map(
+            row => `
+
+            <tr>
+
+                <td class="heard-call">
+                    ${hEsc(row.call)}
+                </td>
+
+                <td>
+                    ${hEsc(row.ago)}
+                </td>
+
+                <td class="heard-number">
+                    ${packLink(row)}
+                </td>
+
+                <td class="heard-number">
+                    ${hEsc(row.junk)}
+                </td>
+
+                <td>
+                    ${hEsc(row.data)}
+                </td>
+
+                <td class="heard-path">
+                    ${hEsc(row.path)}
+                </td>
+
+            </tr>
+
+        `
+        ).join("");
+
+
+    document.getElementById(
+        "tcp-content"
+    ).innerHTML = `
+
+        <div class="heard-table-wrap">
+
+        <table class="heard-table tcp-heard-table">
+
+        <thead>
+        <tr>
+
+            <th>CALL</th>
+            <th>AGO</th>
+            <th>PACK</th>
+            <th>JUNK</th>
+
+            <th>
+                ${
+                    hLang() === "en"
+                    ? "SOFTWARE"
+                    : "SOFTWARE"
+                }
+            </th>
+
+            <th>
+                ${
+                    hLang() === "en"
+                    ? "IP / PORT"
+                    : "IP / PORTA"
+                }
+            </th>
+
+        </tr>
+        </thead>
+
+        <tbody>
+        ${rows}
+        </tbody>
+
+        </table>
+
+        </div>
+    `;
+}
+
+
+
+function renderObjects(data) {
+
+    document.getElementById(
+        "objects-count"
+    ).textContent =
+        data.count ?? 0;
+
+    const objectsPanel =
+        document.getElementById("objects-content").closest(".heard-panel");
+
+    objectsPanel.classList.toggle(
+        "heard-is-empty",
+        !data.rows.length
+    );
+
+
+    if (!data.rows.length) {
+
+        document.getElementById(
+            "objects-content"
+        ).innerHTML =
+            emptyMessage(
+                "objects"
+            );
+
+        return;
+    }
+
+
+    const rows =
+        data.rows.map(
+            row => `
+
+            <tr>
+
+                <td class="heard-call">
+                    ${hEsc(row.object)}
+                </td>
+
+                <td>
+                    ${symbolHtml(row)}
+                </td>
+
+                <td>
+                    ${hEsc(row.port)}
+                </td>
+
+                <td>
+                    ${hEsc(row.ago)}
+                </td>
+
+                <td>
+                    ${hEsc(row.pack)}
+                </td>
+
+                <td>
+                    ${hEsc(row.qrb)}
+                </td>
+
+                <td>
+                    ${hEsc(row.az)}
+                </td>
+
+                <td class="mono">
+                    ${hEsc(row.lat)}
+                </td>
+
+                <td class="mono">
+                    ${hEsc(row.long)}
+                </td>
+
+                <td>
+                    ${hEsc(row.alt)}
+                </td>
+
+                <td>
+                    ${hEsc(row.clb)}
+                </td>
+
+                <td>
+                    ${hEsc(row.dir)}
+                </td>
+
+                <td>
+                    ${hEsc(row.mhz)}
+                </td>
+
+                <td>
+                    ${hEsc(row.dt)}
+                </td>
+
+                <td>
+                    ${hEsc(row.data)}
+                </td>
+
+                <td class="heard-path">
+                    ${hEsc(row.path)}
+                </td>
+
+            </tr>
+
+        `
+        ).join("");
+
+
+    document.getElementById(
+        "objects-content"
+    ).innerHTML = `
+
+        <div class="heard-table-wrap">
+
+        <table class="heard-table">
+
+        <thead>
+        <tr>
+
+            <th>OBJECT</th>
+            <th>ICON</th>
+            <th>PORT</th>
+            <th>AGO</th>
+            <th>PACK</th>
+            <th>QRB km</th>
+            <th>AZ</th>
+            <th>LAT</th>
+            <th>LONG</th>
+            <th>ALT</th>
+            <th>CLB</th>
+            <th>DIR</th>
+            <th>MHz</th>
+            <th>dt</th>
+            <th>DATA</th>
+            <th>PATH</th>
+
+        </tr>
+        </thead>
+
+        <tbody>
+        ${rows}
+        </tbody>
+
+        </table>
+
+        </div>
+    `;
+}
+
+
+
+async function refreshHeard() {
+
+    const error =
+        document.getElementById(
+            "heard-error"
+        );
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/monitor/heard",
+                {
+                    cache:
+                        "no-store"
+                }
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "HTTP " +
+                response.status
+            );
+        }
+
+
+        const data =
+            await response.json();
+
+
+        if (!data.ok) {
+
+            throw new Error(
+                data.error ||
+                "unknown error"
+            );
+        }
+
+
+        error.style.display =
+            "none";
+
+
+        renderRadio(
+            data.radio || {
+                count: 0,
+                rows: []
+            }
+        );
+
+
+        renderTcp(
+            data.tcp || {
+                count: 0,
+                rows: []
+            }
+        );
+
+
+        renderObjects(
+            data.objects || {
+                count: 0,
+                rows: []
+            }
+        );
+
+
+        document.getElementById(
+            "heard-last-update"
+        ).textContent =
+            new Date()
+                .toLocaleTimeString();
+
+    }
+
+    catch (err) {
+
+        error.style.display =
+            "block";
+
+
+        document.getElementById(
+            "heard-error-detail"
+        ).textContent =
+            " (" +
+            err.message +
+            ")";
+    }
+}
+
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        refreshHeard();
+
+
+        setInterval(
+            refreshHeard,
+            5000
+        );
+    }
+);
+
+</script>
+
+
+<style>
+
+/* ============================================================
+   ALLINEAMENTO TABELLA STAZIONI VIA TCP
+   ============================================================ */
+
+.tcp-heard-table th,
+.tcp-heard-table td {
+    text-align: center !important;
+}
+
+.tcp-heard-table th:first-child,
+.tcp-heard-table td:first-child {
+    text-align: center !important;
+}
+
+</style>
+
+{% endblock %}

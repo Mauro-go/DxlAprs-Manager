@@ -1,0 +1,13 @@
+[Unit]
+Description=DxlAprs Manager Web Interface
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/dxlaprs-manager
+ExecStart=/usr/bin/python3 /opt/dxlaprs-manager/manager.py
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

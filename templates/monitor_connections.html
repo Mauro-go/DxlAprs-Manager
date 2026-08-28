@@ -1,0 +1,759 @@
+{% extends "base.html" %}
+
+{% block title %}
+
+<span class="page-icon">
+
+<svg viewBox="0 0 24 24">
+<path d="M4 17a8 8 0 0 1 16 0"/>
+<path d="M7 17a5 5 0 0 1 10 0"/>
+<path d="M10 17a2 2 0 0 1 4 0"/>
+<circle cx="12" cy="19" r="1"/>
+</svg>
+
+</span>
+
+<span
+ data-it="Connessioni"
+ data-en="Connections"
+>
+Connessioni
+</span>
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<!-- ========================================================
+     RIEPILOGO
+     ======================================================== -->
+
+<div class="monitor-summary">
+
+<div class="monitor-summary-card">
+
+<div class="summary-label">
+APRS-IS
+</div>
+
+<div
+ class="summary-main"
+ id="summary-aprs-status"
+>
+—
+</div>
+
+<div
+ class="summary-sub"
+ id="summary-aprs-server"
+>
+—
+</div>
+
+</div>
+
+
+<div class="monitor-summary-card">
+
+<div class="summary-label">
+
+<span
+ data-it="CLIENT COLLEGATI"
+ data-en="CONNECTED CLIENTS"
+>
+CLIENT COLLEGATI
+</span>
+
+</div>
+
+<div
+ class="summary-main summary-number"
+ id="summary-clients"
+>
+—
+</div>
+
+<div class="summary-sub">
+
+<span
+ data-it="connessioni TCP in ingresso"
+ data-en="incoming TCP connections"
+>
+connessioni TCP in ingresso
+</span>
+
+</div>
+
+</div>
+
+
+<div class="monitor-summary-card">
+
+<div class="summary-label">
+
+<span
+ data-it="TRAFFICO APRS-IS"
+ data-en="APRS-IS TRAFFIC"
+>
+TRAFFICO APRS-IS
+</span>
+
+</div>
+
+<div class="summary-main traffic-values">
+
+<span>TX <b id="summary-tx">—</b></span>
+
+<span>RX <b id="summary-rx">—</b></span>
+
+</div>
+
+<div class="summary-sub">bit/s</div>
+
+</div>
+
+
+<div class="monitor-summary-card">
+
+<div class="summary-label">
+UDPGATE4
+</div>
+
+<div class="summary-main">
+
+<span
+ id="summary-udpgate-status"
+ class="monitor-dot-good"
+>
+●
+</span>
+
+<span id="summary-version">
+—
+</span>
+
+</div>
+
+<div class="summary-sub">
+
+<span
+ data-it="Uptime:"
+ data-en="Uptime:"
+>
+Uptime:
+</span>
+
+<span id="summary-uptime">—</span>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- ========================================================
+     LINK APRS-IS
+     ======================================================== -->
+
+<div class="card">
+
+<div class="card-title card-title-flex">
+
+<div>
+
+<span
+ data-it="Connessione APRS-IS"
+ data-en="APRS-IS connection"
+>
+Connessione APRS-IS
+</span>
+
+</div>
+
+<div class="live-indicator">
+
+<span class="live-dot"></span>
+
+<span
+ data-it="LIVE"
+ data-en="LIVE"
+>
+LIVE
+</span>
+
+</div>
+
+</div>
+
+
+<div class="card-body monitor-no-padding">
+
+<div
+ id="aprs-out-container"
+ class="monitor-empty"
+>
+
+<span
+ data-it="Caricamento..."
+ data-en="Loading..."
+>
+Caricamento...
+</span>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- ========================================================
+     CLIENT LOCALI
+     ======================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+
+<span
+ data-it="Client collegati"
+ data-en="Connected clients"
+>
+Client collegati
+</span>
+
+</div>
+
+
+<div class="monitor-table-wrapper">
+
+<table class="monitor-table">
+
+<thead>
+
+<tr>
+
+<th>
+<span data-it="Stato" data-en="Status">Stato</span>
+</th>
+
+<th>IP</th>
+
+<th>
+<span data-it="Porta" data-en="Port">Porta</span>
+</th>
+
+<th>Callsign</th>
+
+<th>Software</th>
+
+<th>
+<span data-it="Filtro" data-en="Filter">Filtro</span>
+</th>
+
+<th>TX Frame</th>
+
+<th>TX bit/s</th>
+
+<th>RX Frame</th>
+
+<th>RX bit/s</th>
+
+<th>Uptime</th>
+
+</tr>
+
+</thead>
+
+
+<tbody id="client-table-body">
+
+<tr>
+
+<td colspan="11" class="monitor-loading">
+
+<span
+ data-it="Caricamento dati..."
+ data-en="Loading data..."
+>
+Caricamento dati...
+</span>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+
+<div
+ id="monitor-error"
+ class="monitor-error"
+ style="display:none"
+>
+
+<span
+ data-it="Impossibile leggere i dati da udpgate4."
+ data-en="Unable to read data from udpgate4."
+>
+Impossibile leggere i dati da udpgate4.
+</span>
+
+<span id="monitor-error-detail"></span>
+
+</div>
+
+
+<div class="monitor-last-update">
+
+<span
+ data-it="Ultimo aggiornamento:"
+ data-en="Last update:"
+>
+Ultimo aggiornamento:
+</span>
+
+<span id="last-update">—</span>
+
+&nbsp; · &nbsp;
+
+<span
+ data-it="Aggiornamento automatico ogni 5 secondi"
+ data-en="Automatic refresh every 5 seconds"
+>
+Aggiornamento automatico ogni 5 secondi
+</span>
+
+</div>
+
+
+
+<script>
+
+function escapeHtml(value) {
+
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+
+function getLanguage() {
+
+    return (
+        localStorage.getItem(
+            "dxlaprs-language"
+        ) || "it"
+    );
+}
+
+
+function renderAprsConnection(row) {
+
+    const lang = getLanguage();
+
+    const title =
+        lang === "en"
+        ? "CONNECTED"
+        : "CONNESSO";
+
+    return `
+        <div class="aprs-link-row">
+
+            <div class="aprs-link-status">
+
+                <div class="connection-icon">
+                    ↗
+                </div>
+
+                <div>
+
+                    <div class="connection-good">
+                        ● ${title}
+                    </div>
+
+                    <div class="connection-server">
+                        ${escapeHtml(row.ip)}:${escapeHtml(row.port)}
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="aprs-link-stat">
+
+                <span class="stat-caption">TX</span>
+
+                <strong>
+                    ${escapeHtml(row.tx_frames)}
+                </strong>
+
+                <small>frame</small>
+
+            </div>
+
+
+            <div class="aprs-link-stat">
+
+                <span class="stat-caption">RX</span>
+
+                <strong>
+                    ${escapeHtml(row.rx_frames)}
+                </strong>
+
+                <small>frame</small>
+
+            </div>
+
+
+            <div class="aprs-link-stat">
+
+                <span class="stat-caption">
+                    ${lang === "en" ? "Filter" : "Filtro"}
+                </span>
+
+                <strong class="filter-text">
+                    ${escapeHtml(row.filter || "—")}
+                </strong>
+
+            </div>
+
+
+            <div class="aprs-link-stat">
+
+                <span class="stat-caption">Uptime</span>
+
+                <strong>
+                    ${escapeHtml(row.uptime)}
+                </strong>
+
+            </div>
+
+        </div>
+    `;
+}
+
+
+function renderClients(rows) {
+
+    const tbody =
+        document.getElementById(
+            "client-table-body"
+        );
+
+    const lang = getLanguage();
+
+    if (!rows.length) {
+
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="11"
+                    class="monitor-loading">
+
+                    ${
+                        lang === "en"
+                        ? "No connected clients"
+                        : "Nessun client collegato"
+                    }
+
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+
+    tbody.innerHTML =
+        rows.map(function(row) {
+
+            const callsign =
+                row.callsign || "—";
+
+            const software =
+                row.software || "—";
+
+            const filter =
+                row.filter || "—";
+
+            return `
+                <tr>
+
+                    <td>
+                        <span class="client-online">
+                            ● ${
+                                lang === "en"
+                                ? "ONLINE"
+                                : "ONLINE"
+                            }
+                        </span>
+                    </td>
+
+                    <td class="mono">
+                        ${escapeHtml(row.ip)}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(row.port)}
+                    </td>
+
+                    <td>
+                        <strong>
+                            ${escapeHtml(callsign)}
+                        </strong>
+                    </td>
+
+                    <td>
+                        ${escapeHtml(software)}
+                    </td>
+
+                    <td class="mono filter-cell">
+                        ${escapeHtml(filter)}
+                    </td>
+
+                    <td class="number">
+                        ${escapeHtml(row.tx_frames)}
+                    </td>
+
+                    <td class="number">
+                        ${escapeHtml(row.tx_bps)}
+                    </td>
+
+                    <td class="number">
+                        ${escapeHtml(row.rx_frames)}
+                    </td>
+
+                    <td class="number">
+                        ${escapeHtml(row.rx_bps)}
+                    </td>
+
+                    <td class="mono">
+                        ${escapeHtml(row.uptime)}
+                    </td>
+
+                </tr>
+            `;
+
+        }).join("");
+}
+
+
+async function loadConnections() {
+
+    const error =
+        document.getElementById(
+            "monitor-error"
+        );
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/monitor/connections",
+                {
+                    cache: "no-store"
+                }
+            );
+
+        if (!response.ok) {
+            throw new Error(
+                "HTTP " + response.status
+            );
+        }
+
+        const data =
+            await response.json();
+
+
+        if (!data.ok) {
+            throw new Error(
+                data.error || "unknown error"
+            );
+        }
+
+
+        error.style.display = "none";
+
+
+        const connections =
+            data.connections || [];
+
+        const outgoing =
+            connections.filter(
+                row => row.direction === "out"
+            );
+
+        const incoming =
+            connections.filter(
+                row => row.direction === "in"
+            );
+
+
+        const aprs =
+            outgoing.length
+            ? outgoing[0]
+            : null;
+
+
+        // ----------------------------------------------------
+        // SUMMARY APRS-IS
+        // ----------------------------------------------------
+
+        const status =
+            document.getElementById(
+                "summary-aprs-status"
+            );
+
+        const server =
+            document.getElementById(
+                "summary-aprs-server"
+            );
+
+
+        if (aprs) {
+
+            status.innerHTML =
+                '<span class="connection-good">● ' +
+                (
+                    getLanguage() === "en"
+                    ? "CONNECTED"
+                    : "CONNESSO"
+                ) +
+                '</span>';
+
+            server.textContent =
+                aprs.ip + ":" + aprs.port;
+
+            document.getElementById(
+                "summary-tx"
+            ).textContent =
+                aprs.tx_bps;
+
+            document.getElementById(
+                "summary-rx"
+            ).textContent =
+                aprs.rx_bps;
+
+            document.getElementById(
+                "aprs-out-container"
+            ).innerHTML =
+                renderAprsConnection(aprs);
+
+        } else {
+
+            status.innerHTML =
+                '<span class="connection-bad">● ' +
+                (
+                    getLanguage() === "en"
+                    ? "DISCONNECTED"
+                    : "DISCONNESSO"
+                ) +
+                '</span>';
+
+            server.textContent = "—";
+
+            document.getElementById(
+                "summary-tx"
+            ).textContent = "0";
+
+            document.getElementById(
+                "summary-rx"
+            ).textContent = "0";
+
+            document.getElementById(
+                "aprs-out-container"
+            ).innerHTML =
+                '<div class="monitor-empty">' +
+                (
+                    getLanguage() === "en"
+                    ? "No APRS-IS connection"
+                    : "Nessuna connessione APRS-IS"
+                ) +
+                '</div>';
+        }
+
+
+        // ----------------------------------------------------
+        // CLIENT
+        // ----------------------------------------------------
+
+        document.getElementById(
+            "summary-clients"
+        ).textContent =
+            incoming.length;
+
+        renderClients(incoming);
+
+
+        // ----------------------------------------------------
+        // SERVER
+        // ----------------------------------------------------
+
+        const srv =
+            data.server || {};
+
+        document.getElementById(
+            "summary-version"
+        ).textContent =
+            srv.version
+            ? "udpgate " + srv.version
+            : "udpgate";
+
+        document.getElementById(
+            "summary-uptime"
+        ).textContent =
+            srv.uptime || "—";
+
+
+        document.getElementById(
+            "last-update"
+        ).textContent =
+            new Date().toLocaleTimeString();
+
+    }
+
+    catch (err) {
+
+        error.style.display = "block";
+
+        document.getElementById(
+            "monitor-error-detail"
+        ).textContent =
+            " (" + err.message + ")";
+
+    }
+}
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        loadConnections();
+
+        window.setInterval(
+            loadConnections,
+            5000
+        );
+    }
+);
+
+</script>
+
+{% endblock %}

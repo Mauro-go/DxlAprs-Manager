@@ -1,0 +1,1102 @@
+{% extends "base.html" %}
+
+{% block title %}
+
+<span class="page-icon">
+<svg viewBox="0 0 24 24">
+<circle cx="12" cy="12" r="9"/>
+<path d="M3 12h18"/>
+<path d="M12 3a15 15 0 0 1 0 18"/>
+<path d="M12 3a15 15 0 0 0 0 18"/>
+</svg>
+</span>
+
+<span>APRS-IS</span>
+
+{% endblock %}
+
+
+{% block content %}
+
+<form method="post" id="aprsis-form">
+
+<!-- ========================================================
+     SERVER APRS-IS
+     ======================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+
+<span
+ data-it="Server APRS-IS"
+ data-en="APRS-IS servers"
+>
+Server APRS-IS
+</span>
+
+<span class="param">-g</span>
+
+</div>
+
+
+<div class="card-body">
+
+<div class="aprsis-info">
+
+<div class="aprsis-info-icon">ⓘ</div>
+
+<div>
+
+<span
+ data-it="udpgate4 può utilizzare più server APRS-IS. I server vengono provati in ordine di priorità: il primo server attivo è il preferito."
+ data-en="udpgate4 can use multiple APRS-IS servers. Servers are tried in priority order: the first enabled server is preferred."
+>
+udpgate4 può utilizzare più server APRS-IS.
+I server vengono provati in ordine di priorità:
+il primo server attivo è il preferito.
+</span>
+
+<br>
+
+<span
+ data-it="Se il collegamento passa a un server successivo, udpgate4 continua a controllare quelli con priorità maggiore e torna automaticamente al preferito quando disponibile."
+ data-en="If the connection moves to a later server, udpgate4 continues checking higher-priority servers and automatically returns to the preferred one when available."
+>
+Se il collegamento passa a un server successivo,
+udpgate4 continua a controllare quelli con priorità maggiore
+e torna automaticamente al preferito quando disponibile.
+</span>
+
+</div>
+
+</div>
+
+
+<div class="aprsis-mode-grid">
+
+<label
+ class="aprsis-mode-card"
+ id="mode-servers-card"
+ onclick="selectAprsisMode('servers')"
+>
+
+<input
+ type="radio"
+ name="aprsis_mode"
+ value="servers"
+ id="mode-servers"
+ {% if aprsis.mode == 'servers' %}checked{% endif %}
+ onchange="updateAprsisMode()"
+>
+
+<div>
+
+<strong
+ data-it="Configura i server nella pagina"
+ data-en="Configure servers on this page"
+>
+Configura i server nella pagina
+</strong>
+
+<div class="help">
+
+<span
+ data-it="Gestisci direttamente server, porta, filtro e priorità."
+ data-en="Directly manage server, port, filter and priority."
+>
+Gestisci direttamente server, porta, filtro e priorità.
+</span>
+
+</div>
+
+</div>
+
+</label>
+
+
+<label
+ class="aprsis-mode-card"
+ id="mode-file-card"
+ onclick="selectAprsisMode('file')"
+>
+
+<input
+ type="radio"
+ name="aprsis_mode"
+ value="file"
+ id="mode-file"
+ {% if aprsis.mode == 'file' %}checked{% endif %}
+ onchange="updateAprsisMode()"
+>
+
+<div>
+
+<strong
+ data-it="Leggi i server da file"
+ data-en="Read servers from file"
+>
+Leggi i server da file
+</strong>
+
+<div class="help">
+
+<span
+ data-it="Utilizza la sintassi udpgate4 -g :nomefile."
+ data-en="Uses the udpgate4 -g :filename syntax."
+>
+Utilizza la sintassi udpgate4 -g :nomefile.
+</span>
+
+</div>
+
+</div>
+
+</label>
+
+</div>
+
+
+
+<!-- ========================================================
+     MODALITA SERVER
+     ======================================================== -->
+
+<div id="servers-panel">
+
+<div class="aprsis-server-header">
+
+<div>
+<span
+ data-it="Priorità"
+ data-en="Priority"
+>
+Priorità
+</span>
+</div>
+
+<div>
+<span
+ data-it="Server"
+ data-en="Server"
+>
+Server
+</span>
+</div>
+
+<div>
+<span
+ data-it="Porta"
+ data-en="Port"
+>
+Porta
+</span>
+</div>
+
+<div>
+<span
+ data-it="Filtro"
+ data-en="Filter"
+>
+Filtro
+</span>
+</div>
+
+<div>
+<span
+ data-it="Stato"
+ data-en="Status"
+>
+Stato
+</span>
+</div>
+
+<div></div>
+
+</div>
+
+
+<div id="server-list">
+
+{% for server in aprsis.servers %}
+
+<div class="aprsis-server-row">
+
+<div class="server-priority">
+{{ loop.index }}
+</div>
+
+<div>
+
+<input
+ type="text"
+ name="server_host[]"
+ value="{{ server.host }}"
+ placeholder="rotate.aprs2.net"
+>
+
+</div>
+
+<div>
+
+<input
+ type="number"
+ min="1"
+ max="65535"
+ name="server_port[]"
+ value="{{ server.port }}"
+>
+
+</div>
+
+<div>
+
+<input
+ type="text"
+ name="server_filter[]"
+ value="{{ server.filter }}"
+ placeholder="m/50"
+>
+
+</div>
+
+<div class="server-enabled">
+
+<label class="mini-switch">
+
+<input
+ type="checkbox"
+ name="server_enabled[]"
+ value="{{ loop.index0 }}"
+ {% if server.enabled %}checked{% endif %}
+>
+
+<span class="mini-slider"></span>
+
+</label>
+
+<span class="server-status-text">
+
+{% if server.enabled %}
+
+<span
+ data-it="ATTIVO"
+ data-en="ACTIVE"
+>
+ATTIVO
+</span>
+
+{% else %}
+
+<span
+ data-it="DISATTIVATO"
+ data-en="DISABLED"
+>
+DISATTIVATO
+</span>
+
+{% endif %}
+
+</span>
+
+</div>
+
+<div>
+
+<button
+ type="button"
+ class="server-delete"
+ onclick="deleteServer(this)"
+ title="Delete"
+>
+×
+</button>
+
+</div>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+
+<button
+ type="button"
+ class="server-add"
+ onclick="addServer()"
+>
+
+<span class="server-add-plus">+</span>
+
+<span
+ data-it="Aggiungi server"
+ data-en="Add server"
+>
+Aggiungi server
+</span>
+
+</button>
+
+</div>
+
+
+
+<!-- ========================================================
+     MODALITA FILE
+     ======================================================== -->
+
+<div id="file-panel">
+
+<div class="field">
+
+<label>
+
+<span
+ data-it="File elenco server APRS-IS"
+ data-en="APRS-IS server list file"
+>
+File elenco server APRS-IS
+</span>
+
+<span class="param">-g :</span>
+
+</label>
+
+<input
+ type="text"
+ name="server_file"
+ value="{{ aprsis.server_file }}"
+ placeholder="/opt/dxlaprs/etc/igates.txt"
+>
+
+<div class="help">
+
+<span
+ data-it="Ogni riga del file può contenere server:porta#filtro. udpgate4 può rileggere il file tramite SIGHUP."
+ data-en="Each file line may contain server:port#filter. udpgate4 can reread the file using SIGHUP."
+>
+Ogni riga del file può contenere server:porta#filtro.
+udpgate4 può rileggere il file tramite SIGHUP.
+</span>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- ========================================================
+     PARAMETRI CONNESSIONE
+     ======================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+
+<span
+ data-it="Connessione APRS-IS"
+ data-en="APRS-IS connection"
+>
+Connessione APRS-IS
+</span>
+
+</div>
+
+
+<div class="card-body">
+
+<div class="aprsis-options-grid">
+
+
+<!-- -f -->
+
+<div class="aprsis-option">
+
+<div class="aprsis-option-top">
+
+<label class="mini-switch">
+
+<input
+ type="checkbox"
+ name="enabled_-f"
+ {% if values.get('-f', {}).get('enabled') %}checked{% endif %}
+>
+
+<span class="mini-slider"></span>
+
+</label>
+
+<div>
+
+<strong>
+<span
+ data-it="Filtro backstream globale"
+ data-en="Global backstream filter"
+>
+Filtro backstream globale
+</span>
+
+<span class="param">-f</span>
+</strong>
+
+</div>
+
+</div>
+
+<input
+ type="text"
+ name="value_-f"
+ value="{{ values.get('-f', {}).get('value','') }}"
+ placeholder="m/50"
+>
+
+<div class="help">
+
+<span
+ data-it="Usato quando il singolo server -g non specifica un proprio filtro."
+ data-en="Used when an individual -g server does not specify its own filter."
+>
+Usato quando il singolo server -g
+non specifica un proprio filtro.
+</span>
+
+</div>
+
+</div>
+
+
+
+<!-- -e -->
+
+<div class="aprsis-option">
+
+<div class="aprsis-option-top">
+
+<label class="mini-switch">
+
+<input
+ type="checkbox"
+ name="enabled_-e"
+ {% if values.get('-e', {}).get('enabled') %}checked{% endif %}
+>
+
+<span class="mini-slider"></span>
+
+</label>
+
+<strong>
+
+<span
+ data-it="Attesa prima della riconnessione"
+ data-en="Reconnect delay"
+>
+Attesa prima della riconnessione
+</span>
+
+<span class="param">-e</span>
+
+</strong>
+
+</div>
+
+<input
+ type="number"
+ min="0"
+ name="value_-e"
+ value="{{ values.get('-e', {}).get('value','30') }}"
+>
+
+<div class="help">
+
+<span
+ data-it="Secondi prima del collegamento o della riconnessione al prossimo gateway. Default: 30."
+ data-en="Seconds before connecting or reconnecting to the next gateway. Default: 30."
+>
+Secondi prima del collegamento o della riconnessione
+al prossimo gateway. Default: 30.
+</span>
+
+</div>
+
+</div>
+
+
+
+<!-- -k -->
+
+<div class="aprsis-option">
+
+<div class="aprsis-option-top">
+
+<label class="mini-switch">
+
+<input
+ type="checkbox"
+ name="enabled_-k"
+ {% if values.get('-k', {}).get('enabled') %}checked{% endif %}
+>
+
+<span class="mini-slider"></span>
+
+</label>
+
+<strong>
+
+<span
+ data-it="Connessione su richiesta"
+ data-en="On-demand connection"
+>
+Connessione su richiesta
+</span>
+
+<span class="param">-k</span>
+
+</strong>
+
+</div>
+
+<input
+ type="number"
+ min="0"
+ name="value_-k"
+ value="{{ values.get('-k', {}).get('value','0') }}"
+>
+
+<div class="help">
+
+<span
+ data-it="0 = sempre connesso. Un valore maggiore mantiene il collegamento per quel numero di secondi dopo l'ultimo traffico valido."
+ data-en="0 = always connected. A higher value keeps the connection for that many seconds after the last valid traffic."
+>
+0 = sempre connesso. Un valore maggiore mantiene il
+collegamento per quel numero di secondi dopo l'ultimo traffico valido.
+</span>
+
+</div>
+
+</div>
+
+
+
+<!-- -T -->
+
+<div class="aprsis-option">
+
+<div class="aprsis-option-top">
+
+<label class="mini-switch">
+
+<input
+ type="checkbox"
+ name="enabled_-T"
+ {% if values.get('-T', {}).get('enabled') %}checked{% endif %}
+>
+
+<span class="mini-slider"></span>
+
+</label>
+
+<strong>
+
+<span
+ data-it="Timeout coda TCP"
+ data-en="TCP queue timeout"
+>
+Timeout coda TCP
+</span>
+
+<span class="param">-T</span>
+
+</strong>
+
+</div>
+
+<input
+ type="number"
+ min="0"
+ max="60"
+ name="value_-T"
+ value="{{ values.get('-T', {}).get('value','15') }}"
+>
+
+<div class="help">
+
+<span
+ data-it="Chiude il link se i byte TCP non confermati rimangono troppo a lungo in coda. 0 = disabilitato, massimo 60 s, default 15."
+ data-en="Closes the link if unacknowledged TCP bytes remain queued too long. 0 = disabled, maximum 60 s, default 15."
+>
+Chiude il link se i byte TCP non confermati rimangono
+troppo a lungo in coda. 0 = disabilitato,
+massimo 60 s, default 15.
+</span>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- ========================================================
+     OPZIONI STREAM
+     ======================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+
+<span
+ data-it="Opzioni stream APRS-IS"
+ data-en="APRS-IS stream options"
+>
+Opzioni stream APRS-IS
+</span>
+
+</div>
+
+
+<div class="card-body">
+
+<div class="aprsis-switch-list">
+
+
+<label class="aprsis-switch-row">
+
+<div>
+
+<strong>
+
+<span
+ data-it="Solo messaggi e ACK agli utenti senza filtro"
+ data-en="Only messages and ACKs to users without a filter"
+>
+Solo messaggi e ACK agli utenti senza filtro
+</span>
+
+<span class="param">-0</span>
+
+</strong>
+
+<div class="help">
+
+<span
+ data-it="Non invia normali dati APRS agli utenti che non hanno impostato un filtro."
+ data-en="Does not send normal APRS data to users who have not configured a filter."
+>
+Non invia normali dati APRS agli utenti
+che non hanno impostato un filtro.
+</span>
+
+</div>
+
+</div>
+
+<label class="mini-switch">
+
+<input
+ type="checkbox"
+ name="enabled_-0"
+ {% if values.get('-0', {}).get('enabled') %}checked{% endif %}
+>
+
+<span class="mini-slider"></span>
+
+</label>
+
+</label>
+
+
+
+<label class="aprsis-switch-row">
+
+<div>
+
+<strong>
+
+<span
+ data-it="Scarta sorgenti APRS non valide"
+ data-en="Drop invalid APRS sources"
+>
+Scarta sorgenti APRS non valide
+</span>
+
+<span class="param">-c</span>
+
+</strong>
+
+<div class="help">
+
+<span
+ data-it="Elimina dallo stream APRS-IS i frame senza un source callsign valido."
+ data-en="Deletes APRS-IS frames that do not contain a valid source callsign."
+>
+Elimina dallo stream APRS-IS i frame
+senza un source callsign valido.
+</span>
+
+</div>
+
+</div>
+
+<label class="mini-switch">
+
+<input
+ type="checkbox"
+ name="enabled_-c"
+ {% if values.get('-c', {}).get('enabled') %}checked{% endif %}
+>
+
+<span class="mini-slider"></span>
+
+</label>
+
+</label>
+
+
+
+
+
+</div>
+
+</div>
+
+</div>
+
+
+
+
+<div class="actions config-actions">
+
+<button
+ type="submit"
+ class="save"
+ name="action"
+ value="save"
+>
+
+<span
+ data-it="Salva configurazione"
+ data-en="Save configuration"
+>
+Salva configurazione
+</span>
+
+</button>
+
+
+<button
+ type="submit"
+ class="apply-config"
+ name="action"
+ value="apply"
+>
+
+<span
+ data-it="Applica configurazione"
+ data-en="Apply configuration"
+>
+Applica configurazione
+</span>
+
+</button>
+
+
+<button
+ type="submit"
+ class="restart-udpgate"
+ name="action"
+ value="restart"
+ formnovalidate
+ onclick="
+    return confirm(
+        document.documentElement.lang === 'en'
+        ? 'Restart udpgate4 using the currently saved configuration?'
+        : 'Riavviare udpgate4 usando la configurazione attualmente salvata?'
+    );
+ "
+>
+
+<span
+ data-it="Riavvia udpgate4"
+ data-en="Restart udpgate4"
+>
+Riavvia udpgate4
+</span>
+
+</button>
+
+</div>
+
+
+
+
+<div class="card">
+
+<div class="card-title">
+
+<span
+ data-it="Anteprima comando udpgate4"
+ data-en="udpgate4 command preview"
+>
+Anteprima comando udpgate4
+</span>
+
+</div>
+
+<pre>{{ command }}</pre>
+
+</div>
+
+</form>
+
+
+
+<!-- Template per nuovo server -->
+
+<template id="server-row-template">
+
+<div class="aprsis-server-row">
+
+<div class="server-priority"></div>
+
+<div>
+<input
+ type="text"
+ name="server_host[]"
+ value=""
+ placeholder="rotate.aprs2.net"
+>
+</div>
+
+<div>
+<input
+ type="number"
+ min="1"
+ max="65535"
+ name="server_port[]"
+ value="14580"
+>
+</div>
+
+<div>
+<input
+ type="text"
+ name="server_filter[]"
+ value=""
+ placeholder="m/50"
+>
+</div>
+
+<div class="server-enabled">
+
+<label class="mini-switch">
+
+<input
+ type="checkbox"
+ name="server_enabled[]"
+ checked
+>
+
+<span class="mini-slider"></span>
+
+</label>
+
+<span class="server-status-text">
+<span
+ data-it="ATTIVO"
+ data-en="ACTIVE"
+>
+ATTIVO
+</span>
+</span>
+
+</div>
+
+<div>
+
+<button
+ type="button"
+ class="server-delete"
+ onclick="deleteServer(this)"
+>
+×
+</button>
+
+</div>
+
+</div>
+
+</template>
+
+
+<script>
+
+function selectAprsisMode(mode) {
+
+    document.getElementById(
+        mode === "servers"
+        ? "mode-servers"
+        : "mode-file"
+    ).checked = true;
+
+    updateAprsisMode();
+}
+
+
+function updateAprsisMode() {
+
+    const servers =
+        document.getElementById(
+            "mode-servers"
+        ).checked;
+
+    document.getElementById(
+        "servers-panel"
+    ).style.display =
+        servers ? "block" : "none";
+
+    document.getElementById(
+        "file-panel"
+    ).style.display =
+        servers ? "none" : "block";
+
+    document.getElementById(
+        "mode-servers-card"
+    ).classList.toggle(
+        "aprsis-mode-selected",
+        servers
+    );
+
+    document.getElementById(
+        "mode-file-card"
+    ).classList.toggle(
+        "aprsis-mode-selected",
+        !servers
+    );
+}
+
+
+function renumberServers() {
+
+    const rows =
+        document.querySelectorAll(
+            "#server-list .aprsis-server-row"
+        );
+
+    rows.forEach(function(row, index) {
+
+        row.querySelector(
+            ".server-priority"
+        ).textContent = index + 1;
+
+        const checkbox =
+            row.querySelector(
+                'input[name="server_enabled[]"]'
+            );
+
+        checkbox.value = index;
+    });
+}
+
+
+function addServer() {
+
+    const template =
+        document.getElementById(
+            "server-row-template"
+        );
+
+    const clone =
+        template.content.cloneNode(true);
+
+    document.getElementById(
+        "server-list"
+    ).appendChild(clone);
+
+    renumberServers();
+
+    const lang =
+        localStorage.getItem(
+            "dxlaprs-language"
+        ) || "it";
+
+    setLanguage(lang);
+}
+
+
+function deleteServer(button) {
+
+    button.closest(
+        ".aprsis-server-row"
+    ).remove();
+
+    renumberServers();
+}
+
+
+document.addEventListener(
+    "change",
+    function(event) {
+
+        if (
+            event.target.matches(
+                'input[name="server_enabled[]"]'
+            )
+        ) {
+
+            const row =
+                event.target.closest(
+                    ".aprsis-server-row"
+                );
+
+            const text =
+                row.querySelector(
+                    ".server-status-text"
+                );
+
+            if (event.target.checked) {
+
+                text.innerHTML =
+                    '<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>';
+
+            } else {
+
+                text.innerHTML =
+                    '<span data-it="DISATTIVATO" data-en="DISABLED">DISATTIVATO</span>';
+            }
+
+            const lang =
+                localStorage.getItem(
+                    "dxlaprs-language"
+                ) || "it";
+
+            setLanguage(lang);
+        }
+    }
+);
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        updateAprsisMode();
+        renumberServers();
+    }
+);
+
+</script>
+
+{% endblock %}

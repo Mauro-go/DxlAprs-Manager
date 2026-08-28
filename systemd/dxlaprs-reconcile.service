@@ -1,0 +1,9 @@
+[Unit]
+Description=DxlAprs Manager - Reconcile TCP connections
+After=dxlaprs-udpgate.service dxlaprs-collector.service
+Requires=dxlaprs-collector.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/dxlaprs-manager
+ExecStart=/usr/bin/python3 -c "import sys; sys.path.insert(0,'/opt/dxlaprs-manager'); import native_collector; native_collector.reconcile_active_connections()"

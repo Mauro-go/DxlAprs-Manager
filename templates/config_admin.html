@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+
+<span class="page-icon">
+
+<svg viewBox="0 0 24 24">
+
+<circle cx="12" cy="8" r="4"/>
+
+<path d="M5 21v-2a7 7 0 0 1 14 0v2"/>
+
+<path d="M18 5l2-2"/>
+<path d="M20 5l-2-2"/>
+
+</svg>
+
+</span>
+
+
+<span
+ data-it="Accesso Admin"
+ data-en="Admin Access"
+>
+Accesso Admin
+</span>
+
+{% endblock %}
+
+
+
+{% block content %}
+
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+
+{% for category, message in messages %}
+
+{% if message == "admin_saved" %}
+
+<div class="flash">
+
+<span
+ data-it="Credenziali amministratore salvate."
+ data-en="Administrator credentials saved."
+>
+Credenziali amministratore salvate.
+</span>
+
+</div>
+
+{% endif %}
+
+{% endfor %}
+
+{% endwith %}
+
+
+<div class="card">
+
+<div class="card-title">
+
+<span
+ data-it="Credenziali amministratore"
+ data-en="Administrator credentials"
+>
+Credenziali amministratore
+</span>
+
+</div>
+
+
+<div class="card-body">
+
+<div class="notice">
+
+<span
+ data-it="Queste credenziali proteggono tutte le pagine di configurazione di DxlAprs Manager."
+ data-en="These credentials protect all DxlAprs Manager configuration pages."
+>
+Queste credenziali proteggono tutte le pagine di configurazione di DxlAprs Manager.
+</span>
+
+</div>
+
+
+{% if error == "username" %}
+
+<div class="flash" style="background:#472222;border-color:#743535;color:#ffb1b1">
+
+<span
+ data-it="Il nome utente non può essere vuoto."
+ data-en="Username cannot be empty."
+>
+Il nome utente non può essere vuoto.
+</span>
+
+</div>
+
+{% endif %}
+
+
+{% if error == "password_match" %}
+
+<div class="flash" style="background:#472222;border-color:#743535;color:#ffb1b1">
+
+<span
+ data-it="Le due password non coincidono."
+ data-en="The two passwords do not match."
+>
+Le due password non coincidono.
+</span>
+
+</div>
+
+{% endif %}
+
+
+<form method="post">
+
+<div class="grid">
+
+
+<div class="field">
+
+<label>
+
+<span
+ data-it="Utente amministratore"
+ data-en="Administrator username"
+>
+Utente amministratore
+</span>
+
+</label>
+
+<input
+ type="text"
+ name="admin_username"
+ value="{{ admin.get('username', 'admin') }}"
+ autocomplete="username"
+ required
+>
+
+</div>
+
+
+<div>
+</div>
+
+
+<div class="field">
+
+<label>
+
+<span
+ data-it="Nuova password"
+ data-en="New password"
+>
+Nuova password
+</span>
+
+</label>
+
+<input
+ type="password"
+ name="admin_password"
+ autocomplete="new-password"
+>
+
+<div class="help">
+
+<span
+ data-it="Lascia vuoto per mantenere la password attuale."
+ data-en="Leave empty to keep the current password."
+>
+Lascia vuoto per mantenere la password attuale.
+</span>
+
+</div>
+
+</div>
+
+
+<div class="field">
+
+<label>
+
+<span
+ data-it="Conferma nuova password"
+ data-en="Confirm new password"
+>
+Conferma nuova password
+</span>
+
+</label>
+
+<input
+ type="password"
+ name="admin_password_confirm"
+ autocomplete="new-password"
+>
+
+</div>
+
+
+</div>
+
+
+<div class="actions">
+
+<button
+ type="submit"
+ class="save"
+>
+
+<span
+ data-it="Salva credenziali"
+ data-en="Save credentials"
+>
+Salva credenziali
+</span>
+
+</button>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+{% endblock %}
