@@ -197,3 +197,4 @@ See the `LICENSE` file for the complete license text.
 The dxlAPRS toolchain is a separate upstream project and retains its own
 copyright and licensing terms.
 <img width="1917" height="856" alt="immagine" src="https://github.com/user-attachments/assets/1af5ea96-c749-4f89-835d-0c5e45e65265" />
+<img width="1902" height="1056" alt="immagine" src="https://github.com/user-attachments/assets/d09619f0-e706-4bf9-ae73-937ea6f21c13" />
