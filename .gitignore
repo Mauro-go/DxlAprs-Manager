@@ -7,12 +7,21 @@ data/*.db
 data/*.db-shm
 data/*.db-wal
 
-# Configurazione locale
+# Configurazione runtime principale
 data/config.json
 data/active_config.json
 
+# Configurazioni runtime programmi
+data/*_config.json
+data/*_active_config.json
+
+# I file default devono essere versionati
+!data/config.default.json
+!data/*_config.default.json
+
 # Backup / temporanei
 backup/
+backups/
 *.bak
 *.bak-*
 *.tmp

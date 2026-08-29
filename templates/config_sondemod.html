@@ -1,0 +1,956 @@
+{% extends "base.html" %}
+
+{% block title %}
+<span class="page-icon">
+<svg viewBox="0 0 24 24">
+<rect x="4" y="4" width="6" height="6" rx="1"/>
+<rect x="14" y="4" width="6" height="6" rx="1"/>
+<rect x="4" y="14" width="6" height="6" rx="1"/>
+<rect x="14" y="14" width="6" height="6" rx="1"/>
+</svg>
+</span>
+<span>sondemod</span>
+{% endblock %}
+
+
+{% macro value_option(name,state,flag,it,en,syntax,help_it,help_en) %}
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+<input type="checkbox"
+       name="{{name}}_enabled"
+       {% if state.get('enabled') %}checked{% endif %}>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge {% if state.get('enabled') %}badge-active{% else %}badge-off{% endif %}">
+{% if state.get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO"
+      data-en="NOT CONFIGURED">NON CONFIGURATO</span>
+{% endif %}
+</div>
+
+</div>
+
+<div class="option-main">
+
+<label class="option-name">
+<span data-it="{{it}}" data-en="{{en}}">{{it}}</span>
+<span class="param">{{flag}}</span>
+</label>
+
+<input name="{{name}}"
+       value="{{state.get('value','')}}"
+       spellcheck="false">
+
+<div class="syntax">
+<code>{{flag}} {{syntax}}</code>
+</div>
+
+</div>
+
+<div class="option-help">
+<div data-it="{{help_it}}"
+     data-en="{{help_en}}">{{help_it}}</div>
+</div>
+
+</div>
+{% endmacro %}
+
+
+{% macro bool_option(name,state,flag,it,en,help_it,help_en) %}
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+<input type="checkbox"
+       name="{{name}}"
+       {% if state.get('enabled') %}checked{% endif %}>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge {% if state.get('enabled') %}badge-active{% else %}badge-off{% endif %}">
+{% if state.get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO"
+      data-en="NOT CONFIGURED">NON CONFIGURATO</span>
+{% endif %}
+</div>
+
+</div>
+
+<div class="option-main">
+
+<label class="option-name">
+<span data-it="{{it}}" data-en="{{en}}">{{it}}</span>
+<span class="param">{{flag}}</span>
+</label>
+
+</div>
+
+<div class="option-help">
+<div data-it="{{help_it}}"
+     data-en="{{help_en}}">{{help_it}}</div>
+</div>
+
+</div>
+{% endmacro %}
+
+
+{% block content %}
+
+<form method="post">
+
+
+<!-- ========================================================
+     STATO
+     ======================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Stato sondemod"
+      data-en="sondemod status">Stato sondemod</span>
+</div>
+
+<div class="card-body">
+
+<div style="display:flex;gap:24px;flex-wrap:wrap;align-items:center;">
+
+<div>
+<strong data-it="Servizio:"
+        data-en="Service:">Servizio:</strong>
+
+{% if running %}
+<span class="option-badge badge-active">
+<span data-it="ATTIVO"
+      data-en="ACTIVE">ATTIVO</span>
+</span>
+{% else %}
+<span class="option-badge badge-off">
+<span data-it="FERMO"
+      data-en="STOPPED">FERMO</span>
+</span>
+{% endif %}
+</div>
+
+<div>
+<strong data-it="Avvio automatico:"
+        data-en="Automatic startup:">
+Avvio automatico:
+</strong>
+
+{% if enabled %}
+<span data-it="abilitato"
+      data-en="enabled">abilitato</span>
+{% else %}
+<span data-it="disabilitato"
+      data-en="disabled">disabilitato</span>
+{% endif %}
+</div>
+
+</div>
+
+
+<div class="actions config-actions"
+     style="margin-top:20px;">
+
+<button type="submit"
+        class="save"
+        name="action"
+        value="start"
+        formnovalidate>
+<span data-it="Avvia sondemod"
+      data-en="Start sondemod">Avvia sondemod</span>
+</button>
+
+<button type="submit"
+        name="action"
+        value="stop"
+        formnovalidate>
+<span data-it="Ferma sondemod"
+      data-en="Stop sondemod">Ferma sondemod</span>
+</button>
+
+<button type="submit"
+        class="restart-udpgate"
+        name="action"
+        value="restart"
+        formnovalidate>
+<span data-it="Riavvia sondemod"
+      data-en="Restart sondemod">Riavvia sondemod</span>
+</button>
+
+</div>
+
+</div>
+</div>
+
+
+<!-- ========================================================
+     INGRESSO
+     ======================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Ingresso dati"
+      data-en="Data input">Ingresso dati</span>
+</div>
+
+<div class="card-body">
+<div class="option-list">
+
+{{ value_option(
+'input_source',
+INPUT.get('source',{}),
+'-o',
+'Ingresso sondeudp / audio',
+'sondeudp / audio input',
+'&lt;UDPport | filename&gt;',
+'Numero di porta UDP per ricevere i dati demodulati da sondeudp oppure file/dispositivo di ingresso.',
+'UDP port for demodulated data from sondeudp, or input file/device.'
+) }}
+
+</div>
+</div>
+</div>
+
+
+<!-- ========================================================
+     APRS
+     ======================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="APRS e trasmissione"
+      data-en="APRS and transmission">
+APRS e trasmissione
+</span>
+</div>
+
+<div class="card-body">
+<div class="option-list">
+
+{{ value_option(
+'aprs_callsign',
+APRS.get('callsign',{}),
+'-I',
+'Nominativo mittente',
+'Sender callsign',
+'&lt;CALL-SSID&gt;',
+'Nominativo mittente degli oggetti APRS quando non viene fornito da sondeudp.',
+'Sender callsign for APRS objects when not supplied by sondeudp.'
+) }}
+
+{{ value_option(
+'aprs_via',
+APRS.get('via',{}),
+'-w',
+'Path APRS',
+'APRS path',
+'&lt;path&gt;',
+'Percorso APRS, ad esempio una lista di digipeater separati da virgola.',
+'APRS path, for example a comma-separated digipeater list.'
+) }}
+
+{{ bool_option(
+'aprs_dao',
+APRS.get('dao',{}),
+'-d',
+'Estensione DAO',
+'DAO extension',
+'Abilita la maggiore risoluzione APRS tramite estensione DAO.',
+'Enables higher APRS position resolution using DAO.'
+) }}
+
+{{ bool_option(
+'aprs_nofilter',
+APRS.get('track_filter_off',{}),
+'-F',
+'Disabilita filtro traccia',
+'Disable track filter',
+'Disabilita il filtro delle tracce. Usare soltanto se realmente necessario.',
+'Disables the track filter. Use only when really necessary.'
+) }}
+
+{{ value_option(
+'aprs_sendquick',
+APRS.get('send_quick',{}),
+'-p',
+'Condizione invio rapido',
+'Quick-send condition',
+'&lt;0..2&gt;',
+'0 invia quando il meteo è pronto, 1 quando è nota la frequenza, 2 immediatamente.',
+'0 sends when weather data is ready, 1 when frequency is known, 2 immediately.'
+) }}
+
+{{ value_option(
+'aprs_beacons',
+APRS.get('beacon_times',{}),
+'-b',
+'Tempi beacon',
+'Beacon times',
+'&lt;s[:s...]&gt;',
+'Intervalli minimi di invio. Il primo vale per alta quota, i successivi per le soglie definite con -A.',
+'Minimum send intervals. First is for high altitude, following values correspond to -A thresholds.'
+) }}
+
+{{ value_option(
+'aprs_altitudes',
+APRS.get('altitude_table',{}),
+'-A',
+'Soglie quota',
+'Altitude thresholds',
+'&lt;m[:m...]&gt;',
+'Soglie di quota discendenti associate ai tempi beacon successivi.',
+'Descending altitude thresholds associated with subsequent beacon times.'
+) }}
+
+{{ value_option(
+'aprs_maxdistance',
+APRS.get('max_distance',{}),
+'-G',
+'Distanza massima',
+'Maximum distance',
+'&lt;km&gt;',
+'Invia solamente entro questa distanza dalla posizione locale. Zero disabilita il limite; richiede -P.',
+'Sends only within this distance from the local position. Zero disables the limit; requires -P.'
+) }}
+
+{{ value_option(
+'aprs_position',
+APRS.get('position',{}),
+'-P',
+'Posizione locale',
+'Local position',
+'&lt;locator | lat long&gt;',
+'Posizione locale per distanza, azimut ed elevazione. Accetta locator oppure latitudine e longitudine.',
+'Local position for distance, azimuth and elevation. Accepts locator or latitude and longitude.'
+) }}
+
+{{ value_option(
+'aprs_altitude',
+APRS.get('my_altitude',{}),
+'-N',
+'Quota locale',
+'Local altitude',
+'&lt;metri&gt;',
+'Quota locale sul livello del mare.',
+'Local altitude above mean sea level.'
+) }}
+
+{{ value_option(
+'aprs_expire',
+APRS.get('expire',{}),
+'-E',
+'Scarto massimo orario GPS',
+'Maximum GPS time difference',
+'&lt;secondi&gt;',
+'Interrompe l’invio se la differenza fra tempo GPS e orologio del computer supera questo valore; 0 disabilita.',
+'Stops sending when GPS time differs from computer clock by more than this value; 0 disables.'
+) }}
+
+{{ value_option(
+'aprs_leap',
+APRS.get('leap_seconds',{}),
+'-g',
+'Correzione GPS → UTC',
+'GPS → UTC correction',
+'&lt;secondi&gt;',
+'Correzione leap-second utilizzata quando non fornita dalla radiosonda.',
+'Leap-second correction used when it is not supplied by the radiosonde.'
+) }}
+
+{{ bool_option(
+'aprs_mhz',
+APRS.get('send_mhz',{}),
+'-M',
+'Invia MHz da SDR',
+'Send MHz from SDR',
+'Usa frequenza SDR più AFC quando la frequenza non è contenuta nei dati della radiosonda.',
+'Uses SDR frequency plus AFC when the frequency is not contained in radiosonde data.'
+) }}
+
+</div>
+</div>
+</div>
+
+
+<!-- ========================================================
+     GEOFENCE
+     ======================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Filtro geografico"
+      data-en="Geographical filter">
+Filtro geografico
+</span>
+</div>
+
+<div class="card-body">
+<div class="option-list">
+
+{{ value_option(
+'aprs_fence',
+APRS.get('fence',{}),
+'-a',
+'Rettangolo geografico',
+'Geographical rectangle',
+'&lt;punto1 punto2&gt;',
+'Due punti: ciascuno può essere un locator oppure una coppia latitudine/longitudine. Invertendo gli angoli si seleziona l’esterno del rettangolo.',
+'Two points: each may be a locator or latitude/longitude pair. Swapping corners selects outside the rectangle.'
+) }}
+
+</div>
+</div>
+</div>
+
+
+<!-- ========================================================
+     FILE E SRTM
+     ======================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="File, SRTM e almanacchi"
+      data-en="Files, SRTM and almanacs">
+File, SRTM e almanacchi
+</span>
+</div>
+
+<div class="card-body">
+<div class="option-list">
+
+{{ value_option(
+'file_comment',
+FILES.get('comment',{}),
+'-t',
+'File commenti',
+'Comment file',
+'&lt;filename&gt;',
+'File con righe di commento da aggiungere agli oggetti APRS.',
+'File containing comment lines to append to APRS objects.'
+) }}
+
+{{ value_option(
+'file_srtm',
+FILES.get('srtm',{}),
+'-S',
+'Directory SRTM',
+'SRTM directory',
+'&lt;pathname&gt;',
+'Directory contenente dati SRTM e, se disponibile, il file EGM96.',
+'Directory containing SRTM data and, when available, the EGM96 file.'
+) }}
+
+{{ value_option(
+'file_rinex',
+FILES.get('rinex',{}),
+'-x',
+'Almanacco RINEX',
+'RINEX almanac',
+'&lt;filename&gt;',
+'File almanacco GPS in formato RINEX navigation. È il formato preferito.',
+'GPS almanac file in RINEX navigation format. This is the preferred format.'
+) }}
+
+{{ value_option(
+'file_sem',
+FILES.get('sem',{}),
+'-s',
+'Almanacco SEM',
+'SEM almanac',
+'&lt;filename&gt;',
+'Formato SEM legacy; il programma stesso ne sconsiglia l’uso.',
+'Legacy SEM format; the program itself discourages its use.'
+) }}
+
+{{ value_option(
+'file_yuma',
+FILES.get('yuma',{}),
+'-y',
+'Almanacco YUMA',
+'YUMA almanac',
+'&lt;filename&gt;',
+'Formato YUMA legacy; il programma stesso ne sconsiglia l’uso.',
+'Legacy YUMA format; the program itself discourages its use.'
+) }}
+
+{{ value_option(
+'alm_maxage',
+ALMANAC.get('max_age',{}),
+'-T',
+'Età massima almanacco',
+'Maximum almanac age',
+'&lt;minuti&gt;',
+'Smette di inviare dati quando l’almanacco supera questa età.',
+'Stops sending data when the almanac exceeds this age.'
+) }}
+
+{{ value_option(
+'alm_request',
+ALMANAC.get('request_after',{}),
+'-R',
+'Richiesta nuovo almanacco',
+'Request new almanac',
+'&lt;minuti&gt;',
+'Richiede un nuovo almanacco dopo questo intervallo.',
+'Requests a new almanac after this interval.'
+) }}
+
+{{ value_option(
+'file_encrypted',
+FILES.get('encrypted',{}),
+'-X',
+'Segnalazione frame cifrato',
+'Encrypted-frame notification',
+'&lt;filename&gt;',
+'Scrive un file con il numero della radiosonda quando viene visto un frame cifrato.',
+'Writes a file containing the radiosonde number when an encrypted frame is detected.'
+) }}
+
+</div>
+</div>
+</div>
+
+
+<!-- ========================================================
+     FILE DECODED
+     ======================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="File dati decodificati"
+      data-en="Decoded data file">
+File dati decodificati
+</span>
+</div>
+
+<div class="card-body">
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+<input type="checkbox"
+       name="decoded_enabled"
+       {% if FILES.get('decoded',{}).get('enabled') %}checked{% endif %}>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge {% if FILES.get('decoded',{}).get('enabled') %}badge-active{% else %}badge-off{% endif %}">
+{% if FILES.get('decoded',{}).get('enabled') %}
+<span data-it="ATTIVO"
+      data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO"
+      data-en="NOT CONFIGURED">NON CONFIGURATO</span>
+{% endif %}
+</div>
+
+</div>
+
+<div class="option-main">
+
+<label class="option-name">
+<span data-it="Formato e destinazione"
+      data-en="Format and destination">
+Formato e destinazione
+</span>
+<span class="param">-C / -j</span>
+</label>
+
+<select name="decoded_mode">
+<option value="csv"
+{% if FILES.get('decoded',{}).get('mode') == 'csv' %}selected{% endif %}>
+CSV (-C)
+</option>
+
+<option value="json"
+{% if FILES.get('decoded',{}).get('mode') == 'json' %}selected{% endif %}>
+LDJSON (-j)
+</option>
+</select>
+
+<input name="decoded_value"
+       value="{{FILES.get('decoded',{}).get('value','')}}"
+       placeholder="filename / pipe"
+       spellcheck="false">
+
+</div>
+
+<div class="option-help">
+<span data-it="Seleziona un singolo file di uscita CSV oppure LDJSON."
+      data-en="Select one output file in CSV or LDJSON format.">
+Seleziona un singolo file di uscita CSV oppure LDJSON.
+</span>
+</div>
+
+</div>
+
+</div>
+</div>
+
+
+<!-- ========================================================
+     APRS OUTPUT
+     ======================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Uscita APRS"
+      data-en="APRS output">
+Uscita APRS
+</span>
+</div>
+
+<div class="card-body">
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+<input type="checkbox"
+       name="radio_enabled"
+       {% if OUTPUTS.get('radio',{}).get('enabled') %}checked{% endif %}>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge {% if OUTPUTS.get('radio',{}).get('enabled') %}badge-active{% else %}badge-off{% endif %}">
+{% if OUTPUTS.get('radio',{}).get('enabled') %}
+<span data-it="ATTIVO"
+      data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO"
+      data-en="NOT CONFIGURED">NON CONFIGURATO</span>
+{% endif %}
+</div>
+
+</div>
+
+<div class="option-main">
+
+<label class="option-name">
+<span data-it="Formato uscita"
+      data-en="Output format">
+Formato uscita
+</span>
+<span class="param">-r / -m</span>
+</label>
+
+<select name="radio_mode">
+
+<option value="r"
+{% if OUTPUTS.get('radio',{}).get('mode') == 'r' %}selected{% endif %}>
+AXUDP (-r)
+</option>
+
+<option value="m"
+{% if OUTPUTS.get('radio',{}).get('mode') == 'm' %}selected{% endif %}>
+Testo (-m)
+</option>
+
+</select>
+
+</div>
+
+<div class="option-help">
+<span data-it="-r invia AXUDP. -m usa le stesse destinazioni ma invia testo."
+      data-en="-r sends AXUDP. -m uses the same destinations but sends text.">
+-r invia AXUDP; -m invia testo.
+</span>
+</div>
+
+</div>
+
+
+<div id="radio-list">
+
+{% for value in OUTPUTS.get('radio',{}).get('destinations',[]) %}
+
+<div style="display:flex;gap:10px;margin:8px 0;">
+<input name="radio_destination"
+       value="{{value}}"
+       placeholder="host:port"
+       spellcheck="false">
+
+<button type="button"
+        onclick="this.parentElement.remove()">×</button>
+</div>
+
+{% endfor %}
+
+</div>
+
+<button type="button"
+        onclick="addRadio()">
+
+<span data-it="Aggiungi destinazione"
+      data-en="Add destination">
+Aggiungi destinazione
+</span>
+
+</button>
+
+</div>
+</div>
+
+
+<!-- ========================================================
+     JSON UDP
+     ======================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="JSON via UDP"
+      data-en="JSON via UDP">
+JSON via UDP
+</span>
+<span class="param">-J</span>
+</div>
+
+<div class="card-body">
+
+<div id="json-list">
+
+{% for value in OUTPUTS.get('json_udp',[]) %}
+
+<div style="display:flex;gap:10px;margin:8px 0;">
+
+<input name="json_destination"
+       value="{{value}}"
+       placeholder="host:port"
+       spellcheck="false">
+
+<button type="button"
+        onclick="this.parentElement.remove()">×</button>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+<button type="button"
+        onclick="addJson()">
+
+<span data-it="Aggiungi destinazione JSON"
+      data-en="Add JSON destination">
+Aggiungi destinazione JSON
+</span>
+
+</button>
+
+<div class="syntax"
+     style="margin-top:15px;">
+<code>-J &lt;ip:port&gt;</code>
+</div>
+
+</div>
+</div>
+
+
+<!-- ========================================================
+     DFM
+     ======================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Mappatura sottotipi DFM"
+      data-en="DFM subtype mapping">
+Mappatura sottotipi DFM
+</span>
+</div>
+
+<div class="card-body">
+<div class="option-list">
+
+{{ value_option(
+'dfm_types',
+OUTPUTS.get('dfm_types',{}),
+'-L',
+'Tabella sottotipi DFM',
+'DFM subtype table',
+'&lt;hex=nome[,hex=nome...]&gt;',
+'Associa il nibble del seriale DFM a un nome di tipo. FF può essere usato come wildcard.',
+'Maps the DFM serial-number nibble to a type name. FF may be used as wildcard.'
+) }}
+
+</div>
+</div>
+</div>
+
+
+<!-- ========================================================
+     DEBUG
+     ======================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Debug"
+      data-en="Debug">Debug</span>
+</div>
+
+<div class="card-body">
+
+<label>
+<input type="checkbox"
+       name="log_verbose"
+       {% if LOGGING.get('verbose') %}checked{% endif %}>
+Verbose <span class="param">-v</span>
+</label>
+
+&nbsp;&nbsp;&nbsp;
+
+<label>
+<input type="checkbox"
+       name="log_very_verbose"
+       {% if LOGGING.get('very_verbose') %}checked{% endif %}>
+Very verbose <span class="param">-V</span>
+</label>
+
+</div>
+</div>
+
+
+<!-- ========================================================
+     CONFIG MANAGEMENT
+     ======================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Gestione configurazione"
+      data-en="Configuration management">
+Gestione configurazione
+</span>
+</div>
+
+<div class="card-body">
+
+<div class="actions config-actions">
+
+<button type="submit"
+        class="save"
+        name="action"
+        value="save">
+
+<span data-it="Salva configurazione"
+      data-en="Save configuration">
+Salva configurazione
+</span>
+
+</button>
+
+<button type="submit"
+        class="apply-config"
+        name="action"
+        value="apply">
+
+<span data-it="Applica configurazione"
+      data-en="Apply configuration">
+Applica configurazione
+</span>
+
+</button>
+
+</div>
+</div>
+</div>
+
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Anteprima comando salvato"
+      data-en="Saved command preview">
+Anteprima comando salvato
+</span>
+</div>
+
+<pre>{{command}}</pre>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Comando attivo"
+      data-en="Active command">
+Comando attivo
+</span>
+</div>
+
+<pre>{{active_command}}</pre>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Ultime righe del log"
+      data-en="Latest log lines">
+Ultime righe del log
+</span>
+</div>
+
+<pre>{{journal}}</pre>
+
+</div>
+
+
+</form>
+
+
+<script>
+
+function addRadio() {
+    const root=document.getElementById("radio-list");
+    const row=document.createElement("div");
+
+    row.style.cssText="display:flex;gap:10px;margin:8px 0;";
+
+    row.innerHTML=
+        '<input name="radio_destination" placeholder="host:port" spellcheck="false">' +
+        '<button type="button" onclick="this.parentElement.remove()">×</button>';
+
+    root.appendChild(row);
+}
+
+
+function addJson() {
+    const root=document.getElementById("json-list");
+    const row=document.createElement("div");
+
+    row.style.cssText="display:flex;gap:10px;margin:8px 0;";
+
+    row.innerHTML=
+        '<input name="json_destination" placeholder="host:port" spellcheck="false">' +
+        '<button type="button" onclick="this.parentElement.remove()">×</button>';
+
+    root.appendChild(row);
+}
+
+</script>
+
+{% endblock %}

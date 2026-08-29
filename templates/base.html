@@ -1571,6 +1571,105 @@ button.restart-udpgate:hover {
 }
 
 
+
+/* ============================================================
+   MENU COMPONENTI DXLAPRS
+   ============================================================ */
+
+.dx-components {
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+.dx-components summary {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 10px 12px;
+
+    cursor: pointer;
+
+    color: #d8e1ea;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    list-style: none;
+
+    border-radius: 6px;
+
+    transition:
+        background 0.15s ease,
+        color 0.15s ease;
+}
+
+.dx-components summary::-webkit-details-marker {
+    display: none;
+}
+
+.dx-components summary:hover {
+    background: rgba(255,255,255,0.06);
+    color: #ffffff;
+}
+
+.dx-components summary::after {
+    content: "›";
+
+    margin-left: auto;
+
+    font-size: 18px;
+    line-height: 1;
+
+    transition: transform 0.15s ease;
+}
+
+.dx-components[open] summary::after {
+    transform: rotate(90deg);
+}
+
+.dx-components-list {
+    margin-top: 3px;
+    margin-left: 18px;
+    padding-left: 11px;
+
+    border-left: 1px solid rgba(255,255,255,0.12);
+}
+
+.dx-component-pending {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    min-height: 34px;
+
+    padding: 6px 10px;
+
+    color: #8795a3;
+
+    font-size: 13px;
+}
+
+.dx-component-pending .component-dot {
+    width: 7px;
+    height: 7px;
+
+    flex: 0 0 7px;
+
+    border-radius: 50%;
+
+    background: #d4a72c;
+}
+
+.dx-component-pending .component-state {
+    margin-left: auto;
+
+    font-size: 10px;
+
+    opacity: 0.8;
+}
+
+
 </style>
 
 </head>
@@ -1625,7 +1724,29 @@ Connessioni
 </a>
 
 
-{% if request.path.startswith('/config') %}
+<a href="/monitor/services"
+ class="{% if request.path == '/monitor/services' %}active{% endif %}">
+
+<span class="menu-icon">
+<svg viewBox="0 0 24 24">
+<rect x="4" y="4" width="16" height="16" rx="2"/>
+<path d="M8 8h8"/>
+<path d="M8 12h8"/>
+<path d="M8 16h5"/>
+</svg>
+</span>
+
+<span
+ data-it="Servizi"
+ data-en="Services"
+>
+Servizi
+</span>
+
+</a>
+
+
+{% if request.path.startswith('/config') or request.path.startswith('/monitor') %}
 <div class="menu-title">
 <span data-it="CONFIGURAZIONE" data-en="CONFIGURATION">
 CONFIGURAZIONE
@@ -1764,6 +1885,374 @@ Porte radio / AXUDP
 </span>
 <span data-it="Avanzate" data-en="Advanced">Avanzate</span>
 </a>
+
+
+
+<!-- DXLAPRS COMPONENTS MENU -->
+
+<details class="dx-components"
+{% if request.path in [
+    '/config/udpbox',
+    '/config/udphub',
+    '/config/udpflex',
+    '/config/lorarx',
+    '/config/loratx',
+    '/config/fsk4rx',
+    '/config/ra02',
+    '/config/ra02waterfall',
+    '/config/sdrtst',
+    '/config/afskmodem',
+    '/config/gps2aprs',
+    '/config/hostint',
+    '/config/l2cat',
+    '/config/sondeudp',
+    '/config/sondemod',
+    '/config/ttytee',
+    '/config/adsb2aprs'
+] %}open{% endif %}>
+
+<summary>
+
+<span class="menu-icon">
+<svg viewBox="0 0 24 24">
+<rect x="4" y="4" width="6" height="6" rx="1"/>
+<rect x="14" y="4" width="6" height="6" rx="1"/>
+<rect x="4" y="14" width="6" height="6" rx="1"/>
+<rect x="14" y="14" width="6" height="6" rx="1"/>
+</svg>
+</span>
+
+<span
+ data-it="Componenti dxlAPRS"
+ data-en="dxlAPRS Components"
+>
+Componenti dxlAPRS
+</span>
+
+</summary>
+
+<div class="dx-components-list">
+
+
+<a href="/config/udpbox"
+ class="{% if request.path == '/config/udpbox' %}active{% endif %}">
+
+<span class="menu-icon">
+<svg viewBox="0 0 24 24">
+<path d="M4 7h16"/>
+<path d="M4 12h16"/>
+<path d="M4 17h16"/>
+<circle cx="7" cy="7" r="1"/>
+<circle cx="7" cy="12" r="1"/>
+<circle cx="7" cy="17" r="1"/>
+</svg>
+</span>
+
+<span>udpbox</span>
+
+</a>
+
+<a href="/config/udphub"
+ class="{% if request.path == '/config/udphub' %}active{% endif %}">
+
+<span class="menu-icon">
+<svg viewBox="0 0 24 24">
+<path d="M4 7h16"/>
+<path d="M4 12h16"/>
+<path d="M4 17h16"/>
+<circle cx="7" cy="7" r="1"/>
+<circle cx="7" cy="12" r="1"/>
+<circle cx="7" cy="17" r="1"/>
+</svg>
+</span>
+
+<span>udphub</span>
+
+</a>
+
+<a href="/config/udpflex"
+ class="{% if request.path == '/config/udpflex' %}active{% endif %}">
+
+<span class="menu-icon">
+<svg viewBox="0 0 24 24">
+<path d="M4 7h16"/>
+<path d="M4 12h16"/>
+<path d="M4 17h16"/>
+<circle cx="7" cy="7" r="1"/>
+<circle cx="7" cy="12" r="1"/>
+<circle cx="7" cy="17" r="1"/>
+</svg>
+</span>
+
+<span>udpflex</span>
+
+</a>
+
+<a href="/config/lorarx"
+ class="{% if request.path == '/config/lorarx' %}active{% endif %}">
+
+<span class="menu-icon">
+<svg viewBox="0 0 24 24">
+<path d="M4 7h16"/>
+<path d="M4 12h16"/>
+<path d="M4 17h16"/>
+<circle cx="7" cy="7" r="1"/>
+<circle cx="7" cy="12" r="1"/>
+<circle cx="7" cy="17" r="1"/>
+</svg>
+</span>
+
+<span>lorarx</span>
+
+</a>
+<a href="/config/loratx"
+ class="{% if request.path == '/config/loratx' %}active{% endif %}">
+
+<span class="menu-icon">
+<svg viewBox="0 0 24 24">
+<path d="M4 7h16"/>
+<path d="M4 12h16"/>
+<path d="M4 17h16"/>
+<circle cx="7" cy="7" r="1"/>
+<circle cx="7" cy="12" r="1"/>
+<circle cx="7" cy="17" r="1"/>
+</svg>
+</span>
+
+<span>loratx</span>
+
+</a>
+
+
+<a href="/config/fsk4rx"
+ class="{% if request.path == '/config/fsk4rx' %}active{% endif %}">
+
+<span class="menu-icon">
+<svg viewBox="0 0 24 24">
+<path d="M4 7h16"/>
+<path d="M4 12h16"/>
+<path d="M4 17h16"/>
+<circle cx="7" cy="7" r="1"/>
+<circle cx="7" cy="12" r="1"/>
+<circle cx="7" cy="17" r="1"/>
+</svg>
+</span>
+
+<span>fsk4rx</span>
+
+</a>
+
+
+<a href="/config/ra02"
+ class="{% if request.path == '/config/ra02' %}active{% endif %}">
+
+<span class="menu-icon">
+<svg viewBox="0 0 24 24">
+<path d="M4 7h16"/>
+<path d="M4 12h16"/>
+<path d="M4 17h16"/>
+<circle cx="7" cy="7" r="1"/>
+<circle cx="7" cy="12" r="1"/>
+<circle cx="7" cy="17" r="1"/>
+</svg>
+</span>
+
+<span>ra02</span>
+
+</a>
+
+<a href="/config/ra02waterfall"
+ class="{% if request.path == '/config/ra02waterfall' %}active{% endif %}">
+
+<span class="menu-icon">
+<svg viewBox="0 0 24 24">
+<path d="M4 7h16"/>
+<path d="M4 12h16"/>
+<path d="M4 17h16"/>
+<circle cx="7" cy="7" r="1"/>
+<circle cx="7" cy="12" r="1"/>
+<circle cx="7" cy="17" r="1"/>
+</svg>
+</span>
+
+<span>ra02waterfall</span>
+
+</a>
+
+<a href="/config/sdrtst"
+ class="{% if request.path == '/config/sdrtst' %}active{% endif %}">
+
+<span class="menu-icon">
+<svg viewBox="0 0 24 24">
+<path d="M4 7h16"/>
+<path d="M4 12h16"/>
+<path d="M4 17h16"/>
+<circle cx="7" cy="7" r="1"/>
+<circle cx="7" cy="12" r="1"/>
+<circle cx="7" cy="17" r="1"/>
+</svg>
+</span>
+
+<span>sdrtst</span>
+
+</a>
+
+<a href="/config/afskmodem"
+ class="{% if request.path == '/config/afskmodem' %}active{% endif %}">
+
+<span class="menu-icon">
+<svg viewBox="0 0 24 24">
+<path d="M4 7h16"/>
+<path d="M4 12h16"/>
+<path d="M4 17h16"/>
+<circle cx="7" cy="7" r="1"/>
+<circle cx="7" cy="12" r="1"/>
+<circle cx="7" cy="17" r="1"/>
+</svg>
+</span>
+
+<span>afskmodem</span>
+
+</a>
+
+<a href="/config/gps2aprs"
+ class="{% if request.path == '/config/gps2aprs' %}active{% endif %}">
+
+<span class="menu-icon">
+<svg viewBox="0 0 24 24">
+<path d="M4 7h16"/>
+<path d="M4 12h16"/>
+<path d="M4 17h16"/>
+<circle cx="7" cy="7" r="1"/>
+<circle cx="7" cy="12" r="1"/>
+<circle cx="7" cy="17" r="1"/>
+</svg>
+</span>
+
+<span>gps2aprs</span>
+
+</a>
+
+<a href="/config/hostint"
+ class="{% if request.path == '/config/hostint' %}active{% endif %}">
+
+<span class="menu-icon">
+<svg viewBox="0 0 24 24">
+<path d="M4 7h16"/>
+<path d="M4 12h16"/>
+<path d="M4 17h16"/>
+<circle cx="7" cy="7" r="1"/>
+<circle cx="7" cy="12" r="1"/>
+<circle cx="7" cy="17" r="1"/>
+</svg>
+</span>
+
+<span>hostint</span>
+
+</a>
+
+<a href="/config/l2cat"
+ class="{% if request.path == '/config/l2cat' %}active{% endif %}">
+
+<span class="menu-icon">
+<svg viewBox="0 0 24 24">
+<path d="M4 7h16"/>
+<path d="M4 12h16"/>
+<path d="M4 17h16"/>
+<circle cx="7" cy="7" r="1"/>
+<circle cx="7" cy="12" r="1"/>
+<circle cx="7" cy="17" r="1"/>
+</svg>
+</span>
+
+<span>l2cat</span>
+
+</a>
+
+<a href="/config/sondeudp"
+ class="{% if request.path == '/config/sondeudp' %}active{% endif %}">
+
+<span class="menu-icon">
+<svg viewBox="0 0 24 24">
+<path d="M4 7h16"/>
+<path d="M4 12h16"/>
+<path d="M4 17h16"/>
+<circle cx="7" cy="7" r="1"/>
+<circle cx="7" cy="12" r="1"/>
+<circle cx="7" cy="17" r="1"/>
+</svg>
+</span>
+
+<span>sondeudp</span>
+
+</a>
+
+<a href="/config/sondemod"
+ class="{% if request.path == '/config/sondemod' %}active{% endif %}">
+
+<span class="menu-icon">
+
+<svg viewBox="0 0 24 24">
+<path d="M4 7h16"/>
+<path d="M4 12h16"/>
+<path d="M4 17h16"/>
+<circle cx="7" cy="7" r="1"/>
+<circle cx="7" cy="12" r="1"/>
+<circle cx="7" cy="17" r="1"/>
+</svg>
+
+</span>
+
+<span>sondemod</span>
+
+</a>
+
+<a href="/config/ttytee"
+ class="{% if request.path == '/config/ttytee' %}active{% endif %}">
+
+<span class="menu-icon">
+
+<svg viewBox="0 0 24 24">
+<path d="M4 7h16"/>
+<path d="M4 12h16"/>
+<path d="M4 17h16"/>
+<circle cx="7" cy="7" r="1"/>
+<circle cx="7" cy="12" r="1"/>
+<circle cx="7" cy="17" r="1"/>
+</svg>
+
+</span>
+
+<span>ttytee</span>
+
+</a>
+
+<a href="/config/adsb2aprs"
+ class="{% if request.path == '/config/adsb2aprs' %}active{% endif %}">
+
+<span class="menu-icon">
+
+<svg viewBox="0 0 24 24">
+<path d="M4 7h16"/>
+<path d="M4 12h16"/>
+<path d="M4 17h16"/>
+<circle cx="7" cy="7" r="1"/>
+<circle cx="7" cy="12" r="1"/>
+<circle cx="7" cy="17" r="1"/>
+</svg>
+
+</span>
+
+<span>adsb2aprs</span>
+
+</a>
+
+
+
+
+</div>
+
+</details>
 
 <a href="/config/admin"
  class="{% if request.path == '/config/admin' %}active{% endif %}">
@@ -1960,6 +2449,78 @@ document.addEventListener("DOMContentLoaded", function() {
 
     setLanguage(lang);
 });
+</script>
+
+
+<script>
+/* DXLAPRS SIDEBAR SCROLL MEMORY */
+(function () {
+
+    const STORAGE_KEY = "dxlaprs_sidebar_scroll";
+
+    function getSidebar() {
+        return document.querySelector(".sidebar");
+    }
+
+    function restoreSidebarScroll() {
+
+        const sidebar = getSidebar();
+
+        if (!sidebar) return;
+
+        const saved = sessionStorage.getItem(STORAGE_KEY);
+
+        if (saved !== null) {
+
+            const pos = parseInt(saved, 10);
+
+            if (!Number.isNaN(pos)) {
+                sidebar.scrollTop = pos;
+            }
+        }
+    }
+
+    function saveSidebarScroll() {
+
+        const sidebar = getSidebar();
+
+        if (!sidebar) return;
+
+        sessionStorage.setItem(
+            STORAGE_KEY,
+            String(sidebar.scrollTop)
+        );
+    }
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            restoreSidebarScroll();
+
+            const sidebar = getSidebar();
+
+            if (!sidebar) return;
+
+            sidebar.addEventListener(
+                "scroll",
+                saveSidebarScroll,
+                { passive: true }
+            );
+
+            sidebar.querySelectorAll("a").forEach(function (link) {
+
+                link.addEventListener(
+                    "click",
+                    saveSidebarScroll
+                );
+
+            });
+
+        }
+    );
+
+})();
 </script>
 
 </body>

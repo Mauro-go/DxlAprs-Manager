@@ -1,0 +1,611 @@
+{% extends "base.html" %}
+
+{% block title %}
+<span class="page-icon">
+<svg viewBox="0 0 24 24">
+<rect x="4" y="4" width="6" height="6" rx="1"/>
+<rect x="14" y="4" width="6" height="6" rx="1"/>
+<rect x="4" y="14" width="6" height="6" rx="1"/>
+<rect x="14" y="14" width="6" height="6" rx="1"/>
+</svg>
+</span>
+<span>hostint</span>
+{% endblock %}
+
+
+{% macro value_option(name,state,flag,it,en,syntax,help_it,help_en) %}
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+<input
+    type="checkbox"
+    name="{{name}}_enabled"
+    {% if state.get('enabled') %}checked{% endif %}
+>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge {% if state.get('enabled') %}badge-active{% else %}badge-off{% endif %}">
+
+{% if state.get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">
+NON CONFIGURATO
+</span>
+{% endif %}
+
+</div>
+
+</div>
+
+
+<div class="option-main">
+
+<label class="option-name">
+<span data-it="{{it}}" data-en="{{en}}">{{it}}</span>
+<span class="param">{{flag}}</span>
+</label>
+
+<input
+    name="{{name}}"
+    value="{{state.get('value','')}}"
+    spellcheck="false"
+>
+
+<div class="syntax">
+<code>{{flag}} {{syntax}}</code>
+</div>
+
+</div>
+
+
+<div class="option-help">
+
+<div
+    data-it="{{help_it}}"
+    data-en="{{help_en}}"
+>
+{{help_it}}
+</div>
+
+</div>
+
+</div>
+{% endmacro %}
+
+
+{% macro bool_option(name,state,flag,it,en,help_it,help_en) %}
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+<input
+    type="checkbox"
+    name="{{name}}"
+    {% if state.get('enabled') %}checked{% endif %}
+>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge {% if state.get('enabled') %}badge-active{% else %}badge-off{% endif %}">
+
+{% if state.get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">
+NON CONFIGURATO
+</span>
+{% endif %}
+
+</div>
+
+</div>
+
+
+<div class="option-main">
+
+<label class="option-name">
+<span data-it="{{it}}" data-en="{{en}}">{{it}}</span>
+<span class="param">{{flag}}</span>
+</label>
+
+<div
+    class="boolean-description"
+    data-it="Parametro senza valore: viene aggiunto quando attivo."
+    data-en="Value-less parameter: added when enabled."
+>
+Parametro senza valore: viene aggiunto quando attivo.
+</div>
+
+</div>
+
+
+<div class="option-help">
+
+<div
+    data-it="{{help_it}}"
+    data-en="{{help_en}}"
+>
+{{help_it}}
+</div>
+
+</div>
+
+</div>
+{% endmacro %}
+
+
+{% block content %}
+
+<form method="post">
+
+
+<!-- ========================================================
+     STATO
+     ======================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Stato hostint" data-en="hostint status">
+Stato hostint
+</span>
+</div>
+
+<div class="card-body">
+
+<div style="display:flex;gap:24px;flex-wrap:wrap;align-items:center;">
+
+<div>
+
+<strong data-it="Servizio:" data-en="Service:">
+Servizio:
+</strong>
+
+{% if running %}
+
+<span class="option-badge badge-active">
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+</span>
+
+{% else %}
+
+<span class="option-badge badge-off">
+<span data-it="FERMO" data-en="STOPPED">FERMO</span>
+</span>
+
+{% endif %}
+
+</div>
+
+
+<div>
+
+<strong
+    data-it="Avvio automatico:"
+    data-en="Automatic startup:"
+>
+Avvio automatico:
+</strong>
+
+{% if enabled %}
+<span data-it="abilitato" data-en="enabled">abilitato</span>
+{% else %}
+<span data-it="disabilitato" data-en="disabled">disabilitato</span>
+{% endif %}
+
+</div>
+
+</div>
+
+
+<div class="actions config-actions" style="margin-top:20px;">
+
+<button
+    type="submit"
+    class="save"
+    name="action"
+    value="start"
+    formnovalidate
+>
+<span data-it="Avvia hostint" data-en="Start hostint">
+Avvia hostint
+</span>
+</button>
+
+
+<button
+    type="submit"
+    name="action"
+    value="stop"
+    formnovalidate
+>
+<span data-it="Ferma hostint" data-en="Stop hostint">
+Ferma hostint
+</span>
+</button>
+
+
+<button
+    type="submit"
+    class="restart-udpgate"
+    name="action"
+    value="restart"
+    formnovalidate
+>
+<span data-it="Riavvia hostint" data-en="Restart hostint">
+Riavvia hostint
+</span>
+</button>
+
+</div>
+
+</div>
+</div>
+
+
+<!-- ========================================================
+     INTERFACCIA HOSTMODE
+     ======================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+
+<span
+    data-it="Interfaccia Hostmode"
+    data-en="Hostmode interface"
+>
+Interfaccia Hostmode
+</span>
+
+</div>
+
+<div class="card-body">
+
+<div class="option-list">
+
+
+{{ value_option(
+'general_callsign',
+GENERAL.get('callsign',{}),
+'-i',
+'Nominativo',
+'Callsign',
+'&lt;CALL-SSID&gt;',
+'Imposta lo stesso nominativo su tutte le porte hostmode.',
+'Sets the same callsign on all hostmode ports.'
+) }}
+
+
+{{ value_option(
+'general_tty',
+GENERAL.get('tty',{}),
+'-t',
+'TTY / pipe Hostmode',
+'Hostmode TTY / pipe',
+'&lt;tty[:baud]&gt;',
+'Pseudo-TTY senza baud, pipe con :0 oppure porta seriale reale con :baud.',
+'Pseudo-TTY without baud, normal pipe with :0, or real serial port with :baud.'
+) }}
+
+
+{{ bool_option(
+'general_verbose',
+GENERAL.get('verbose',{}),
+'-v',
+'Verbose',
+'Verbose',
+'Mostra informazioni operative e diagnostiche.',
+'Shows operational and diagnostic information.'
+) }}
+
+
+</div>
+
+</div>
+</div>
+
+
+<!-- ========================================================
+     AXUDP
+     ======================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+
+<span
+    data-it="Porte AXUDP"
+    data-en="AXUDP ports"
+>
+Porte AXUDP
+</span>
+
+</div>
+
+
+<div class="card-body">
+
+<div class="option-name">
+
+<span
+    data-it="Destinazioni AXUDP"
+    data-en="AXUDP destinations"
+>
+Destinazioni AXUDP
+</span>
+
+<span class="param">-U</span>
+
+</div>
+
+
+<div
+    style="margin-top:8px;margin-bottom:18px;"
+    data-it="Il parametro -U può essere ripetuto per configurare più porte. Formato: indirizzo:porta-destinazione:porta-ascolto."
+    data-en="The -U parameter may be repeated for multiple ports. Format: address:destination-port:listen-port."
+>
+Il parametro -U può essere ripetuto per configurare più porte.
+Formato: indirizzo:porta-destinazione:porta-ascolto.
+</div>
+
+
+<div id="axudp-list">
+
+{% for value in AXUDP %}
+
+<div
+    class="dynamic-row"
+    style="display:flex;gap:10px;margin:8px 0;"
+>
+
+<input
+    name="axudp"
+    value="{{value}}"
+    placeholder="host:destport:listenport"
+    spellcheck="false"
+>
+
+<button
+    type="button"
+    onclick="this.parentElement.remove()"
+>
+×
+</button>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+
+<button
+    type="button"
+    onclick="addAxudp()"
+>
+
+<span
+    data-it="Aggiungi porta AXUDP"
+    data-en="Add AXUDP port"
+>
+Aggiungi porta AXUDP
+</span>
+
+</button>
+
+
+<div class="syntax" style="margin-top:15px;">
+<code>-U &lt;ip:destport:listenport&gt;</code>
+</div>
+
+
+<div
+    style="margin-top:12px;"
+    data-it="La listenport non effettua il controllo dell'IP sorgente, secondo il comportamento originale di hostint."
+    data-en="The listen port does not check the source IP, according to hostint's original behaviour."
+>
+La listenport non effettua il controllo dell'IP sorgente,
+secondo il comportamento originale di hostint.
+</div>
+
+</div>
+</div>
+
+
+<!-- ========================================================
+     NOTE HOSTMODE
+     ======================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+
+<span
+    data-it="Note Hostmode"
+    data-en="Hostmode notes"
+>
+Note Hostmode
+</span>
+
+</div>
+
+
+<div class="card-body">
+
+<div
+    data-it="WA8DED Hostmode: monitor TNC 0=off, 1=protocollo senza info, 2=con info, 3=CRC off. I valori temporali del protocollo Hostmode sono espressi in unità da 100 ms."
+    data-en="WA8DED Hostmode: TNC monitor 0=off, 1=protocol without info, 2=with info, 3=CRC off. Hostmode protocol time values are expressed in 100 ms units."
+>
+WA8DED Hostmode: monitor TNC 0=off, 1=protocollo senza info,
+2=con info, 3=CRC off. I valori temporali sono espressi
+in unità da 100 ms.
+</div>
+
+</div>
+</div>
+
+
+<!-- ========================================================
+     CONFIG
+     ======================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+
+<span
+    data-it="Gestione configurazione"
+    data-en="Configuration management"
+>
+Gestione configurazione
+</span>
+
+</div>
+
+
+<div class="card-body">
+
+<div class="actions config-actions">
+
+<button
+    type="submit"
+    class="save"
+    name="action"
+    value="save"
+>
+
+<span
+    data-it="Salva configurazione"
+    data-en="Save configuration"
+>
+Salva configurazione
+</span>
+
+</button>
+
+
+<button
+    type="submit"
+    class="apply-config"
+    name="action"
+    value="apply"
+>
+
+<span
+    data-it="Applica configurazione"
+    data-en="Apply configuration"
+>
+Applica configurazione
+</span>
+
+</button>
+
+</div>
+
+</div>
+</div>
+
+
+<!-- ========================================================
+     COMMAND / LOG
+     ======================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+
+<span
+    data-it="Anteprima comando salvato"
+    data-en="Saved command preview"
+>
+Anteprima comando salvato
+</span>
+
+</div>
+
+<pre>{{command}}</pre>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-title">
+
+<span
+    data-it="Comando attivo"
+    data-en="Active command"
+>
+Comando attivo
+</span>
+
+</div>
+
+<pre>{{active_command}}</pre>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-title">
+
+<span
+    data-it="Ultime righe del log"
+    data-en="Latest log lines"
+>
+Ultime righe del log
+</span>
+
+</div>
+
+<pre>{{journal}}</pre>
+
+</div>
+
+
+</form>
+
+
+<script>
+
+function addAxudp() {
+
+    const root =
+        document.getElementById("axudp-list");
+
+    const row =
+        document.createElement("div");
+
+    row.className =
+        "dynamic-row";
+
+    row.style.cssText =
+        "display:flex;gap:10px;margin:8px 0;";
+
+    row.innerHTML = `
+        <input
+            name="axudp"
+            placeholder="host:destport:listenport"
+            spellcheck="false"
+        >
+        <button
+            type="button"
+            onclick="this.parentElement.remove()"
+        >
+        ×
+        </button>
+    `;
+
+    root.appendChild(row);
+}
+
+</script>
+
+{% endblock %}

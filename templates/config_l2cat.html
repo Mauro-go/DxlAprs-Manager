@@ -1,0 +1,459 @@
+{% extends "base.html" %}
+
+{% block title %}
+<span class="page-icon">
+<svg viewBox="0 0 24 24">
+<rect x="4" y="4" width="6" height="6" rx="1"/>
+<rect x="14" y="4" width="6" height="6" rx="1"/>
+<rect x="4" y="14" width="6" height="6" rx="1"/>
+<rect x="14" y="14" width="6" height="6" rx="1"/>
+</svg>
+</span>
+<span>l2cat</span>
+{% endblock %}
+
+
+{% macro value_option(name,state,flag,it,en,syntax,help_it,help_en) %}
+<div class="option-row">
+<div class="option-state">
+<label class="switch">
+<input type="checkbox" name="{{name}}_enabled"
+{% if state.get('enabled') %}checked{% endif %}>
+<span class="slider"></span>
+</label>
+<div class="option-badge {% if state.get('enabled') %}badge-active{% else %}badge-off{% endif %}">
+{% if state.get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">NON CONFIGURATO</span>
+{% endif %}
+</div>
+</div>
+
+<div class="option-main">
+<label class="option-name">
+<span data-it="{{it}}" data-en="{{en}}">{{it}}</span>
+<span class="param">{{flag}}</span>
+</label>
+<input name="{{name}}" value="{{state.get('value','')}}" spellcheck="false">
+<div class="syntax"><code>{{flag}} {{syntax}}</code></div>
+</div>
+
+<div class="option-help">
+<div data-it="{{help_it}}" data-en="{{help_en}}">{{help_it}}</div>
+</div>
+</div>
+{% endmacro %}
+
+
+{% macro bool_option(name,state,flag,it,en,help_it,help_en) %}
+<div class="option-row">
+<div class="option-state">
+<label class="switch">
+<input type="checkbox" name="{{name}}"
+{% if state.get('enabled') %}checked{% endif %}>
+<span class="slider"></span>
+</label>
+<div class="option-badge {% if state.get('enabled') %}badge-active{% else %}badge-off{% endif %}">
+{% if state.get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">NON CONFIGURATO</span>
+{% endif %}
+</div>
+</div>
+
+<div class="option-main">
+<label class="option-name">
+<span data-it="{{it}}" data-en="{{en}}">{{it}}</span>
+<span class="param">{{flag}}</span>
+</label>
+<div class="boolean-description"
+data-it="Parametro senza valore: viene aggiunto quando attivo."
+data-en="Value-less parameter: added when enabled.">
+Parametro senza valore: viene aggiunto quando attivo.
+</div>
+</div>
+
+<div class="option-help">
+<div data-it="{{help_it}}" data-en="{{help_en}}">{{help_it}}</div>
+</div>
+</div>
+{% endmacro %}
+
+
+{% block content %}
+<form method="post">
+
+<div class="card">
+<div class="card-title">
+<span data-it="Stato l2cat" data-en="l2cat status">Stato l2cat</span>
+</div>
+<div class="card-body">
+
+<div style="display:flex;gap:24px;flex-wrap:wrap;align-items:center;">
+<div>
+<strong data-it="Servizio:" data-en="Service:">Servizio:</strong>
+{% if running %}
+<span class="option-badge badge-active"><span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span></span>
+{% else %}
+<span class="option-badge badge-off"><span data-it="FERMO" data-en="STOPPED">FERMO</span></span>
+{% endif %}
+</div>
+
+<div>
+<strong data-it="Avvio automatico:" data-en="Automatic startup:">Avvio automatico:</strong>
+{% if enabled %}
+<span data-it="abilitato" data-en="enabled">abilitato</span>
+{% else %}
+<span data-it="disabilitato" data-en="disabled">disabilitato</span>
+{% endif %}
+</div>
+</div>
+
+<div class="actions config-actions" style="margin-top:20px;">
+<button type="submit" class="save" name="action" value="start" formnovalidate>
+<span data-it="Avvia l2cat" data-en="Start l2cat">Avvia l2cat</span>
+</button>
+
+<button type="submit" name="action" value="stop" formnovalidate>
+<span data-it="Ferma l2cat" data-en="Stop l2cat">Ferma l2cat</span>
+</button>
+
+<button type="submit" class="restart-udpgate" name="action" value="restart" formnovalidate>
+<span data-it="Riavvia l2cat" data-en="Restart l2cat">Riavvia l2cat</span>
+</button>
+</div>
+
+</div>
+</div>
+
+
+<div class="card">
+<div class="card-title">
+<span data-it="Connessione Layer 2" data-en="Layer 2 connection">Connessione Layer 2</span>
+</div>
+<div class="card-body">
+<div class="option-list">
+
+{{ value_option('conn_callsigns',CONNECTION.get('callsigns',{}),'-i',
+'Nominativi collegabili','Connectable callsigns',
+'&lt;CALL CALL-SSID ...&gt;',
+'Elenco dei nominativi collegabili. Il primo viene usato anche per le connessioni in uscita.',
+'List of connectable callsigns. The first is also used for outgoing connections.') }}
+
+{{ value_option('conn_destination',CONNECTION.get('destination',{}),'-C',
+'Destinazione slave','Slave destination',
+'&lt;destination&gt;',
+'Destinazione AX.25 da collegare. Senza -C l2cat opera come server.',
+'AX.25 destination to connect. Without -C l2cat operates as a server.') }}
+
+{{ value_option('conn_command',CONNECTION.get('command',{}),'-c',
+'Comando alla connessione','Command on connect',
+'&lt;command line&gt;',
+'Esegue un comando alla connessione. Supporta %m, %u, %U e %%.',
+'Executes a command on connect. Supports %m, %u, %U and %%.') }}
+
+{{ value_option('conn_pipe',CONNECTION.get('pipe',{}),'-p',
+'Device / pipe dati','Data device / pipe',
+'&lt;filename&gt;',
+'Device o pipe usato per il flusso dati.',
+'Device or pipe used for the data stream.') }}
+
+{{ value_option('conn_reconnect_min',CONNECTION.get('reconnect_min',{}),'-r',
+'Ritardo minimo riconnessione','Minimum reconnect delay',
+'&lt;ms&gt;',
+'Abilita keep-connected e imposta il ritardo minimo di riconnessione.',
+'Enables keep-connected and sets minimum reconnect delay.') }}
+
+{{ value_option('conn_reconnect_max',CONNECTION.get('reconnect_max',{}),'-R',
+'Ritardo massimo riconnessione','Maximum reconnect delay',
+'&lt;ms&gt;',
+'Imposta il ritardo massimo di riconnessione, fino a 4000000 ms.',
+'Sets maximum reconnect delay, up to 4000000 ms.') }}
+
+</div>
+</div>
+</div>
+
+
+<div class="card">
+<div class="card-title">
+<span data-it="Conversione e protocollo" data-en="Conversion and protocol">
+Conversione e protocollo
+</span>
+</div>
+<div class="card-body">
+<div class="option-list">
+
+{{ value_option('stream_convert',STREAM.get('convert_from_pr',{}),'-j',
+'Conversione dal protocollo','Conversion from protocol',
+'&lt;0..6&gt;',
+'Conversione CR/LF del flusso proveniente dal protocollo.',
+'CR/LF conversion of the stream coming from the protocol.') }}
+
+{{ value_option('stream_monitor',STREAM.get('monitor',{}),'-m',
+'Monitor AX.25','AX.25 monitor',
+'&lt;0..2&gt;',
+'Monitor AX.25 su stderr; 2 include il campo informativo.',
+'AX.25 monitor on stderr; 2 includes the information field.') }}
+
+{{ value_option('stream_dupe',STREAM.get('dupe_check',{}),'-w',
+'Controllo duplicati AXUDP','AXUDP duplicate check',
+'&lt;0..31&gt;',
+'Controlla i duplicati AXUDP sugli ultimi n frame o n×10 ms.',
+'Checks AXUDP duplicates over the last n frames or n×10 ms.') }}
+
+{{ value_option('stream_discard',STREAM.get('discard',{}),'-D',
+'Scarta frame PPP lunghi','Discard long PPP frames',
+'&lt;bytes&gt;',
+'Scarta frame PPP troppo lunghi quando il buffer di trasmissione è pieno.',
+'Discards long PPP frames when the transmit buffer is full.') }}
+
+{{ bool_option('stream_autodetect',STREAM.get('autodetect',{}),'-a',
+'Autodetect','Autodetect',
+'Rileva automaticamente PPP, deflate e modalità di conversione dai primi byte.',
+'Automatically detects PPP, deflate and conversion mode from the first bytes.') }}
+
+{{ bool_option('stream_ppp',STREAM.get('ppp_deflate',{}),'-P',
+'PPP + deflate','PPP + deflate',
+'Abilita contemporaneamente PPP e deflate.',
+'Enables PPP and deflate together.') }}
+
+{{ bool_option('stream_deflate',STREAM.get('deflate',{}),'-d',
+'Deflate','Deflate',
+'Abilita la compressione deflate.',
+'Enables deflate compression.') }}
+
+{{ bool_option('stream_lfcr',STREAM.get('convert_lf_cr',{}),'-l',
+'LF → CR verso protocollo','LF → CR to protocol',
+'Converte LF in CR nel flusso verso il protocollo.',
+'Converts LF to CR in the stream sent to the protocol.') }}
+
+{{ bool_option('stream_striplf',STREAM.get('strip_lf',{}),'-L',
+'Rimuovi LF verso protocollo','Strip LF to protocol',
+'Rimuove LF nel flusso verso il protocollo. Alternativo a -l.',
+'Strips LF in the stream sent to the protocol. Alternative to -l.') }}
+
+</div>
+</div>
+</div>
+
+
+<div class="card">
+<div class="card-title">
+<span data-it="Porte AXUDP" data-en="AXUDP ports">Porte AXUDP</span>
+</div>
+<div class="card-body">
+
+<div data-it="l2cat richiede almeno una porta AXUDP. -U può essere ripetuto fino al limite previsto dal programma."
+     data-en="l2cat requires at least one AXUDP port. -U may be repeated up to the program limit.">
+l2cat richiede almeno una porta AXUDP.
+</div>
+
+<div id="axudp-list" style="margin-top:15px;">
+{% for value in AXUDP %}
+<div class="dynamic-row" style="display:flex;gap:10px;margin:8px 0;">
+<input name="axudp" value="{{value}}" placeholder="host:destport:listenport" spellcheck="false">
+<button type="button" onclick="this.parentElement.remove()">×</button>
+</div>
+{% endfor %}
+</div>
+
+<button type="button" onclick="addAxudp()">
+<span data-it="Aggiungi porta AXUDP" data-en="Add AXUDP port">Aggiungi porta AXUDP</span>
+</button>
+
+<div class="syntax" style="margin-top:15px;">
+<code>-U &lt;ip:destport:listenport&gt;</code>
+</div>
+
+</div>
+</div>
+
+
+<div class="card">
+<div class="card-title">
+<span data-it="Parametri Layer 2" data-en="Layer 2 parameters">Parametri Layer 2</span>
+</div>
+<div class="card-body">
+
+<div data-it="Ogni riga genera -n &lt;porta&gt; &lt;parametro&gt; &lt;valore&gt;. Usa 'a' come porta per applicare il parametro a tutte le porte."
+     data-en="Each row generates -n &lt;port&gt; &lt;parameter&gt; &lt;value&gt;. Use 'a' as the port to apply the parameter to all ports.">
+Ogni riga genera un parametro Layer 2.
+</div>
+
+<div id="l2-list" style="margin-top:15px;">
+{% for item in L2PARAMS %}
+<div class="dynamic-row" style="display:grid;grid-template-columns:160px 220px 1fr 50px;gap:10px;margin:8px 0;">
+
+<input name="l2_port" value="{{item.get('port','')}}" placeholder="porta 0..15 / a">
+
+<select name="l2_parameter">
+{% for p in ['t','d','o','f','F','I','n','h'] %}
+<option value="{{p}}" {% if item.get('parameter') == p %}selected{% endif %}>{{p}}</option>
+{% endfor %}
+</select>
+
+<input name="l2_value" value="{{item.get('value','')}}" placeholder="valore">
+
+<button type="button" onclick="this.parentElement.remove()">×</button>
+
+</div>
+{% endfor %}
+</div>
+
+<button type="button" onclick="addL2Param()">
+<span data-it="Aggiungi parametro Layer 2" data-en="Add Layer 2 parameter">
+Aggiungi parametro Layer 2
+</span>
+</button>
+
+<div class="syntax" style="margin-top:15px;">
+<code>-n &lt;port|a&gt; &lt;t|d|o|f|F|I|n|h&gt; &lt;value&gt;</code>
+</div>
+
+</div>
+</div>
+
+
+<div class="card">
+<div class="card-title">
+<span data-it="Debug" data-en="Debug">Debug</span>
+</div>
+<div class="card-body">
+
+<div class="option-list">
+
+<div class="option-row">
+<div class="option-state">
+<label class="switch">
+<input type="checkbox" name="log_verbose" {% if LOGGING.get('verbose') %}checked{% endif %}>
+<span class="slider"></span>
+</label>
+</div>
+<div class="option-main">
+<label class="option-name">Verbose <span class="param">-v</span></label>
+</div>
+<div class="option-help">
+<span data-it="Output diagnostico."
+      data-en="Diagnostic output.">Output diagnostico.</span>
+</div>
+</div>
+
+<div class="option-row">
+<div class="option-state">
+<label class="switch">
+<input type="checkbox" name="log_very_verbose" {% if LOGGING.get('very_verbose') %}checked{% endif %}>
+<span class="slider"></span>
+</label>
+</div>
+<div class="option-main">
+<label class="option-name">Very verbose <span class="param">-V</span></label>
+</div>
+<div class="option-help">
+<span data-it="Output diagnostico esteso; implica verbose."
+      data-en="Extended diagnostic output; implies verbose.">
+Output diagnostico esteso.
+</span>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+
+<div class="card">
+<div class="card-title">
+<span data-it="Gestione configurazione" data-en="Configuration management">
+Gestione configurazione
+</span>
+</div>
+<div class="card-body">
+<div class="actions config-actions">
+
+<button type="submit" class="save" name="action" value="save">
+<span data-it="Salva configurazione" data-en="Save configuration">
+Salva configurazione
+</span>
+</button>
+
+<button type="submit" class="apply-config" name="action" value="apply">
+<span data-it="Applica configurazione" data-en="Apply configuration">
+Applica configurazione
+</span>
+</button>
+
+</div>
+</div>
+</div>
+
+
+<div class="card">
+<div class="card-title">
+<span data-it="Anteprima comando salvato" data-en="Saved command preview">
+Anteprima comando salvato
+</span>
+</div>
+<pre>{{command}}</pre>
+</div>
+
+<div class="card">
+<div class="card-title">
+<span data-it="Comando attivo" data-en="Active command">
+Comando attivo
+</span>
+</div>
+<pre>{{active_command}}</pre>
+</div>
+
+<div class="card">
+<div class="card-title">
+<span data-it="Ultime righe del log" data-en="Latest log lines">
+Ultime righe del log
+</span>
+</div>
+<pre>{{journal}}</pre>
+</div>
+
+</form>
+
+
+<script>
+function addAxudp() {
+    const root=document.getElementById("axudp-list");
+    const row=document.createElement("div");
+    row.className="dynamic-row";
+    row.style.cssText="display:flex;gap:10px;margin:8px 0;";
+    row.innerHTML=`
+      <input name="axudp" placeholder="host:destport:listenport" spellcheck="false">
+      <button type="button" onclick="this.parentElement.remove()">×</button>`;
+    root.appendChild(row);
+}
+
+function addL2Param() {
+    const root=document.getElementById("l2-list");
+    const row=document.createElement("div");
+    row.className="dynamic-row";
+    row.style.cssText="display:grid;grid-template-columns:160px 220px 1fr 50px;gap:10px;margin:8px 0;";
+    row.innerHTML=`
+      <input name="l2_port" placeholder="porta 0..15 / a">
+      <select name="l2_parameter">
+        <option value="t">t</option>
+        <option value="d">d</option>
+        <option value="o">o</option>
+        <option value="f">f</option>
+        <option value="F">F</option>
+        <option value="I">I</option>
+        <option value="n">n</option>
+        <option value="h">h</option>
+      </select>
+      <input name="l2_value" placeholder="valore">
+      <button type="button" onclick="this.parentElement.remove()">×</button>`;
+    root.appendChild(row);
+}
+</script>
+
+{% endblock %}

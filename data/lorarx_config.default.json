@@ -1,0 +1,56 @@
+{
+  "global": {
+    "input_file":       {"enabled": false, "value": ""},
+    "format":           {"enabled": false, "value": "u8"},
+    "bandwidth":        {"enabled": false, "value": "7"},
+    "gain_correction":  {"enabled": false, "value": "0"},
+    "sample_rate":      {"enabled": false, "value": ""},
+    "fir_length":       {"enabled": false, "value": ""},
+    "offset":           {"enabled": false, "value": ""},
+    "frequency_mhz":    {"enabled": false, "value": ""},
+    "notch":            {"enabled": false, "values": []},
+    "autonotch":        {"enabled": false, "value": ""},
+    "noise_blanker":    {"enabled": false, "up": "", "down": ""},
+    "json_udp":         {"enabled": false, "value": ""},
+    "debug_iq":         {"enabled": false, "mode": "d", "value": ""},
+    "no_multipath":     {"enabled": false},
+    "no_crc_repair":    {"enabled": false},
+    "no_max_block_fec": {"enabled": false},
+    "ascii":            {"enabled": false},
+    "newline":          {"enabled": false},
+    "crc_only":         {"enabled": false},
+    "verbose":          {"enabled": false},
+    "very_verbose":     {"enabled": false}
+  },
+
+  "demodulators": [
+    {
+      "enabled": false,
+      "sf": "12",
+
+      "afc":         {"enabled": false, "value": ""},
+      "coding_rate": {"enabled": false, "value": ""},
+      "data_length": {"enabled": false, "value": ""},
+      "squelch":     {"enabled": false, "value": ""},
+      "network_id":  {"enabled": false, "value": ""},
+      "optimize":    {"enabled": false, "value": ""},
+      "ppm":         {"enabled": false, "value": ""},
+
+      "frame_chaining":    false,
+      "implicit_crc":      false,
+      "continue_dcd":      false,
+      "disable_collision": false,
+      "invert_iq":         false,
+
+      "axudp": {
+        "mode": "",
+        "value": ""
+      },
+
+      "raw_udp": {
+        "mode": "",
+        "value": ""
+      }
+    }
+  ]
+}

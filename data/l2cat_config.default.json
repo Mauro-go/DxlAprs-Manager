@@ -1,0 +1,27 @@
+{
+  "connection": {
+    "destination": {"enabled": false, "value": ""},
+    "callsigns": {"enabled": false, "value": ""},
+    "command": {"enabled": false, "value": ""},
+    "pipe": {"enabled": false, "value": ""},
+    "reconnect_min": {"enabled": false, "value": ""},
+    "reconnect_max": {"enabled": false, "value": ""}
+  },
+  "stream": {
+    "convert_from_pr": {"enabled": false, "value": "0"},
+    "convert_lf_cr": {"enabled": false},
+    "strip_lf": {"enabled": false},
+    "autodetect": {"enabled": false},
+    "ppp_deflate": {"enabled": false},
+    "deflate": {"enabled": false},
+    "discard": {"enabled": false, "value": ""},
+    "monitor": {"enabled": false, "value": "0"},
+    "dupe_check": {"enabled": false, "value": "0"}
+  },
+  "axudp": [],
+  "l2_parameters": [],
+  "logging": {
+    "verbose": false,
+    "very_verbose": false
+  }
+}

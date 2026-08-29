@@ -1,0 +1,837 @@
+{% extends "base.html" %}
+
+{% block title %}
+<span class="page-icon">
+<svg viewBox="0 0 24 24">
+<rect x="4" y="4" width="6" height="6" rx="1"/>
+<rect x="14" y="4" width="6" height="6" rx="1"/>
+<rect x="4" y="14" width="6" height="6" rx="1"/>
+<rect x="14" y="14" width="6" height="6" rx="1"/>
+</svg>
+</span>
+<span>gps2aprs</span>
+{% endblock %}
+
+
+{% macro value_option(name,state,flag,it,en,syntax,help_it,help_en) %}
+<div class="option-row">
+
+<div class="option-state">
+<label class="switch">
+<input type="checkbox"
+       name="{{name}}_enabled"
+       {% if state.get('enabled') %}checked{% endif %}>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge {% if state.get('enabled') %}badge-active{% else %}badge-off{% endif %}">
+{% if state.get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">NON CONFIGURATO</span>
+{% endif %}
+</div>
+</div>
+
+<div class="option-main">
+<label class="option-name">
+<span data-it="{{it}}" data-en="{{en}}">{{it}}</span>
+<span class="param">{{flag}}</span>
+</label>
+
+<input name="{{name}}"
+       value="{{state.get('value','')}}"
+       spellcheck="false">
+
+<div class="syntax">
+<code>{{flag}} {{syntax}}</code>
+</div>
+</div>
+
+<div class="option-help">
+<div data-it="{{help_it}}" data-en="{{help_en}}">
+{{help_it}}
+</div>
+</div>
+
+</div>
+{% endmacro %}
+
+
+{% macro bool_option(name,state,flag,it,en,help_it,help_en) %}
+<div class="option-row">
+
+<div class="option-state">
+<label class="switch">
+<input type="checkbox"
+       name="{{name}}"
+       {% if state.get('enabled') %}checked{% endif %}>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge {% if state.get('enabled') %}badge-active{% else %}badge-off{% endif %}">
+{% if state.get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">NON CONFIGURATO</span>
+{% endif %}
+</div>
+</div>
+
+<div class="option-main">
+<label class="option-name">
+<span data-it="{{it}}" data-en="{{en}}">{{it}}</span>
+<span class="param">{{flag}}</span>
+</label>
+
+<div class="boolean-description"
+     data-it="Parametro senza valore: viene aggiunto quando attivo."
+     data-en="Value-less parameter: added when enabled.">
+Parametro senza valore: viene aggiunto quando attivo.
+</div>
+</div>
+
+<div class="option-help">
+<div data-it="{{help_it}}" data-en="{{help_en}}">
+{{help_it}}
+</div>
+</div>
+
+</div>
+{% endmacro %}
+
+
+{% block content %}
+<form method="post">
+
+
+<!-- STATO -->
+
+<div class="card">
+<div class="card-title">
+<span data-it="Stato gps2aprs" data-en="gps2aprs status">
+Stato gps2aprs
+</span>
+</div>
+
+<div class="card-body">
+
+<div style="display:flex;gap:24px;flex-wrap:wrap;align-items:center;">
+
+<div>
+<strong data-it="Servizio:" data-en="Service:">Servizio:</strong>
+
+{% if running %}
+<span class="option-badge badge-active">
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+</span>
+{% else %}
+<span class="option-badge badge-off">
+<span data-it="FERMO" data-en="STOPPED">FERMO</span>
+</span>
+{% endif %}
+</div>
+
+<div>
+<strong data-it="Avvio automatico:" data-en="Automatic startup:">
+Avvio automatico:
+</strong>
+
+{% if enabled %}
+<span data-it="abilitato" data-en="enabled">abilitato</span>
+{% else %}
+<span data-it="disabilitato" data-en="disabled">disabilitato</span>
+{% endif %}
+</div>
+
+</div>
+
+<div class="actions config-actions" style="margin-top:20px;">
+
+<button type="submit"
+        class="save"
+        name="action"
+        value="start"
+        formnovalidate>
+<span data-it="Avvia gps2aprs" data-en="Start gps2aprs">
+Avvia gps2aprs
+</span>
+</button>
+
+<button type="submit"
+        name="action"
+        value="stop"
+        formnovalidate>
+<span data-it="Ferma gps2aprs" data-en="Stop gps2aprs">
+Ferma gps2aprs
+</span>
+</button>
+
+<button type="submit"
+        class="restart-udpgate"
+        name="action"
+        value="restart"
+        formnovalidate>
+<span data-it="Riavvia gps2aprs" data-en="Restart gps2aprs">
+Riavvia gps2aprs
+</span>
+</button>
+
+</div>
+</div>
+</div>
+
+
+<!-- GPS -->
+
+<div class="card">
+<div class="card-title">
+<span data-it="GPS e porta seriale" data-en="GPS and serial port">
+GPS e porta seriale
+</span>
+</div>
+
+<div class="card-body">
+<div class="option-list">
+
+{{ value_option(
+'gps_tty',GPS.get('tty',{}),'-t',
+'Porta GPS','GPS port',
+'&lt;device:baud&gt;',
+'Porta seriale GPS e velocità.',
+'GPS serial port and baud rate.'
+) }}
+
+{{ bool_option(
+'gps_usb_abort',GPS.get('usb_abort',{}),'-u',
+'Non ritentare USB','Do not retry USB',
+'Termina se non riesce ad aprire una porta USB rimovibile.',
+'Abort if a removable USB serial port cannot be opened.'
+) }}
+
+{{ bool_option(
+'gps_ublox',GPS.get('ublox_raw',{}),'-U',
+'Modalità Ublox Raw','Ublox Raw mode',
+'Abilita Ublox Raw per ricevitori compatibili e velocità verticale.',
+'Enables Ublox Raw on compatible receivers and vertical speed.'
+) }}
+
+{{ value_option(
+'gps_dynamic',GPS.get('dynamic_model',{}),'-M',
+'Modello dinamico Ublox','Ublox dynamic model',
+'&lt;numero&gt;',
+'Modello dinamico usato in modalità Raw.',
+'Dynamic model used in Raw mode.'
+) }}
+
+</div>
+
+
+<div class="option-row">
+
+<div class="option-state">
+<label class="switch">
+<input type="checkbox"
+       name="gps_fixed_enabled"
+       {% if GPS.get('fixed_altitude',{}).get('enabled') %}checked{% endif %}>
+<span class="slider"></span>
+</label>
+</div>
+
+<div class="option-main">
+<label class="option-name">
+<span data-it="Quota fissa Raw" data-en="Raw fixed altitude">
+Quota fissa Raw
+</span>
+<span class="param">-A</span>
+</label>
+
+<input name="gps_fixed_altitude"
+       value="{{GPS.get('fixed_altitude',{}).get('altitude_cm','')}}"
+       placeholder="cm">
+
+<select name="gps_fix_mode" style="margin-top:10px;">
+<option value="1" {% if GPS.get('fixed_altitude',{}).get('fix_mode') == '1' %}selected{% endif %}>1 - 2D</option>
+<option value="2" {% if GPS.get('fixed_altitude',{}).get('fix_mode') == '2' %}selected{% endif %}>2 - 3D</option>
+<option value="4" {% if GPS.get('fixed_altitude',{}).get('fix_mode','4') == '4' %}selected{% endif %}>4 - Auto 2D/3D</option>
+</select>
+
+<div class="syntax">
+<code>-A &lt;cm&gt; &lt;fixmode&gt;</code>
+</div>
+</div>
+
+<div class="option-help">
+<div data-it="Quota 2D fissa in centimetri sul livello del mare, usata in modalità Ublox Raw."
+     data-en="Fixed 2D altitude in centimetres above sea level, used in Ublox Raw mode.">
+Quota fissa per la modalità Raw.
+</div>
+</div>
+
+</div>
+
+
+<div class="option-row">
+
+<div class="option-state">
+<label class="switch">
+<input type="checkbox"
+       name="gps_timepulse_enabled"
+       {% if GPS.get('timepulse',{}).get('enabled') %}checked{% endif %}>
+<span class="slider"></span>
+</label>
+</div>
+
+<div class="option-main">
+
+<label class="option-name">
+<span data-it="Timepulse Ublox" data-en="Ublox timepulse">
+Timepulse Ublox
+</span>
+<span class="param">-T</span>
+</label>
+
+<input name="gps_timepulse_period"
+       value="{{GPS.get('timepulse',{}).get('period_us','')}}"
+       placeholder="periodo µs">
+
+<input style="margin-top:10px;"
+       name="gps_timepulse_duration"
+       value="{{GPS.get('timepulse',{}).get('duration_us','')}}"
+       placeholder="durata µs">
+
+<div class="syntax">
+<code>-T &lt;period_us&gt; &lt;duration_us&gt;</code>
+</div>
+
+</div>
+
+<div class="option-help">
+<div data-it="Configurazione Timepulse in modalità Raw. Il periodo può essere negativo."
+     data-en="Timepulse configuration in Raw mode. Period may be negative.">
+Configurazione Timepulse in modalità Raw.
+</div>
+</div>
+
+</div>
+
+
+<div class="option-name" style="margin-top:24px;">
+<span data-it="Stringhe configurazione GPS" data-en="GPS configuration strings">
+Stringhe configurazione GPS
+</span>
+<span class="param">-C</span>
+</div>
+
+<div id="gps-config-list">
+
+{% for value in GPS.get('config_strings',[]) %}
+<div class="dynamic-row" style="display:flex;gap:10px;margin:8px 0;">
+<input name="gps_config_string"
+       value="{{value}}"
+       spellcheck="false">
+<button type="button" onclick="this.parentElement.remove()">×</button>
+</div>
+{% endfor %}
+
+</div>
+
+<button type="button" onclick="addGpsConfig()">
+<span data-it="Aggiungi stringa -C" data-en="Add -C string">
+Aggiungi stringa -C
+</span>
+</button>
+
+</div>
+</div>
+
+
+<!-- APRS -->
+
+<div class="card">
+<div class="card-title">
+<span data-it="Identità e formato APRS" data-en="APRS identity and format">
+Identità e formato APRS
+</span>
+</div>
+
+<div class="card-body">
+<div class="option-list">
+
+{{ value_option(
+'aprs_callsign',APRS.get('callsign',{}),'-I',
+'Nominativo','Callsign',
+'&lt;CALL-SSID&gt;',
+'Nominativo APRS con eventuale SSID.',
+'APRS callsign with optional SSID.'
+) }}
+
+{{ value_option(
+'aprs_via',APRS.get('via',{}),'-w',
+'Percorso via','Via path',
+'&lt;path&gt;',
+'Percorso digipeater APRS.',
+'APRS digipeater path.'
+) }}
+
+{{ value_option(
+'aprs_comment',APRS.get('comment',{}),'-c',
+'Commento APRS','APRS comment',
+'&lt;max 60 byte&gt;',
+'Commento APRS. Può contenere le sequenze speciali supportate da gps2aprs.',
+'APRS comment. May contain gps2aprs supported special sequences.'
+) }}
+
+{{ value_option(
+'aprs_symbol',APRS.get('symbol',{}),'-i',
+'Simbolo APRS','APRS symbol',
+'&lt;2 caratteri&gt;',
+'Due caratteri: tabella e simbolo APRS.',
+'Two characters: APRS table and symbol.'
+) }}
+
+</div>
+
+
+<div class="option-row">
+<div class="option-state">
+<label class="switch">
+<input type="checkbox"
+       name="aprs_format_enabled"
+       {% if APRS.get('format',{}).get('enabled') %}checked{% endif %}>
+<span class="slider"></span>
+</label>
+</div>
+
+<div class="option-main">
+<label class="option-name">
+<span data-it="Formato posizione" data-en="Position format">
+Formato posizione
+</span>
+<span class="param">-f</span>
+</label>
+
+<select name="aprs_format">
+<option value="0" {% if APRS.get('format',{}).get('value','0') == '0' %}selected{% endif %}>0 - Normal</option>
+<option value="1" {% if APRS.get('format',{}).get('value') == '1' %}selected{% endif %}>1 - Compressed</option>
+<option value="2" {% if APRS.get('format',{}).get('value') == '2' %}selected{% endif %}>2 - Mic-E</option>
+</select>
+
+</div>
+
+<div class="option-help">
+<div data-it="Formato del beacon APRS. DAO non è compatibile con il formato compresso."
+     data-en="APRS beacon format. DAO is not compatible with compressed format.">
+Formato posizione APRS.
+</div>
+</div>
+</div>
+
+
+{{ value_option(
+'aprs_ssid',APRS.get('destination_ssid',{}),'-d',
+'Destination SSID Mic-E','Mic-E destination SSID',
+'&lt;0..7&gt;',
+'SSID destinazione usato per digipeating efficiente.',
+'Destination SSID used for efficient digipeating.'
+) }}
+
+{{ bool_option(
+'aprs_dao',APRS.get('dao',{}),'-D',
+'Estensione DAO','DAO extension',
+'Abilita estensione DAO ad alta risoluzione. Non compatibile con -f 1.',
+'Enables high-resolution DAO extension. Not compatible with -f 1.'
+) }}
+
+{{ bool_option(
+'aprs_no_alt',APRS.get('altitude_off',{}),'-a',
+'Disabilita quota','Disable altitude',
+'Non inserisce la quota nel beacon.',
+'Does not include altitude in the beacon.'
+) }}
+
+{{ bool_option(
+'aprs_no_speed',APRS.get('speed_course_off',{}),'-k',
+'Disabilita velocità/rotta','Disable speed/course',
+'Non inserisce velocità e rotta, eccetto quanto previsto da Mic-E.',
+'Does not include speed and course, except as required by Mic-E.'
+) }}
+
+{{ bool_option(
+'aprs_no_climb',APRS.get('climb_off',{}),'-e',
+'Disabilita Clb','Disable Clb',
+'Disabilita Clb in modalità Ublox Raw.',
+'Disables Clb in Ublox Raw mode.'
+) }}
+
+{{ bool_option(
+'aprs_no_checksum',APRS.get('checksum_off',{}),'-s',
+'Disabilita controllo checksum GPS','Disable GPS checksum check',
+'Non verifica il checksum delle frasi GPS.',
+'Disables GPS sentence checksum checking.'
+) }}
+
+</div>
+</div>
+
+
+<!-- BEACON -->
+
+<div class="card">
+<div class="card-title">
+<span data-it="Tempi beacon e movimento" data-en="Beacon timing and movement">
+Tempi beacon e movimento
+</span>
+</div>
+
+<div class="card-body">
+<div class="option-list">
+
+{{ value_option(
+'beacon_standing',BEACON.get('standing_time',{}),'-0',
+'Beacon da fermo','Standing beacon time',
+'&lt;secondi&gt;',
+'Intervallo beacon quando il veicolo è fermo.',
+'Beacon interval while stationary.'
+) }}
+
+{{ value_option(
+'beacon_driving',BEACON.get('driving_time',{}),'-b',
+'Beacon in movimento','Driving beacon time',
+'&lt;secondi&gt;',
+'Intervallo beacon durante il movimento.',
+'Beacon interval while moving.'
+) }}
+
+{{ value_option(
+'beacon_navigation',BEACON.get('navigation_time',{}),'-n',
+'Intervallo destinazioni -N','-N destination interval',
+'&lt;secondi&gt;',
+'Intervallo dei beacon inviati alle destinazioni -N.',
+'Beacon interval sent to -N destinations.'
+) }}
+
+{{ value_option(
+'beacon_speed',BEACON.get('drive_speed',{}),'-g',
+'Soglia movimento','Driving threshold',
+'&lt;km/h&gt;',
+'Soglia velocità per considerare il mezzo in movimento. In Balloon mode rappresenta la quota in metri.',
+'Speed threshold for driving mode. In Balloon mode it represents altitude in metres.'
+) }}
+
+{{ value_option(
+'beacon_comment_interval',BEACON.get('comment_interval',{}),'-l',
+'Frequenza commento','Comment interval',
+'&lt;n&gt;',
+'Invia il commento APRS ogni n beacon.',
+'Sends the APRS comment every n beacons.'
+) }}
+
+{{ bool_option(
+'beacon_double',BEACON.get('double_drive_time',{}),'-p',
+'Raddoppio progressivo intervallo','Progressive interval doubling',
+'Quando non si è in movimento raddoppia progressivamente il tempo beacon.',
+'Progressively doubles beacon time while not driving.'
+) }}
+
+{{ bool_option(
+'beacon_balloon',BEACON.get('balloon',{}),'-B',
+'Modalità pallone','Balloon mode',
+'Modalità balloon con semantica altimetrica per -g e commutazione di tempi/path.',
+'Balloon mode with altitude semantics for -g and timing/path switching.'
+) }}
+
+{{ value_option(
+'beacon_mesh',BEACON.get('meshcom4',{}),'-4',
+'MeshCom4 max hops','MeshCom4 max hops',
+'&lt;0..7&gt;',
+'Abilita codifica MeshCom4 e imposta il massimo numero di hop.',
+'Enables MeshCom4 encoding and sets maximum hops.'
+) }}
+
+</div>
+</div>
+</div>
+
+
+<!-- DESTINAZIONI -->
+
+<div class="card">
+<div class="card-title">
+<span data-it="Destinazioni UDP" data-en="UDP destinations">
+Destinazioni UDP
+</span>
+</div>
+
+<div class="card-body">
+
+<div class="option-name">
+Monitor UDP <span class="param">-m</span>
+</div>
+
+<div id="monitor-list">
+{% for value in OUTPUTS.get('monitor',[]) %}
+<div class="dynamic-row" style="display:flex;gap:10px;margin:8px 0;">
+<input name="output_monitor" value="{{value}}" placeholder="host:port">
+<button type="button" onclick="this.parentElement.remove()">×</button>
+</div>
+{% endfor %}
+</div>
+
+<button type="button" onclick="addRow('monitor-list','output_monitor')">
+<span data-it="Aggiungi destinazione -m" data-en="Add -m destination">
+Aggiungi destinazione -m
+</span>
+</button>
+
+
+<hr style="margin:24px 0;">
+
+
+<div class="option-name">
+AXUDP <span class="param">-r</span>
+</div>
+
+<div id="axudp-list">
+{% for value in OUTPUTS.get('axudp',[]) %}
+<div class="dynamic-row" style="display:flex;gap:10px;margin:8px 0;">
+<input name="output_axudp" value="{{value}}" placeholder="host:port">
+<button type="button" onclick="this.parentElement.remove()">×</button>
+</div>
+{% endfor %}
+</div>
+
+<button type="button" onclick="addRow('axudp-list','output_axudp')">
+<span data-it="Aggiungi destinazione -r" data-en="Add -r destination">
+Aggiungi destinazione -r
+</span>
+</button>
+
+
+<hr style="margin:24px 0;">
+
+
+<div class="option-name">
+AXUDP navigazione <span class="param">-N</span>
+</div>
+
+<div id="nav-list">
+{% for value in OUTPUTS.get('navigation_axudp',[]) %}
+<div class="dynamic-row" style="display:flex;gap:10px;margin:8px 0;">
+<input name="output_nav" value="{{value}}" placeholder="host:port">
+<button type="button" onclick="this.parentElement.remove()">×</button>
+</div>
+{% endfor %}
+</div>
+
+<button type="button" onclick="addRow('nav-list','output_nav')">
+<span data-it="Aggiungi destinazione -N" data-en="Add -N destination">
+Aggiungi destinazione -N
+</span>
+</button>
+
+</div>
+</div>
+
+
+<!-- SISTEMA -->
+
+<div class="card">
+<div class="card-title">
+<span data-it="Sistema, log e debug" data-en="System, logging and debug">
+Sistema, log e debug
+</span>
+</div>
+
+<div class="card-body">
+<div class="option-list">
+
+{{ value_option(
+'sys_log',SYSTEM.get('gps_log',{}),'-L',
+'Log GPS grezzo','Raw GPS log',
+'&lt;file&gt;',
+'Aggiunge il testo GPS ricevuto al file indicato.',
+'Appends received raw GPS text to the specified file.'
+) }}
+
+</div>
+
+
+<div class="option-row">
+
+<div class="option-state">
+<label class="switch">
+<input type="checkbox"
+       name="sys_time_enabled"
+       {% if SYSTEM.get('time_set',{}).get('enabled') %}checked{% endif %}>
+<span class="slider"></span>
+</label>
+</div>
+
+<div class="option-main">
+
+<label class="option-name">
+<span data-it="Sincronizzazione ora sistema" data-en="System time synchronization">
+Sincronizzazione ora sistema
+</span>
+<span class="param">-z / -Z</span>
+</label>
+
+<select name="sys_time_mode">
+<option value="continue"
+{% if SYSTEM.get('time_set',{}).get('mode','continue') == 'continue' %}selected{% endif %}>
+-z — imposta ora e continua
+</option>
+
+<option value="terminate"
+{% if SYSTEM.get('time_set',{}).get('mode') == 'terminate' %}selected{% endif %}>
+-Z — imposta ora e termina
+</option>
+</select>
+
+<input style="margin-top:10px;"
+       name="sys_time_offset"
+       value="{{SYSTEM.get('time_set',{}).get('offset','0')}}"
+       placeholder="secondi">
+
+<div class="syntax">
+<code>-z|-Z &lt;secondi&gt;</code>
+</div>
+
+</div>
+
+<div class="option-help">
+<div data-it="Imposta l'ora di sistema da GPS con l'offset indicato. Richiede privilegi adeguati."
+     data-en="Sets system time from GPS with the specified offset. Requires appropriate privileges.">
+Sincronizzazione dell'orologio dal GPS.
+</div>
+</div>
+
+</div>
+
+
+{{ bool_option(
+'sys_verbose',SYSTEM.get('verbose',{}),'-v',
+'Verbose','Verbose',
+'Mostra informazioni operative.',
+'Shows operational information.'
+) }}
+
+{{ bool_option(
+'sys_verbose2',SYSTEM.get('verbose_satellites',{}),'-V',
+'Verbose satelliti','Satellite verbose',
+'Verbose esteso con informazioni GSV sui satelliti.',
+'Extended verbose output including GSV satellite information.'
+) }}
+
+</div>
+</div>
+
+
+<!-- GESTIONE -->
+
+<div class="card">
+<div class="card-title">
+<span data-it="Gestione configurazione" data-en="Configuration management">
+Gestione configurazione
+</span>
+</div>
+
+<div class="card-body">
+<div class="actions config-actions">
+
+<button type="submit"
+        class="save"
+        name="action"
+        value="save">
+<span data-it="Salva configurazione" data-en="Save configuration">
+Salva configurazione
+</span>
+</button>
+
+<button type="submit"
+        class="apply-config"
+        name="action"
+        value="apply">
+<span data-it="Applica configurazione" data-en="Apply configuration">
+Applica configurazione
+</span>
+</button>
+
+</div>
+</div>
+</div>
+
+
+<div class="card">
+<div class="card-title">
+<span data-it="Anteprima comando salvato" data-en="Saved command preview">
+Anteprima comando salvato
+</span>
+</div>
+<pre>{{command}}</pre>
+</div>
+
+<div class="card">
+<div class="card-title">
+<span data-it="Comando attivo" data-en="Active command">
+Comando attivo
+</span>
+</div>
+<pre>{{active_command}}</pre>
+</div>
+
+<div class="card">
+<div class="card-title">
+<span data-it="Ultime righe del log" data-en="Latest log lines">
+Ultime righe del log
+</span>
+</div>
+<pre>{{journal}}</pre>
+</div>
+
+
+</form>
+
+
+<script>
+
+function addRow(rootId,name) {
+    const root=document.getElementById(rootId);
+    const row=document.createElement("div");
+
+    row.className="dynamic-row";
+    row.style.cssText="display:flex;gap:10px;margin:8px 0;";
+
+    row.innerHTML=`
+      <input name="${name}"
+             placeholder="host:port"
+             spellcheck="false">
+      <button type="button"
+              onclick="this.parentElement.remove()">×</button>
+    `;
+
+    root.appendChild(row);
+}
+
+
+function addGpsConfig() {
+    const root=document.getElementById("gps-config-list");
+    const row=document.createElement("div");
+
+    row.className="dynamic-row";
+    row.style.cssText="display:flex;gap:10px;margin:8px 0;";
+
+    row.innerHTML=`
+      <input name="gps_config_string"
+             spellcheck="false">
+      <button type="button"
+              onclick="this.parentElement.remove()">×</button>
+    `;
+
+    root.appendChild(row);
+}
+
+</script>
+
+{% endblock %}

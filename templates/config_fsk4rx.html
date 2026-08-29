@@ -1,0 +1,630 @@
+{% extends "base.html" %}
+
+{% block title %}
+
+<span class="page-icon">
+<svg viewBox="0 0 24 24">
+<rect x="4" y="4" width="6" height="6" rx="1"/>
+<rect x="14" y="4" width="6" height="6" rx="1"/>
+<rect x="4" y="14" width="6" height="6" rx="1"/>
+<rect x="14" y="14" width="6" height="6" rx="1"/>
+</svg>
+</span>
+
+<span>fsk4rx</span>
+
+{% endblock %}
+
+
+{% block content %}
+
+<form method="post">
+
+<div class="card">
+<div class="card-title">
+<span data-it="Stato fsk4rx" data-en="fsk4rx status">
+Stato fsk4rx
+</span>
+</div>
+
+<div class="card-body">
+
+<div style="display:flex;gap:24px;flex-wrap:wrap;align-items:center;">
+
+<div>
+<strong data-it="Servizio:" data-en="Service:">Servizio:</strong>
+
+{% if running %}
+<span class="option-badge badge-active">
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+</span>
+{% else %}
+<span class="option-badge badge-off">
+<span data-it="FERMO" data-en="STOPPED">FERMO</span>
+</span>
+{% endif %}
+</div>
+
+<div>
+<strong data-it="Avvio automatico:" data-en="Automatic startup:">
+Avvio automatico:
+</strong>
+
+{% if enabled %}
+<span data-it="abilitato" data-en="enabled">abilitato</span>
+{% else %}
+<span data-it="disabilitato" data-en="disabled">disabilitato</span>
+{% endif %}
+</div>
+
+</div>
+
+<div class="actions config-actions" style="margin-top:20px;">
+
+<button type="submit" class="save"
+ name="action" value="start" formnovalidate>
+<span data-it="Avvia fsk4rx" data-en="Start fsk4rx">
+Avvia fsk4rx
+</span>
+</button>
+
+<button type="submit"
+ name="action" value="stop" formnovalidate>
+<span data-it="Ferma fsk4rx" data-en="Stop fsk4rx">
+Ferma fsk4rx
+</span>
+</button>
+
+<button type="submit" class="restart-udpgate"
+ name="action" value="restart" formnovalidate>
+<span data-it="Riavvia fsk4rx" data-en="Restart fsk4rx">
+Riavvia fsk4rx
+</span>
+</button>
+
+</div>
+</div>
+</div>
+
+
+<div class="card">
+<div class="card-title">
+<span data-it="Ingresso IQ" data-en="IQ input">Ingresso IQ</span>
+</div>
+
+<div class="card-body">
+<div class="option-list">
+
+{% for key, flag, it, en, syntax, help_it, help_en in [
+('input','-i','File / pipe IQ','IQ file / pipe','<file>',
+'File IQ o pipe proveniente dal ricevitore SDR.',
+'IQ file or pipe from the SDR receiver.'),
+
+('format','-f','Formato IQ','IQ format','u8 | i16 | f32',
+'Formato dei campioni IQ.',
+'IQ sample format.'),
+
+('sample_rate','-r','Sample rate','Sample rate','<Hz>',
+'Frequenza di campionamento IQ. È obbligatoria per fsk4rx.',
+'IQ sample rate. Required by fsk4rx.')
+] %}
+
+{% set state = G.get(key,{}) %}
+
+<div class="option-row">
+
+<div class="option-state">
+<label class="switch">
+<input type="checkbox"
+ name="g_enabled_{{ key }}"
+ {% if state.get('enabled') %}checked{% endif %}>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge {% if state.get('enabled') %}badge-active{% else %}badge-off{% endif %}">
+{% if state.get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">NON CONFIGURATO</span>
+{% endif %}
+</div>
+</div>
+
+<div class="option-main">
+<label class="option-name">
+<span data-it="{{ it }}" data-en="{{ en }}">{{ it }}</span>
+<span class="param">{{ flag }}</span>
+</label>
+
+<input name="g_value_{{ key }}"
+ value="{{ state.get('value','') }}" spellcheck="false">
+
+<div class="syntax">
+<span data-it="Sintassi:" data-en="Syntax:">Sintassi:</span>
+<code>{{ flag }} {{ syntax }}</code>
+</div>
+</div>
+
+<div class="option-help">
+<div data-it="{{ help_it }}" data-en="{{ help_en }}">{{ help_it }}</div>
+</div>
+
+</div>
+
+{% endfor %}
+
+</div>
+</div>
+</div>
+
+
+<div class="card">
+<div class="card-title">
+<span data-it="Uscite e dati APRS / AIS"
+ data-en="APRS / AIS outputs and data">
+Uscite e dati APRS / AIS
+</span>
+</div>
+
+<div class="card-body">
+<div class="option-list">
+
+{% for key, flag, it, en, syntax in [
+('callsign','-I','Callsign APRS','APRS callsign','<callsign-ssid>'),
+('json_udp','-J','Destinazione JSON UDP','JSON UDP destination','<ip:porta>'),
+('ais_file','-A','File dati AIS','AIS data file','<file>'),
+('callbook','-C','Database callsign','Callsign database','<file>'),
+('country_db','-Y','Database paesi AIS','AIS country database','<file>'),
+('ship_beacon','-T','Tempi beacon AIS','AIS beacon times','<s>[,<s>]'),
+('squelch','-q','Soglia visualizzazione / SNR','Display / SNR threshold','<dB>')
+] %}
+
+{% set state = G.get(key,{}) %}
+
+<div class="option-row">
+
+<div class="option-state">
+<label class="switch">
+<input type="checkbox"
+ name="g_enabled_{{ key }}"
+ {% if state.get('enabled') %}checked{% endif %}>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge {% if state.get('enabled') %}badge-active{% else %}badge-off{% endif %}">
+{% if state.get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">NON CONFIGURATO</span>
+{% endif %}
+</div>
+</div>
+
+<div class="option-main">
+<label class="option-name">
+<span data-it="{{ it }}" data-en="{{ en }}">{{ it }}</span>
+<span class="param">{{ flag }}</span>
+</label>
+
+<input name="g_value_{{ key }}"
+ value="{{ state.get('value','') }}" spellcheck="false">
+
+<div class="syntax">
+<span data-it="Sintassi:" data-en="Syntax:">Sintassi:</span>
+<code>{{ flag }} {{ syntax }}</code>
+</div>
+</div>
+
+<div class="option-help">
+<div
+ data-it="Parametro globale di fsk4rx."
+ data-en="Global fsk4rx parameter.">
+Parametro globale di fsk4rx.
+</div>
+</div>
+
+</div>
+
+{% endfor %}
+
+
+{% set state = G.get('axudp',{}) %}
+
+<div class="option-row">
+
+<div class="option-state">
+<label class="switch">
+<input type="checkbox" name="g_enabled_axudp"
+ {% if state.get('enabled') %}checked{% endif %}>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge {% if state.get('enabled') %}badge-active{% else %}badge-off{% endif %}">
+{% if state.get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">NON CONFIGURATO</span>
+{% endif %}
+</div>
+</div>
+
+<div class="option-main">
+
+<label class="option-name">
+<span data-it="Destinazioni AXUDP"
+ data-en="AXUDP destinations">Destinazioni AXUDP</span>
+<span class="param">-U / -L</span>
+</label>
+
+<textarea name="g_value_axudp" rows="4"
+ spellcheck="false">{{ state.get('values',[]) | join('\n') }}</textarea>
+
+<div class="help">
+<span
+ data-it="Una destinazione per riga. Prefisso U per AXUDP oppure L per AXUDPv2. Senza prefisso viene usato U."
+ data-en="One destination per line. Prefix U for AXUDP or L for AXUDPv2. Without a prefix U is used.">
+Una destinazione per riga. Prefisso U per AXUDP oppure L per AXUDPv2.
+</span>
+</div>
+
+<div class="syntax">
+<span data-it="Sintassi:" data-en="Syntax:">Sintassi:</span>
+<code>U 192.0.2.1:9000</code><br>
+<code>L 192.0.2.1:9001</code>
+</div>
+
+</div>
+
+<div class="option-help">
+<div
+ data-it="Le destinazioni possono essere ripetute. L abilita AXUDPv2 con metadata."
+ data-en="Destinations may be repeated. L enables AXUDPv2 with metadata.">
+Le destinazioni possono essere ripetute.
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+</div>
+
+
+{% for d in demodulators %}
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Demodulatore {{ loop.index }}"
+ data-en="Demodulator {{ loop.index }}">
+Demodulatore {{ loop.index }}
+</span>
+</div>
+
+<div class="card-body">
+
+<input type="hidden" name="demod_count"
+ value="{{ demodulators|length }}">
+
+<div class="option-list">
+
+<div class="option-row">
+
+<div class="option-state">
+<label class="switch">
+<input type="checkbox"
+ name="d{{ loop.index0 }}_enabled"
+ {% if d.get('enabled') %}checked{% endif %}>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge {% if d.get('enabled') %}badge-active{% else %}badge-off{% endif %}">
+{% if d.get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">NON CONFIGURATO</span>
+{% endif %}
+</div>
+</div>
+
+<div class="option-main">
+
+<label class="option-name">
+<span data-it="Tipo demodulatore"
+ data-en="Demodulator type">Tipo demodulatore</span>
+<span class="param">-m</span>
+</label>
+
+<select name="d{{ loop.index0 }}_mode">
+{% for value,label in [
+('4','4FSK'),
+('a','AFSK'),
+('f','FSK'),
+('0','Solo audio / No demodulator')
+] %}
+<option value="{{ value }}"
+ {% if d.get('mode','4') == value %}selected{% endif %}>
+{{ label }}
+</option>
+{% endfor %}
+</select>
+
+</div>
+
+<div class="option-help">
+<div
+ data-it="Ogni blocco rappresenta un modem indipendente. fsk4rx consente più modem con differenti offset."
+ data-en="Each block represents an independent modem. fsk4rx supports multiple modems with different offsets.">
+Ogni blocco rappresenta un modem indipendente.
+</div>
+</div>
+
+</div>
+
+
+{% set idx = loop.index0 %}
+
+{% for key, flag, it, en, syntax in [
+('tune','-t','Offset ricezione','Receive offset','<+-Hz>'),
+('afc','-t','Range AFC','AFC range','<Hz>'),
+('frequency_mhz','-M','Frequenza metadata','Metadata frequency','<MHz>'),
+('bfo','-n','Frequenza BFO','BFO frequency','<Hz>'),
+('baud','-b','Baud 4FSK','4FSK baud','<baud>'),
+('spacing','-D','Spacing 4FSK','4FSK spacing','<Hz>'),
+('if_width','-W','Banda IF 4FSK','4FSK IF bandwidth','<Hz>'),
+('afsk_baud','-m a','Baud AFSK','AFSK baud','<baud>'),
+('afsk_low','-m a','Tono basso AFSK','AFSK low tone','<Hz>'),
+('afsk_high','-m a','Tono alto AFSK','AFSK high tone','<Hz>'),
+('fsk_baud','-m f','Baud FSK','FSK baud','<baud>'),
+('fsk_if_width','-m','Banda IF AFSK/FSK','AFSK/FSK IF bandwidth','<Hz>'),
+('scramble','-m f','Scrambler FSK','FSK scrambler','<0|1|2>'),
+('audio_rate','-m 0','Sample rate audio','Audio sample rate','<Hz>'),
+('audio_if_width','-m 0','Banda IF audio','Audio IF bandwidth','<Hz>'),
+('audio_squelch','-m 0','Squelch audio','Audio squelch','<livello>')
+] %}
+
+<div class="option-row">
+
+<div class="option-state">
+<div class="option-badge badge-active">
+<span data-it="PARAMETRO" data-en="PARAMETER">PARAMETRO</span>
+</div>
+</div>
+
+<div class="option-main">
+<label class="option-name">
+<span data-it="{{ it }}" data-en="{{ en }}">{{ it }}</span>
+<span class="param">{{ flag }}</span>
+</label>
+
+<input
+ name="d{{ idx }}_{{ key }}"
+ value="{{ d.get(key,'') }}"
+ spellcheck="false">
+
+<div class="syntax">
+<span data-it="Sintassi:" data-en="Syntax:">Sintassi:</span>
+<code>{{ syntax }}</code>
+</div>
+</div>
+
+<div class="option-help">
+<div
+ data-it="Valore associato a questo demodulatore."
+ data-en="Value associated with this demodulator.">
+Valore associato a questo demodulatore.
+</div>
+</div>
+
+</div>
+
+{% endfor %}
+
+
+<div class="option-row">
+
+<div class="option-state">
+<div class="option-badge badge-active">
+<span data-it="AUDIO" data-en="AUDIO">AUDIO</span>
+</div>
+</div>
+
+<div class="option-main">
+
+<label class="option-name">
+<span data-it="Uscita audio"
+ data-en="Audio output">Uscita audio</span>
+<span class="param">-F / -S</span>
+</label>
+
+<select name="d{{ idx }}_audio_mode">
+<option value=""
+ {% if not d.get('audio_mode') %}selected{% endif %}>
+Nessuna / None
+</option>
+<option value="FM"
+ {% if d.get('audio_mode') == 'FM' %}selected{% endif %}>
+FM (-F)
+</option>
+<option value="USB"
+ {% if d.get('audio_mode') == 'USB' %}selected{% endif %}>
+USB (-S)
+</option>
+</select>
+
+<input
+ name="d{{ idx }}_audio_file"
+ value="{{ d.get('audio_file','') }}"
+ placeholder="<file / pipe>"
+ spellcheck="false">
+
+</div>
+
+<div class="option-help">
+<div
+ data-it="-F e -S sono mutuamente esclusivi. L'uscita selezionata appartiene soltanto a questo modem."
+ data-en="-F and -S are mutually exclusive. The selected output belongs only to this modem.">
+-F e -S sono mutuamente esclusivi.
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+</div>
+
+{% endfor %}
+
+
+<div class="card">
+<div class="card-title">
+<span data-it="Debug e monitor" data-en="Debug and monitor">
+Debug e monitor
+</span>
+</div>
+
+<div class="card-body">
+<div class="option-list">
+
+{% for key, flag, it, en in [
+('verbose','-v','Verbose','Verbose'),
+('very_verbose','-V','Verbose esteso','Extended verbose')
+] %}
+
+{% set state = G.get(key,{}) %}
+
+<div class="option-row">
+
+<div class="option-state">
+<label class="switch">
+<input type="checkbox"
+ name="g_enabled_{{ key }}"
+ {% if state.get('enabled') %}checked{% endif %}>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge {% if state.get('enabled') %}badge-active{% else %}badge-off{% endif %}">
+{% if state.get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">NON CONFIGURATO</span>
+{% endif %}
+</div>
+</div>
+
+<div class="option-main">
+<label class="option-name">
+<span data-it="{{ it }}" data-en="{{ en }}">{{ it }}</span>
+<span class="param">{{ flag }}</span>
+</label>
+
+<div class="boolean-description">
+<span
+ data-it="Parametro senza valore: viene aggiunto quando attivo."
+ data-en="Value-less parameter: added when enabled.">
+Parametro senza valore: viene aggiunto quando attivo.
+</span>
+</div>
+</div>
+
+<div class="option-help">
+<div
+ data-it="Abilita l'output diagnostico."
+ data-en="Enables diagnostic output.">
+Abilita l'output diagnostico.
+</div>
+</div>
+
+</div>
+
+{% endfor %}
+
+</div>
+</div>
+</div>
+
+
+<div class="card">
+<div class="card-title">
+<span data-it="Nota sul parametro -B"
+ data-en="Note about -B">
+Nota sul parametro -B
+</span>
+</div>
+
+<div class="card-body">
+<span
+ data-it="Il parametro -B è documentato da fsk4rx ma nella versione attuale il parser legge il valore senza applicarlo. Per questo non viene configurato dal Manager."
+ data-en="The -B parameter is documented by fsk4rx, but in the current version its parser reads the value without applying it. Therefore it is not configurable in the Manager.">
+Il parametro -B è documentato ma non viene applicato dal parser della versione attuale.
+</span>
+</div>
+</div>
+
+
+<div class="card">
+<div class="card-title">
+<span data-it="Gestione configurazione"
+ data-en="Configuration management">
+Gestione configurazione
+</span>
+</div>
+
+<div class="card-body">
+<div class="actions config-actions">
+
+<button type="submit" class="save"
+ name="action" value="save">
+<span data-it="Salva configurazione"
+ data-en="Save configuration">
+Salva configurazione
+</span>
+</button>
+
+<button type="submit" class="apply-config"
+ name="action" value="apply">
+<span data-it="Applica configurazione"
+ data-en="Apply configuration">
+Applica configurazione
+</span>
+</button>
+
+</div>
+</div>
+</div>
+
+
+<div class="card">
+<div class="card-title">
+<span data-it="Anteprima comando salvato"
+ data-en="Saved command preview">
+Anteprima comando salvato
+</span>
+</div>
+<pre>{{ command }}</pre>
+</div>
+
+<div class="card">
+<div class="card-title">
+<span data-it="Comando attivo"
+ data-en="Active command">
+Comando attivo
+</span>
+</div>
+<pre>{{ active_command }}</pre>
+</div>
+
+<div class="card">
+<div class="card-title">
+<span data-it="Ultime righe del log"
+ data-en="Latest log lines">
+Ultime righe del log
+</span>
+</div>
+<pre>{{ journal }}</pre>
+</div>
+
+</form>
+
+{% endblock %}

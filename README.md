@@ -1,11 +1,13 @@
 # DxlAprs Manager
 
-DxlAprs Manager is a web-based management and monitoring interface for the
-dxlAPRS toolchain, initially focused on `udpgate4`.
+DxlAprs Manager is a web-based management, configuration and monitoring
+interface for the dxlAPRS toolchain.
 
-The project provides a modern bilingual (Italian/English) interface for
-configuration, service management and native monitoring without depending
-on the original udpgate4 monitoring pages.
+It provides a modern bilingual (Italian/English) interface for managing
+`udpgate4` and additional dxlAPRS programs from a single web application.
+
+DxlAprs Manager is an independent project and is not part of the official
+dxlAPRS distribution.
 
 ## Current features
 
@@ -14,7 +16,11 @@ on the original udpgate4 monitoring pages.
 - Public monitoring pages
 - Password-protected administration area
 - Save / Apply configuration workflow
-- Automatic rollback when a new udpgate4 configuration fails to start
+- Separate saved (draft) and active configurations
+- Automatic rollback when an applied configuration fails
+- Start / Stop / Restart controls for managed programs
+- Saved and active command preview
+- systemd journal viewer
 - Native monitoring based on udpgate4 verbose output
 - SQLite monitoring database
 - Heard stations monitoring
@@ -22,9 +28,74 @@ on the original udpgate4 monitoring pages.
 - Raw packet monitoring
 - TCP/APRS-IS connection monitoring
 - Live traffic view
+- Services monitor
+- Runtime and automatic boot state displayed separately
 - Original dxlAPRS web interface selectable as an alternative frontend
-- systemd service management
 - Apache reverse-proxy frontend
+
+## Managed dxlAPRS programs
+
+In addition to `udpgate4`, DxlAprs Manager currently provides dedicated
+configuration and service management for:
+
+- `udpbox`
+- `udphub`
+- `udpflex`
+- `lorarx`
+- `loratx`
+- `fsk4rx`
+- `ra02`
+- `ra02waterfall`
+- `sdrtst`
+- `afskmodem`
+- `gps2aprs`
+- `hostint`
+- `l2cat`
+- `sondeudp`
+- `sondemod`
+- `ttytee`
+- `adsb2aprs`
+
+Each additional program has its own configuration page, Python launcher
+and systemd service.
+
+## Save / Apply configuration
+
+DxlAprs Manager separates the configuration being edited from the last
+configuration successfully applied to a program.
+
+`Save configuration` stores the draft configuration without restarting
+the program.
+
+`Apply configuration` promotes the saved configuration to active,
+restarts the program when required and verifies the result.
+
+When verification fails, the Manager restores the previous active
+configuration.
+
+This prevents an invalid configuration change from unnecessarily
+replacing the last known working configuration.
+
+## Services monitor
+
+The `Monitor -> Services` page provides a central view of dxlAPRS services.
+
+Services are grouped into:
+
+1. DxlAprs Manager infrastructure
+2. Base service (`udpgate4`)
+3. Additional dxlAPRS programs
+
+Runtime state and automatic boot state are intentionally displayed
+separately.
+
+A service can therefore be running now but disabled at boot, or stopped
+now while still enabled for the next system boot.
+
+Managed program services can be started, stopped, restarted, enabled or
+disabled from the interface.
+
+Internal infrastructure services are protected from inappropriate actions.
 
 ## Installation
 
@@ -32,12 +103,14 @@ A Debian-based system is currently recommended.
 
 Clone or download this repository, then run the installer as root:
 
+    git clone https://github.com/Mauro-go/DxlAprs-Manager.git
+    cd DxlAprs-Manager
     chmod +x install.sh
     sudo ./install.sh
 
 The installer automatically installs the required Debian packages,
-downloads the official dxlAPRS source code, builds the complete dxlAPRS
-toolchain and installs DxlAprs Manager.
+downloads the official dxlAPRS source code, builds the dxlAPRS toolchain
+and installs DxlAprs Manager.
 
 The tested dxlAPRS source revision is pinned to:
 
@@ -67,18 +140,56 @@ Change the administrator password immediately after the first login.
 udpgate4 is intentionally not enabled or started immediately after a fresh
 installation.
 
-Open the configuration interface and configure at least the required
-udpgate4 parameters, including the server callsign.
+Open the configuration interface and configure the required parameters,
+including the server callsign.
 
 Then use:
 
     Save / Apply
 
 DxlAprs Manager validates the new configuration by starting udpgate4 and
-checking the configured TCP services.
+checking the configured services.
 
-After the first successful Apply, the udpgate4 service, native monitoring
-collector and reconciliation timer are enabled for subsequent system boots.
+Additional dxlAPRS programs can then be configured independently from
+their dedicated pages.
+
+## Configuration files
+
+The main Manager configuration uses separate saved and active files.
+
+Additional programs follow the same model:
+
+    PROGRAM_config.json
+    PROGRAM_active_config.json
+
+The public repository does not contain installation-specific runtime
+configurations.
+
+Instead it contains neutral templates:
+
+    PROGRAM_config.default.json
+
+During a new installation, the installer creates the local saved and
+active configuration files from these defaults.
+
+During upgrades, existing runtime configurations are preserved.
+
+This keeps callsigns, addresses, ports, paths and other installation-
+specific values out of the public repository.
+
+## dxlAPRS binary directory
+
+The common dxlAPRS binary directory is stored in the global Manager
+configuration as:
+
+    dxlaprs.bin_dir
+
+The default installer sets it to:
+
+    /opt/dxlaprs/bin
+
+All additional program launchers use this setting instead of containing
+installation-specific dxlAPRS paths.
 
 ## Network ports
 
@@ -88,7 +199,8 @@ DxlAprs Manager uses the following fixed infrastructure ports:
 - `8085/tcp` - internal DxlAprs Manager service, bound to localhost
 - `14502/tcp` - internal port reserved for the original udpgate4 web interface
 
-Additional ports used by udpgate4 depend on the user's configuration.
+Additional ports depend on the programs and configuration selected by the
+user.
 
 ## Installation directories
 
@@ -112,22 +224,17 @@ Original dxlAPRS web files:
 
     /opt/dxlaprs/www
 
-## Services
+## systemd integration
 
-The installation provides these systemd units:
+DxlAprs Manager installs its infrastructure systemd units together with
+dedicated units for the supported dxlAPRS programs.
 
-- `dxlaprs-manager.service`
-- `dxlaprs-udpgate.service`
-- `dxlaprs-collector.service`
-- `dxlaprs-reconcile.service`
-- `dxlaprs-reconcile.timer`
-- `dxlaprs-web-router.service`
-- `dxlaprs-web-router.path`
+The installer automatically installs all service units distributed in the
+repository.
 
-The Manager and web router are enabled during installation.
-
-udpgate4 and its monitoring services are enabled only after a valid
-configuration has been successfully applied.
+Program configuration and program boot state remain independent: enabling
+a service controls automatic startup, while Start / Stop controls its
+current runtime state.
 
 ## Monitoring architecture
 
@@ -171,12 +278,12 @@ terms, documentation and source code.
 
 DxlAprs Manager is under active development.
 
-The current release concentrates on `udpgate4`. The architecture is
-intended to allow additional dxlAPRS programs to be integrated as separate
-management modules in future versions.
+The original udpgate4 management architecture has been extended to
+additional dxlAPRS programs while keeping each component independent.
 
-Possible future modules include other components of the dxlAPRS toolchain
-such as afskmodem, udpbox, udpflex, udphub, udprfnet, gps2aprs and aprsmap.
+The project is designed so that additional dxlAPRS components can be
+integrated without changing the configuration of already working
+components.
 
 ## Important note
 
@@ -196,5 +303,6 @@ See the `LICENSE` file for the complete license text.
 
 The dxlAPRS toolchain is a separate upstream project and retains its own
 copyright and licensing terms.
+
 <img width="1917" height="856" alt="immagine" src="https://github.com/user-attachments/assets/1af5ea96-c749-4f89-835d-0c5e45e65265" />
 <img width="1902" height="1056" alt="immagine" src="https://github.com/user-attachments/assets/d09619f0-e706-4bf9-ae73-937ea6f21c13" />

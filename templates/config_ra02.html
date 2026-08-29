@@ -1,0 +1,1533 @@
+{% extends "base.html" %}
+
+{% block title %}
+
+<span class="page-icon">
+<svg viewBox="0 0 24 24">
+<rect x="4" y="4" width="6" height="6" rx="1"/>
+<rect x="14" y="4" width="6" height="6" rx="1"/>
+<rect x="4" y="14" width="6" height="6" rx="1"/>
+<rect x="14" y="14" width="6" height="6" rx="1"/>
+</svg>
+</span>
+
+<span>ra02</span>
+
+{% endblock %}
+
+
+{% block content %}
+
+<form method="post" id="ra02-form">
+
+<input
+ type="hidden"
+ id="chip_count"
+ name="chip_count"
+ value="{{ chips|length }}"
+>
+
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Stato ra02" data-en="ra02 status">
+Stato ra02
+</span>
+</div>
+
+<div class="card-body">
+
+<div style="
+ display:flex;
+ gap:24px;
+ flex-wrap:wrap;
+ align-items:center;
+">
+
+<div>
+
+<strong data-it="Servizio:" data-en="Service:">
+Servizio:
+</strong>
+
+{% if running %}
+
+<span class="option-badge badge-active">
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+</span>
+
+{% else %}
+
+<span class="option-badge badge-off">
+<span data-it="FERMO" data-en="STOPPED">FERMO</span>
+</span>
+
+{% endif %}
+
+</div>
+
+
+<div>
+
+<strong
+ data-it="Avvio automatico:"
+ data-en="Automatic startup:"
+>
+Avvio automatico:
+</strong>
+
+{% if enabled %}
+<span data-it="abilitato" data-en="enabled">abilitato</span>
+{% else %}
+<span data-it="disabilitato" data-en="disabled">disabilitato</span>
+{% endif %}
+
+</div>
+
+</div>
+
+
+<div class="actions config-actions" style="margin-top:20px;">
+
+<button
+ type="submit"
+ class="save"
+ name="action"
+ value="start"
+ formnovalidate
+>
+<span data-it="Avvia ra02" data-en="Start ra02">
+Avvia ra02
+</span>
+</button>
+
+<button
+ type="submit"
+ name="action"
+ value="stop"
+ formnovalidate
+>
+<span data-it="Ferma ra02" data-en="Stop ra02">
+Ferma ra02
+</span>
+</button>
+
+<button
+ type="submit"
+ class="restart-udpgate"
+ name="action"
+ value="restart"
+ formnovalidate
+>
+<span data-it="Riavvia ra02" data-en="Restart ra02">
+Riavvia ra02
+</span>
+</button>
+
+</div>
+
+</div>
+</div>
+
+
+<div class="card">
+
+<div class="card-title">
+<span
+ data-it="Parametri globali"
+ data-en="Global parameters"
+>
+Parametri globali
+</span>
+</div>
+
+<div class="card-body">
+<div class="option-list">
+
+
+{% set poll = G.get('poll', {}) %}
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+<input
+ type="checkbox"
+ name="g_poll_enabled"
+ {% if poll.get('enabled') %}checked{% endif %}
+>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge
+ {% if poll.get('enabled') %}badge-active{% else %}badge-off{% endif %}
+">
+{% if poll.get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">
+NON CONFIGURATO
+</span>
+{% endif %}
+</div>
+
+</div>
+
+
+<div class="option-main">
+
+<label class="option-name">
+<span
+ data-it="Tempi polling"
+ data-en="Polling delays"
+>
+Tempi polling
+</span>
+
+<span class="param">-u</span>
+</label>
+
+<div style="display:flex; gap:10px; flex-wrap:wrap;">
+
+<input
+ name="g_poll_rx"
+ value="{{ poll.get('rx_us','30000') }}"
+ placeholder="RX µs"
+ spellcheck="false"
+>
+
+<input
+ name="g_poll_tx"
+ value="{{ poll.get('tx_us','10000') }}"
+ placeholder="TX µs"
+ spellcheck="false"
+>
+
+</div>
+
+<div class="syntax">
+<span data-it="Sintassi:" data-en="Syntax:">Sintassi:</span>
+<code>-u &lt;rx-us&gt; &lt;tx-us&gt;</code>
+</div>
+
+</div>
+
+
+<div class="option-help">
+<div
+ data-it="Tempi di attesa tra i cicli di polling RX e TX. Per AFSK il programma raccomanda 20000 µs o meno."
+ data-en="Delay between RX and TX polling cycles. For AFSK the program recommends 20000 µs or less."
+>
+Tempi di attesa tra i cicli di polling RX e TX.
+</div>
+</div>
+
+</div>
+
+
+{% set js = G.get('json_udp', {}) %}
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+<input
+ type="checkbox"
+ name="g_json_enabled"
+ {% if js.get('enabled') %}checked{% endif %}
+>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge
+ {% if js.get('enabled') %}badge-active{% else %}badge-off{% endif %}
+">
+{% if js.get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">
+NON CONFIGURATO
+</span>
+{% endif %}
+</div>
+
+</div>
+
+<div class="option-main">
+
+<label class="option-name">
+<span
+ data-it="Uscita JSON UDP"
+ data-en="JSON UDP output"
+>
+Uscita JSON UDP
+</span>
+<span class="param">-J</span>
+</label>
+
+<input
+ name="g_json_value"
+ value="{{ js.get('value','') }}"
+ placeholder="192.0.2.1:9000"
+ spellcheck="false"
+>
+
+<div class="syntax">
+<span data-it="Sintassi:" data-en="Syntax:">Sintassi:</span>
+<code>-J &lt;ip:porta&gt;</code>
+</div>
+
+</div>
+
+<div class="option-help">
+<div
+ data-it="Invia i dati demodulati con metadata in formato JSON. Con più chip il Manager applica la stessa destinazione a ciascun chip per abilitarne la ricezione."
+ data-en="Sends demodulated data with metadata as JSON. With multiple chips the Manager applies the same destination to every chip so reception is enabled on each one."
+>
+Invia i dati demodulati con metadata in formato JSON.
+</div>
+</div>
+
+</div>
+
+
+{% for key, flag, it, en in [
+('verbose','-v','Verbose','Verbose'),
+('very_verbose','-V','Verbose esteso','Extended verbose')
+] %}
+
+{% set state = G.get(key,{}) %}
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+<input
+ type="checkbox"
+ name="g_{{ key }}"
+ {% if state.get('enabled') %}checked{% endif %}
+>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge
+ {% if state.get('enabled') %}badge-active{% else %}badge-off{% endif %}
+">
+{% if state.get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">
+NON CONFIGURATO
+</span>
+{% endif %}
+</div>
+
+</div>
+
+<div class="option-main">
+
+<label class="option-name">
+<span data-it="{{ it }}" data-en="{{ en }}">{{ it }}</span>
+<span class="param">{{ flag }}</span>
+</label>
+
+<div class="boolean-description">
+<span
+ data-it="Parametro senza valore: viene aggiunto quando attivo."
+ data-en="Value-less parameter: added when enabled."
+>
+Parametro senza valore: viene aggiunto quando attivo.
+</span>
+</div>
+
+</div>
+
+<div class="option-help">
+<div
+ data-it="Abilita le informazioni diagnostiche su stdout."
+ data-en="Enables diagnostic information on stdout."
+>
+Abilita le informazioni diagnostiche.
+</div>
+</div>
+
+</div>
+
+{% endfor %}
+
+</div>
+</div>
+</div>
+
+
+<div id="chips-container">
+
+{% for chip in chips %}
+
+{% set ci = loop.index0 %}
+{% set RX = chip.get('rx',{}) %}
+
+<div class="ra02-chip" data-chip="{{ ci }}">
+
+
+<div class="card">
+
+<div class="card-title">
+
+<span
+ data-it="Chip {{ loop.index }} - GPIO"
+ data-en="Chip {{ loop.index }} - GPIO"
+>
+Chip {{ loop.index }} - GPIO
+</span>
+
+</div>
+
+<div class="card-body">
+
+<input
+ type="hidden"
+ class="tx-count"
+ name="chip{{ ci }}_tx_count"
+ value="{{ chip.get('tx_contexts',[])|length }}"
+>
+
+<div class="option-list">
+
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+<input
+ type="checkbox"
+ name="chip{{ ci }}_enabled"
+ {% if chip.get('enabled') %}checked{% endif %}
+>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge
+ {% if chip.get('enabled') %}badge-active{% else %}badge-off{% endif %}
+">
+{% if chip.get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">
+NON CONFIGURATO
+</span>
+{% endif %}
+</div>
+
+</div>
+
+
+<div class="option-main">
+
+<label class="option-name">
+
+<span
+ data-it="Interfaccia GPIO"
+ data-en="GPIO interface"
+>
+Interfaccia GPIO
+</span>
+
+<span class="param">-p</span>
+
+</label>
+
+<div style="display:flex; gap:10px; flex-wrap:wrap;">
+
+<input
+ name="chip{{ ci }}_gpio_nss"
+ value="{{ chip.get('gpio',{}).get('nss','8') }}"
+ placeholder="NSS"
+ spellcheck="false"
+>
+
+<input
+ name="chip{{ ci }}_gpio_mosi"
+ value="{{ chip.get('gpio',{}).get('mosi','10') }}"
+ placeholder="MOSI"
+ spellcheck="false"
+>
+
+<input
+ name="chip{{ ci }}_gpio_miso"
+ value="{{ chip.get('gpio',{}).get('miso','9') }}"
+ placeholder="MISO"
+ spellcheck="false"
+>
+
+<input
+ name="chip{{ ci }}_gpio_sck"
+ value="{{ chip.get('gpio',{}).get('sck','11') }}"
+ placeholder="SCK"
+ spellcheck="false"
+>
+
+</div>
+
+<div class="syntax">
+<span data-it="Sintassi:" data-en="Syntax:">Sintassi:</span>
+<code>-p &lt;nss&gt; &lt;mosi&gt; &lt;miso&gt; &lt;sck&gt;</code>
+</div>
+
+</div>
+
+
+<div class="option-help">
+<div
+ data-it="Seleziona il chip SX127x tramite GPIO. Ogni chip successivo deve utilizzare un NSS differente."
+ data-en="Selects the SX127x chip through GPIO. Each additional chip must use a different NSS."
+>
+Seleziona il chip SX127x tramite GPIO.
+</div>
+</div>
+
+</div>
+
+
+</div>
+</div>
+</div>
+
+
+<div class="card">
+
+<div class="card-title">
+
+<span
+ data-it="Chip {{ loop.index }} - Ricezione"
+ data-en="Chip {{ loop.index }} - Receive"
+>
+Chip {{ loop.index }} - Ricezione
+</span>
+
+</div>
+
+<div class="card-body">
+<div class="option-list">
+
+
+{% set rx_options = [
+('frequency','-f','Frequenza RX','RX frequency','<MHz>','433.775'),
+('sf','-s','Spread factor RX','RX spread factor','<[-]6..12>','12'),
+('bandwidth','-b','Bandwidth RX','RX bandwidth','<0..9>','7'),
+('coding_rate','-c','Coding rate RX','RX coding rate','<5..8>','5'),
+('network_id','-n','Network ID RX','RX network ID','<hex>','12'),
+('gfsk_baud','-g','GFSK RX','RX GFSK','<[-]baud>',''),
+('lna_gain','-e','LNA gain','LNA gain','<1..6>','1'),
+('lna_boost','-l','LNA boost','LNA boost','<0..3>','3'),
+('rssi_correction','-r','Correzione RSSI','RSSI correction','<dB>','0'),
+('optimize','-o','Low data-rate optimize RX','RX low data-rate optimize','<-1|0|1>','-1'),
+('ppm','-P','Correzione quarzo','Crystal correction','<ppm>','0'),
+('datarate','-X','Correzione data-rate','Data-rate correction','<ppm>','0'),
+('preamble_limit','-W','Limite preambolo RX','RX preamble limit','<simboli>','250'),
+('pa_ramp','-R','PaRamp del chip','Chip PaRamp','<0..15>','9'),
+('ocp','-Z','Protezione sovracorrente','Overcurrent protection','<n>','')
+] %}
+
+
+{% for key, flag, it, en, syntax, default in rx_options %}
+
+{% set state = RX.get(key,{}) %}
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+<input
+ type="checkbox"
+ name="chip{{ ci }}_rx_{{ key }}_enabled"
+ {% if state.get('enabled') %}checked{% endif %}
+>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge
+ {% if state.get('enabled') %}badge-active{% else %}badge-off{% endif %}
+">
+{% if state.get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">
+NON CONFIGURATO
+</span>
+{% endif %}
+</div>
+
+</div>
+
+
+<div class="option-main">
+
+<label class="option-name">
+<span data-it="{{ it }}" data-en="{{ en }}">{{ it }}</span>
+<span class="param">{{ flag }}</span>
+</label>
+
+<input
+ name="chip{{ ci }}_rx_{{ key }}"
+ value="{{ state.get('value',default) }}"
+ spellcheck="false"
+>
+
+<div class="syntax">
+<span data-it="Sintassi:" data-en="Syntax:">Sintassi:</span>
+<code>{{ flag }} {{ syntax }}</code>
+</div>
+
+</div>
+
+
+<div class="option-help">
+
+{% if key == 'pa_ramp' %}
+
+<div
+ data-it="Il manuale lo descrive come PaRamp TX, ma il sorgente corrente lo memorizza nel CHIP. Per questo viene configurato qui."
+ data-en="The help describes this as TX PaRamp, but the current source stores it in the CHIP. Therefore it is configured here."
+>
+Nel sorgente corrente questo parametro appartiene al chip.
+</div>
+
+{% elif key == 'ocp' %}
+
+<div
+ data-it="Protezione da sovracorrente del chip. Utilizzare con attenzione come indicato dal programma."
+ data-en="Chip overcurrent protection. Use with care as indicated by the program."
+>
+Protezione da sovracorrente del chip.
+</div>
+
+{% else %}
+
+<div
+ data-it="Parametro di ricezione associato a questo chip."
+ data-en="Receive parameter associated with this chip."
+>
+Parametro di ricezione associato a questo chip.
+</div>
+
+{% endif %}
+
+</div>
+
+</div>
+
+{% endfor %}
+
+
+{% for key, flag, it, en in [
+('agc','-a','AGC','AGC'),
+('implicit','-i','Header implicito RX','RX implicit header'),
+('invert_iq','-q','Inverti IQ RX','Invert RX IQ')
+] %}
+
+{% set state = RX.get(key,{}) %}
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+<input
+ type="checkbox"
+ name="chip{{ ci }}_rx_{{ key }}_enabled"
+ {% if state.get('enabled') %}checked{% endif %}
+>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge
+ {% if state.get('enabled') %}badge-active{% else %}badge-off{% endif %}
+">
+{% if state.get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">
+NON CONFIGURATO
+</span>
+{% endif %}
+</div>
+
+</div>
+
+
+<div class="option-main">
+
+<label class="option-name">
+<span data-it="{{ it }}" data-en="{{ en }}">{{ it }}</span>
+<span class="param">{{ flag }}</span>
+</label>
+
+<div class="boolean-description">
+<span
+ data-it="Parametro senza valore: viene aggiunto quando attivo."
+ data-en="Value-less parameter: added when enabled."
+>
+Parametro senza valore: viene aggiunto quando attivo.
+</span>
+</div>
+
+</div>
+
+<div class="option-help">
+<div
+ data-it="Parametro di ricezione del chip."
+ data-en="Chip receive parameter."
+>
+Parametro di ricezione del chip.
+</div>
+</div>
+
+</div>
+
+{% endfor %}
+
+
+</div>
+</div>
+</div>
+
+
+<div class="tx-container" data-chip="{{ ci }}">
+
+{% for tx in chip.get('tx_contexts',[]) %}
+
+{% set ti = loop.index0 %}
+
+<div class="card tx-card">
+
+<div class="card-title">
+
+<span
+ data-it="Chip {{ ci + 1 }} - Contesto TX {{ loop.index }}"
+ data-en="Chip {{ ci + 1 }} - TX context {{ loop.index }}"
+>
+Chip {{ ci + 1 }} - Contesto TX {{ loop.index }}
+</span>
+
+</div>
+
+<div class="card-body">
+<div class="option-list">
+
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+<input
+ type="checkbox"
+ name="chip{{ ci }}_tx{{ ti }}_enabled"
+ {% if tx.get('enabled') %}checked{% endif %}
+>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge
+ {% if tx.get('enabled') %}badge-active{% else %}badge-off{% endif %}
+">
+{% if tx.get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">
+NON CONFIGURATO
+</span>
+{% endif %}
+</div>
+
+</div>
+
+
+<div class="option-main">
+
+<label class="option-name">
+
+<span
+ data-it="Porta AXUDP"
+ data-en="AXUDP port"
+>
+Porta AXUDP
+</span>
+
+<span class="param">-L / -U</span>
+
+</label>
+
+<select name="chip{{ ci }}_tx{{ ti }}_transport">
+
+<option
+ value="L"
+ {% if tx.get('transport','L') == 'L' %}selected{% endif %}
+>
+AXUDPv2 (-L)
+</option>
+
+<option
+ value="U"
+ {% if tx.get('transport') == 'U' %}selected{% endif %}
+>
+AXUDP (-U)
+</option>
+
+</select>
+
+<input
+ name="chip{{ ci }}_tx{{ ti }}_endpoint"
+ value="{{ tx.get('endpoint','') }}"
+ placeholder="192.0.2.1:9000:9001"
+ spellcheck="false"
+>
+
+<div class="syntax">
+<span data-it="Sintassi:" data-en="Syntax:">Sintassi:</span>
+<code>-L/-U &lt;ip:sendport:listenport&gt;</code>
+</div>
+
+</div>
+
+
+<div class="option-help">
+
+<div
+ data-it="Questo parametro apre il contesto TX. Deve precedere tutti gli altri parametri TX del contesto."
+ data-en="This parameter opens the TX context. It must precede all other TX parameters for that context."
+>
+Apre il contesto TX e deve precederne i parametri.
+</div>
+
+</div>
+
+</div>
+
+
+{% set tx_options = [
+('frequency','-F','Frequenza TX','TX frequency','<MHz>','433.775'),
+('sf','-S','Spread factor TX','TX spread factor','<[-]6..12>','12'),
+('bandwidth','-B','Bandwidth TX','TX bandwidth','<0..9>','7'),
+('coding_rate','-C','Coding rate TX','TX coding rate','<5..8>','5'),
+('network_id','-N','Network ID TX','TX network ID','<hex>','12'),
+('power','-w','Potenza TX','TX power','<0..17 dBm>','10'),
+('preamble','-H','Preambolo TX','TX preamble','<n>','8'),
+('tx_delay','-T','TX delay AFSK/FSK','AFSK/FSK TX delay','<byte>','6'),
+('deviation','-D','Deviazione AFSK/FSK','AFSK/FSK deviation','<Hz>','3000'),
+('gfsk_baud','-G','GFSK TX','TX GFSK','<[-]baud>',''),
+('optimize','-O','Low data-rate optimize TX','TX low data-rate optimize','<-1|0|1>','-1')
+] %}
+
+
+{% for key, flag, it, en, syntax, default in tx_options %}
+
+{% set state = tx.get(key,{}) %}
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+<input
+ type="checkbox"
+ name="chip{{ ci }}_tx{{ ti }}_{{ key }}_enabled"
+ {% if state.get('enabled') %}checked{% endif %}
+>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge
+ {% if state.get('enabled') %}badge-active{% else %}badge-off{% endif %}
+">
+{% if state.get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">
+NON CONFIGURATO
+</span>
+{% endif %}
+</div>
+
+</div>
+
+
+<div class="option-main">
+
+<label class="option-name">
+<span data-it="{{ it }}" data-en="{{ en }}">{{ it }}</span>
+<span class="param">{{ flag }}</span>
+</label>
+
+<input
+ name="chip{{ ci }}_tx{{ ti }}_{{ key }}"
+ value="{{ state.get('value',default) }}"
+ spellcheck="false"
+>
+
+<div class="syntax">
+<span data-it="Sintassi:" data-en="Syntax:">Sintassi:</span>
+<code>{{ flag }} {{ syntax }}</code>
+</div>
+
+</div>
+
+
+<div class="option-help">
+<div
+ data-it="Parametro appartenente esclusivamente a questo contesto TX."
+ data-en="Parameter belonging exclusively to this TX context."
+>
+Parametro del contesto TX.
+</div>
+</div>
+
+</div>
+
+{% endfor %}
+
+
+{% for key, flag, it, en in [
+('afsk','-A','AFSK 1200 TX','AFSK 1200 TX'),
+('raw_fsk','-E','FSK raw','Raw FSK'),
+('raw_lora','-K','LoRa raw AXUDP','Raw LoRa AXUDP'),
+('implicit','-I','Header implicito TX','TX implicit header'),
+('dcd','-d','Blocco TX con DCD','DCD TX inhibit'),
+('invert_iq','-Q','Inverti IQ TX','Invert TX IQ')
+] %}
+
+{% set state = tx.get(key,{}) %}
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+<input
+ type="checkbox"
+ name="chip{{ ci }}_tx{{ ti }}_{{ key }}_enabled"
+ {% if state.get('enabled') %}checked{% endif %}
+>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge
+ {% if state.get('enabled') %}badge-active{% else %}badge-off{% endif %}
+">
+{% if state.get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">
+NON CONFIGURATO
+</span>
+{% endif %}
+</div>
+
+</div>
+
+
+<div class="option-main">
+
+<label class="option-name">
+<span data-it="{{ it }}" data-en="{{ en }}">{{ it }}</span>
+<span class="param">{{ flag }}</span>
+</label>
+
+<div class="boolean-description">
+<span
+ data-it="Parametro senza valore: viene aggiunto quando attivo."
+ data-en="Value-less parameter: added when enabled."
+>
+Parametro senza valore: viene aggiunto quando attivo.
+</span>
+</div>
+
+</div>
+
+<div class="option-help">
+<div
+ data-it="Parametro booleano associato esclusivamente a questo contesto TX."
+ data-en="Boolean parameter associated exclusively with this TX context."
+>
+Parametro del contesto TX.
+</div>
+</div>
+
+</div>
+
+{% endfor %}
+
+
+</div>
+</div>
+</div>
+
+{% endfor %}
+
+</div>
+
+
+<div class="card">
+
+<div class="card-body">
+
+<div class="actions config-actions">
+
+<button
+ type="button"
+ class="save"
+ onclick="addTxContext({{ ci }})"
+>
+<span
+ data-it="Aggiungi contesto TX"
+ data-en="Add TX context"
+>
+Aggiungi contesto TX
+</span>
+</button>
+
+</div>
+
+</div>
+</div>
+
+
+</div>
+
+{% endfor %}
+
+</div>
+
+
+<div class="card">
+
+<div class="card-body">
+
+<div class="actions config-actions">
+
+<button
+ type="button"
+ class="save"
+ onclick="addChip()"
+>
+<span
+ data-it="Aggiungi chip"
+ data-en="Add chip"
+>
+Aggiungi chip
+</span>
+</button>
+
+</div>
+
+<div class="help" style="margin-top:12px;">
+<span
+ data-it="I chip o i contesti non utilizzati possono essere lasciati disattivati."
+ data-en="Unused chips or contexts can simply be left disabled."
+>
+I chip o i contesti non utilizzati possono essere lasciati disattivati.
+</span>
+</div>
+
+</div>
+</div>
+
+
+<div class="card">
+
+<div class="card-title">
+<span
+ data-it="Gestione configurazione"
+ data-en="Configuration management"
+>
+Gestione configurazione
+</span>
+</div>
+
+<div class="card-body">
+
+<div class="actions config-actions">
+
+<button
+ type="submit"
+ class="save"
+ name="action"
+ value="save"
+>
+<span
+ data-it="Salva configurazione"
+ data-en="Save configuration"
+>
+Salva configurazione
+</span>
+</button>
+
+<button
+ type="submit"
+ class="apply-config"
+ name="action"
+ value="apply"
+>
+<span
+ data-it="Applica configurazione"
+ data-en="Apply configuration"
+>
+Applica configurazione
+</span>
+</button>
+
+</div>
+
+</div>
+</div>
+
+
+<div class="card">
+<div class="card-title">
+<span
+ data-it="Anteprima comando salvato"
+ data-en="Saved command preview"
+>
+Anteprima comando salvato
+</span>
+</div>
+
+<pre>{{ command }}</pre>
+</div>
+
+
+<div class="card">
+<div class="card-title">
+<span
+ data-it="Comando attivo"
+ data-en="Active command"
+>
+Comando attivo
+</span>
+</div>
+
+<pre>{{ active_command }}</pre>
+</div>
+
+
+<div class="card">
+<div class="card-title">
+<span
+ data-it="Ultime righe del log"
+ data-en="Latest log lines"
+>
+Ultime righe del log
+</span>
+</div>
+
+<pre>{{ journal }}</pre>
+</div>
+
+
+</form>
+
+
+<script>
+
+function esc(s) {
+    return String(s)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+}
+
+
+function optionRow(name, flag, title, value) {
+
+    return `
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+<input type="checkbox" name="${name}_enabled">
+<span class="slider"></span>
+</label>
+
+<div class="option-badge badge-off">
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">
+NON CONFIGURATO
+</span>
+</div>
+
+</div>
+
+<div class="option-main">
+
+<label class="option-name">
+<span>${esc(title)}</span>
+<span class="param">${esc(flag)}</span>
+</label>
+
+<input
+ name="${name}"
+ value="${esc(value)}"
+ spellcheck="false"
+>
+
+</div>
+
+<div class="option-help">
+<div
+ data-it="Parametro configurabile."
+ data-en="Configurable parameter."
+>
+Parametro configurabile.
+</div>
+</div>
+
+</div>`;
+}
+
+
+function boolRow(name, flag, title) {
+
+    return `
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+<input type="checkbox" name="${name}_enabled">
+<span class="slider"></span>
+</label>
+
+<div class="option-badge badge-off">
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">
+NON CONFIGURATO
+</span>
+</div>
+
+</div>
+
+<div class="option-main">
+
+<label class="option-name">
+<span>${esc(title)}</span>
+<span class="param">${esc(flag)}</span>
+</label>
+
+<div class="boolean-description">
+<span
+ data-it="Parametro senza valore: viene aggiunto quando attivo."
+ data-en="Value-less parameter: added when enabled."
+>
+Parametro senza valore: viene aggiunto quando attivo.
+</span>
+</div>
+
+</div>
+
+<div class="option-help">
+<div
+ data-it="Parametro configurabile."
+ data-en="Configurable parameter."
+>
+Parametro configurabile.
+</div>
+</div>
+
+</div>`;
+}
+
+
+function txHtml(ci, ti) {
+
+    const p = `chip${ci}_tx${ti}`;
+
+    return `
+<div class="card tx-card">
+
+<div class="card-title">
+<span>
+Chip ${ci + 1} - Contesto TX ${ti + 1}
+</span>
+</div>
+
+<div class="card-body">
+<div class="option-list">
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+<input type="checkbox" name="${p}_enabled">
+<span class="slider"></span>
+</label>
+
+<div class="option-badge badge-off">
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">
+NON CONFIGURATO
+</span>
+</div>
+
+</div>
+
+<div class="option-main">
+
+<label class="option-name">
+<span>Porta AXUDP</span>
+<span class="param">-L / -U</span>
+</label>
+
+<select name="${p}_transport">
+<option value="L">AXUDPv2 (-L)</option>
+<option value="U">AXUDP (-U)</option>
+</select>
+
+<input
+ name="${p}_endpoint"
+ value=""
+ placeholder="192.0.2.1:9000:9001"
+ spellcheck="false"
+>
+
+</div>
+
+<div class="option-help">
+<div>
+Apre il contesto TX.
+</div>
+</div>
+
+</div>
+
+${optionRow(p + "_frequency", "-F", "Frequenza TX", "433.775")}
+${optionRow(p + "_sf", "-S", "Spread factor TX", "12")}
+${optionRow(p + "_bandwidth", "-B", "Bandwidth TX", "7")}
+${optionRow(p + "_coding_rate", "-C", "Coding rate TX", "5")}
+${optionRow(p + "_network_id", "-N", "Network ID TX", "12")}
+${optionRow(p + "_power", "-w", "Potenza TX", "10")}
+${optionRow(p + "_preamble", "-H", "Preambolo TX", "8")}
+${optionRow(p + "_tx_delay", "-T", "TX delay", "6")}
+${optionRow(p + "_deviation", "-D", "Deviazione", "3000")}
+${optionRow(p + "_gfsk_baud", "-G", "GFSK TX", "")}
+${optionRow(p + "_optimize", "-O", "Optimize TX", "-1")}
+
+${boolRow(p + "_afsk", "-A", "AFSK 1200 TX")}
+${boolRow(p + "_raw_fsk", "-E", "FSK raw")}
+${boolRow(p + "_raw_lora", "-K", "LoRa raw AXUDP")}
+${boolRow(p + "_implicit", "-I", "Header implicito TX")}
+${boolRow(p + "_dcd", "-d", "Blocco TX con DCD")}
+${boolRow(p + "_invert_iq", "-Q", "Inverti IQ TX")}
+
+</div>
+</div>
+</div>`;
+}
+
+
+function addTxContext(ci) {
+
+    const chip = document.querySelector(
+        `.ra02-chip[data-chip="${ci}"]`
+    );
+
+    if (!chip) return;
+
+    const counter = chip.querySelector(
+        '.tx-count'
+    );
+
+    const container = chip.querySelector(
+        '.tx-container'
+    );
+
+    let count = parseInt(counter.value || "0", 10);
+
+    container.insertAdjacentHTML(
+        "beforeend",
+        txHtml(ci, count)
+    );
+
+    count += 1;
+    counter.value = String(count);
+
+    if (typeof applyLanguage === "function") {
+        applyLanguage();
+    }
+}
+
+
+function chipHtml(ci) {
+
+    return `
+<div class="ra02-chip" data-chip="${ci}">
+
+<div class="card">
+
+<div class="card-title">
+<span>
+Chip ${ci + 1} - GPIO
+</span>
+</div>
+
+<div class="card-body">
+
+<input
+ type="hidden"
+ class="tx-count"
+ name="chip${ci}_tx_count"
+ value="1"
+>
+
+<div class="option-list">
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+<input type="checkbox" name="chip${ci}_enabled">
+<span class="slider"></span>
+</label>
+
+<div class="option-badge badge-off">
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">
+NON CONFIGURATO
+</span>
+</div>
+
+</div>
+
+<div class="option-main">
+
+<label class="option-name">
+<span>Interfaccia GPIO</span>
+<span class="param">-p</span>
+</label>
+
+<div style="display:flex;gap:10px;flex-wrap:wrap;">
+
+<input name="chip${ci}_gpio_nss" value="8" placeholder="NSS">
+<input name="chip${ci}_gpio_mosi" value="10" placeholder="MOSI">
+<input name="chip${ci}_gpio_miso" value="9" placeholder="MISO">
+<input name="chip${ci}_gpio_sck" value="11" placeholder="SCK">
+
+</div>
+
+</div>
+
+<div class="option-help">
+<div>
+Seleziona il chip SX127x tramite GPIO.
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+</div>
+
+
+<div class="card">
+
+<div class="card-title">
+<span>
+Chip ${ci + 1} - Ricezione
+</span>
+</div>
+
+<div class="card-body">
+<div class="option-list">
+
+${optionRow(`chip${ci}_rx_frequency`, "-f", "Frequenza RX", "433.775")}
+${optionRow(`chip${ci}_rx_sf`, "-s", "Spread factor RX", "12")}
+${optionRow(`chip${ci}_rx_bandwidth`, "-b", "Bandwidth RX", "7")}
+${optionRow(`chip${ci}_rx_coding_rate`, "-c", "Coding rate RX", "5")}
+${optionRow(`chip${ci}_rx_network_id`, "-n", "Network ID RX", "12")}
+${optionRow(`chip${ci}_rx_gfsk_baud`, "-g", "GFSK RX", "")}
+${optionRow(`chip${ci}_rx_lna_gain`, "-e", "LNA gain", "1")}
+${optionRow(`chip${ci}_rx_lna_boost`, "-l", "LNA boost", "3")}
+${optionRow(`chip${ci}_rx_rssi_correction`, "-r", "Correzione RSSI", "0")}
+${optionRow(`chip${ci}_rx_optimize`, "-o", "Optimize RX", "-1")}
+${optionRow(`chip${ci}_rx_ppm`, "-P", "Correzione quarzo", "0")}
+${optionRow(`chip${ci}_rx_datarate`, "-X", "Correzione data-rate", "0")}
+${optionRow(`chip${ci}_rx_preamble_limit`, "-W", "Limite preambolo RX", "250")}
+${optionRow(`chip${ci}_rx_pa_ramp`, "-R", "PaRamp del chip", "9")}
+${optionRow(`chip${ci}_rx_ocp`, "-Z", "Protezione sovracorrente", "")}
+
+${boolRow(`chip${ci}_rx_agc`, "-a", "AGC")}
+${boolRow(`chip${ci}_rx_implicit`, "-i", "Header implicito RX")}
+${boolRow(`chip${ci}_rx_invert_iq`, "-q", "Inverti IQ RX")}
+
+</div>
+</div>
+</div>
+
+
+<div class="tx-container" data-chip="${ci}">
+${txHtml(ci, 0)}
+</div>
+
+
+<div class="card">
+
+<div class="card-body">
+
+<div class="actions config-actions">
+
+<button
+ type="button"
+ class="save"
+ onclick="addTxContext(${ci})"
+>
+Aggiungi contesto TX
+</button>
+
+</div>
+
+</div>
+</div>
+
+</div>`;
+}
+
+
+function addChip() {
+
+    const counter = document.getElementById(
+        "chip_count"
+    );
+
+    const container = document.getElementById(
+        "chips-container"
+    );
+
+    let count = parseInt(
+        counter.value || "0",
+        10
+    );
+
+    container.insertAdjacentHTML(
+        "beforeend",
+        chipHtml(count)
+    );
+
+    count += 1;
+
+    counter.value = String(count);
+
+    if (typeof applyLanguage === "function") {
+        applyLanguage();
+    }
+}
+
+</script>
+
+{% endblock %}

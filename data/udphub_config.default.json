@@ -1,0 +1,51 @@
+{
+  "options": {
+    "-a": {
+      "enabled": false
+    },
+    "-b": {
+      "enabled": false,
+      "value": ""
+    },
+    "-d": {
+      "enabled": false,
+      "value": ""
+    },
+    "-I": {
+      "enabled": false
+    },
+    "-i": {
+      "enabled": false,
+      "value": ""
+    },
+    "-l": {
+      "enabled": false,
+      "value": ""
+    },
+    "-m": {
+      "enabled": false,
+      "value": ""
+    },
+    "-O": {
+      "enabled": false
+    },
+    "-p": {
+      "enabled": false,
+      "value": ""
+    },
+    "-u": {
+      "enabled": false,
+      "value": ""
+    },
+    "-v": {
+      "enabled": false
+    },
+    "-V": {
+      "enabled": false
+    },
+    "-w": {
+      "enabled": false,
+      "value": ""
+    }
+  }
+}

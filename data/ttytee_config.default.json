@@ -1,0 +1,14 @@
+{
+  "serial": {
+    "enabled": false,
+    "device": "",
+    "baud": "4800",
+    "abort_on_usb_error": false
+  },
+
+  "outputs": [],
+
+  "logging": {
+    "verbose": false
+  }
+}

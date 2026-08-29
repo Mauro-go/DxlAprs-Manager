@@ -1,0 +1,147 @@
+{
+  "input": {
+    "source": {
+      "enabled": false,
+      "value": ""
+    }
+  },
+
+  "aprs": {
+    "callsign": {
+      "enabled": false,
+      "value": ""
+    },
+
+    "via": {
+      "enabled": false,
+      "value": ""
+    },
+
+    "dao": {
+      "enabled": false
+    },
+
+    "track_filter_off": {
+      "enabled": false
+    },
+
+    "send_quick": {
+      "enabled": false,
+      "value": "2"
+    },
+
+    "beacon_times": {
+      "enabled": false,
+      "value": "30:10"
+    },
+
+    "altitude_table": {
+      "enabled": false,
+      "value": ""
+    },
+
+    "max_distance": {
+      "enabled": false,
+      "value": "0"
+    },
+
+    "position": {
+      "enabled": false,
+      "value": ""
+    },
+
+    "my_altitude": {
+      "enabled": false,
+      "value": ""
+    },
+
+    "fence": {
+      "enabled": false,
+      "value": ""
+    },
+
+    "expire": {
+      "enabled": false,
+      "value": "0"
+    },
+
+    "leap_seconds": {
+      "enabled": false,
+      "value": "18"
+    },
+
+    "send_mhz": {
+      "enabled": false
+    }
+  },
+
+  "files": {
+    "comment": {
+      "enabled": false,
+      "value": ""
+    },
+
+    "srtm": {
+      "enabled": false,
+      "value": ""
+    },
+
+    "sem": {
+      "enabled": false,
+      "value": ""
+    },
+
+    "rinex": {
+      "enabled": false,
+      "value": ""
+    },
+
+    "yuma": {
+      "enabled": false,
+      "value": ""
+    },
+
+    "encrypted": {
+      "enabled": false,
+      "value": ""
+    },
+
+    "decoded": {
+      "enabled": false,
+      "mode": "csv",
+      "value": ""
+    }
+  },
+
+  "almanac": {
+    "max_age": {
+      "enabled": false,
+      "value": "360"
+    },
+
+    "request_after": {
+      "enabled": false,
+      "value": "240"
+    }
+  },
+
+  "outputs": {
+    "radio": {
+      "enabled": false,
+      "mode": "r",
+      "destinations": []
+    },
+
+    "json_udp": [],
+
+    "dfm_types": {
+      "enabled": false,
+      "value": ""
+    }
+  },
+
+  "logging": {
+    "verbose": false,
+    "very_verbose": false
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "options": {
+    "-i": {
+      "enabled": false,
+      "value": ""
+    },
+    "-o": {
+      "enabled": false,
+      "value": ""
+    },
+    "-f": {
+      "enabled": false,
+      "value": "u8"
+    },
+    "-r": {
+      "enabled": false,
+      "value": ""
+    },
+
+    "-b": {
+      "enabled": false,
+      "value": "7"
+    },
+    "-s": {
+      "enabled": false,
+      "value": "12"
+    },
+    "-c": {
+      "enabled": false,
+      "value": "5"
+    },
+    "-C": {
+      "enabled": false
+    },
+    "-I": {
+      "enabled": false
+    },
+    "-N": {
+      "enabled": false,
+      "value": "12"
+    },
+    "-O": {
+      "enabled": false,
+      "value": ""
+    },
+    "-p": {
+      "enabled": false,
+      "value": "8"
+    },
+    "-q": {
+      "enabled": false
+    },
+    "-j": {
+      "enabled": false
+    },
+
+    "-g": {
+      "enabled": false,
+      "value": ""
+    },
+    "-S": {
+      "enabled": false,
+      "value": ""
+    },
+
+    "-B": {
+      "enabled": false,
+      "values": []
+    },
+    "-E": {
+      "enabled": false,
+      "value": ""
+    },
+    "-P": {
+      "enabled": false,
+      "value": ""
+    },
+    "-R": {
+      "enabled": false,
+      "value": ""
+    },
+    "-T": {
+      "enabled": false,
+      "values": []
+    },
+    "-w": {
+      "enabled": false,
+      "value": ""
+    },
+    "-Z": {
+      "enabled": false,
+      "value": ""
+    },
+    "-z": {
+      "enabled": false,
+      "value": ""
+    },
+
+    "-H": {
+      "enabled": false
+    },
+    "-v": {
+      "enabled": false
+    },
+    "-V": {
+      "enabled": false
+    }
+  }
+}

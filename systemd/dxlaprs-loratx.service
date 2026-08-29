@@ -1,0 +1,14 @@
+[Unit]
+Description=DxlAprs Manager - loratx
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /opt/dxlaprs-manager/run_loratx.py
+Restart=no
+KillSignal=SIGTERM
+TimeoutStopSec=15
+
+[Install]
+WantedBy=multi-user.target

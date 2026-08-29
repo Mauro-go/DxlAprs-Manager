@@ -1,0 +1,492 @@
+{% extends "base.html" %}
+
+{% block title %}
+
+<span class="page-icon">
+<svg viewBox="0 0 24 24">
+<rect x="4" y="4" width="6" height="6" rx="1"/>
+<rect x="14" y="4" width="6" height="6" rx="1"/>
+<rect x="4" y="14" width="6" height="6" rx="1"/>
+<rect x="14" y="14" width="6" height="6" rx="1"/>
+</svg>
+</span>
+
+<span>loratx</span>
+
+{% endblock %}
+
+
+{% block content %}
+
+{% set groups = [
+
+    {
+        "it": "Ingresso e uscita",
+        "en": "Input and output",
+        "flags": ["-i", "-o", "-f", "-r"]
+    },
+
+    {
+        "it": "Parametri LoRa",
+        "en": "LoRa parameters",
+        "flags": ["-b", "-s", "-c", "-C", "-I", "-N", "-O", "-p", "-q", "-j"]
+    },
+
+    {
+        "it": "Livello e frequenza",
+        "en": "Level and frequency",
+        "flags": ["-g", "-S"]
+    },
+
+    {
+        "it": "Disturbi e test RF",
+        "en": "RF impairments and tests",
+        "flags": ["-B", "-E", "-P", "-R", "-T", "-w", "-Z", "-z"]
+    },
+
+    {
+        "it": "Formato input e debug",
+        "en": "Input format and debug",
+        "flags": ["-H", "-v", "-V"]
+    }
+
+] %}
+
+
+<form method="post">
+
+<div class="card">
+
+<div class="card-title">
+
+<span
+ data-it="Stato loratx"
+ data-en="loratx status"
+>
+Stato loratx
+</span>
+
+</div>
+
+<div class="card-body">
+
+<div style="
+ display:flex;
+ gap:24px;
+ flex-wrap:wrap;
+ align-items:center;
+">
+
+<div>
+
+<strong
+ data-it="Servizio:"
+ data-en="Service:"
+>
+Servizio:
+</strong>
+
+{% if running %}
+
+<span class="option-badge badge-active">
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+</span>
+
+{% else %}
+
+<span class="option-badge badge-off">
+<span data-it="FERMO" data-en="STOPPED">FERMO</span>
+</span>
+
+{% endif %}
+
+</div>
+
+
+<div>
+
+<strong
+ data-it="Avvio automatico:"
+ data-en="Automatic startup:"
+>
+Avvio automatico:
+</strong>
+
+{% if enabled %}
+
+<span data-it="abilitato" data-en="enabled">
+abilitato
+</span>
+
+{% else %}
+
+<span data-it="disabilitato" data-en="disabled">
+disabilitato
+</span>
+
+{% endif %}
+
+</div>
+
+</div>
+
+
+<div class="actions config-actions" style="margin-top:20px;">
+
+<button
+ type="submit"
+ class="save"
+ name="action"
+ value="start"
+ formnovalidate
+>
+<span data-it="Avvia loratx" data-en="Start loratx">
+Avvia loratx
+</span>
+</button>
+
+
+<button
+ type="submit"
+ name="action"
+ value="stop"
+ formnovalidate
+>
+<span data-it="Ferma loratx" data-en="Stop loratx">
+Ferma loratx
+</span>
+</button>
+
+
+<button
+ type="submit"
+ class="restart-udpgate"
+ name="action"
+ value="restart"
+ formnovalidate
+>
+<span data-it="Riavvia loratx" data-en="Restart loratx">
+Riavvia loratx
+</span>
+</button>
+
+</div>
+
+
+<div class="help" style="margin-top:16px;">
+
+<span
+ data-it="loratx è un programma batch: genera il file IQ e termina normalmente. Lo stato FERMO dopo il completamento è quindi normale."
+ data-en="loratx is a batch program: it generates the IQ file and exits normally. STOPPED after completion is therefore expected."
+>
+loratx è un programma batch: genera il file IQ e termina normalmente.
+Lo stato FERMO dopo il completamento è quindi normale.
+</span>
+
+</div>
+
+</div>
+</div>
+
+
+{% for group in groups %}
+
+<div class="card">
+
+<div class="card-title">
+
+<span
+ data-it="{{ group.it }}"
+ data-en="{{ group.en }}"
+>
+{{ group.it }}
+</span>
+
+</div>
+
+
+<div class="card-body">
+
+<div class="option-list">
+
+{% for option in catalog if option.flag in group.flags %}
+
+{% set state = values.get(option.flag, {}) %}
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+
+<input
+ type="checkbox"
+ name="enabled_{{ option.flag }}"
+ {% if state.get('enabled') %}checked{% endif %}
+>
+
+<span class="slider"></span>
+
+</label>
+
+
+<div class="option-badge
+ {% if state.get('enabled') %}badge-active{% else %}badge-off{% endif %}
+">
+
+{% if state.get('enabled') %}
+
+<span data-it="ATTIVO" data-en="ACTIVE">
+ATTIVO
+</span>
+
+{% else %}
+
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">
+NON CONFIGURATO
+</span>
+
+{% endif %}
+
+</div>
+
+</div>
+
+
+<div class="option-main">
+
+<label class="option-name">
+
+<span
+ data-it="{{ option.it }}"
+ data-en="{{ option.en }}"
+>
+{{ option.it }}
+</span>
+
+<span class="param">
+{{ option.flag }}
+</span>
+
+</label>
+
+
+{% if option.get('boolean') %}
+
+<div class="boolean-description">
+
+<span
+ data-it="Parametro senza valore: viene aggiunto quando attivo."
+ data-en="Value-less parameter: added when enabled."
+>
+Parametro senza valore: viene aggiunto quando attivo.
+</span>
+
+</div>
+
+
+{% elif option.get('repeat') %}
+
+<textarea
+ name="value_{{ option.flag }}"
+ rows="4"
+ spellcheck="false"
+ placeholder="{{ option.get('placeholder','') }}"
+>{{ state.get('values', []) | join('\n') }}</textarea>
+
+<div class="help">
+
+<span
+ data-it="Una configurazione per riga. Il parametro viene ripetuto automaticamente."
+ data-en="One configuration per line. The parameter is repeated automatically."
+>
+Una configurazione per riga. Il parametro viene ripetuto automaticamente.
+</span>
+
+</div>
+
+
+{% elif option.get('select') %}
+
+<select
+ name="value_{{ option.flag }}"
+>
+
+{% for v in option.get('select', []) %}
+
+<option
+ value="{{ v }}"
+ {% if state.get('value','') == v %}selected{% endif %}
+>
+{{ v }}
+</option>
+
+{% endfor %}
+
+</select>
+
+
+{% else %}
+
+<input
+ name="value_{{ option.flag }}"
+ value="{{ state.get('value','') }}"
+ placeholder="{{ option.get('placeholder','') }}"
+ spellcheck="false"
+>
+
+{% endif %}
+
+
+{% if option.syntax %}
+
+<div class="syntax">
+
+<span data-it="Sintassi:" data-en="Syntax:">
+Sintassi:
+</span>
+
+<code>{{ option.flag }} {{ option.syntax }}</code>
+
+</div>
+
+{% endif %}
+
+</div>
+
+
+<div class="option-help">
+
+<div
+ data-it="{{ option.help_it }}"
+ data-en="{{ option.help_en }}"
+>
+{{ option.help_it }}
+</div>
+
+</div>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+</div>
+</div>
+
+{% endfor %}
+
+
+<div class="card">
+
+<div class="card-title">
+
+<span
+ data-it="Gestione configurazione"
+ data-en="Configuration management"
+>
+Gestione configurazione
+</span>
+
+</div>
+
+<div class="card-body">
+
+<div class="actions config-actions">
+
+<button
+ type="submit"
+ class="save"
+ name="action"
+ value="save"
+>
+
+<span
+ data-it="Salva configurazione"
+ data-en="Save configuration"
+>
+Salva configurazione
+</span>
+
+</button>
+
+
+<button
+ type="submit"
+ class="apply-config"
+ name="action"
+ value="apply"
+>
+
+<span
+ data-it="Applica configurazione"
+ data-en="Apply configuration"
+>
+Applica configurazione
+</span>
+
+</button>
+
+</div>
+
+</div>
+</div>
+
+
+<div class="card">
+
+<div class="card-title">
+
+<span
+ data-it="Anteprima comando salvato"
+ data-en="Saved command preview"
+>
+Anteprima comando salvato
+</span>
+
+</div>
+
+<pre>{{ command }}</pre>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-title">
+
+<span
+ data-it="Comando attivo"
+ data-en="Active command"
+>
+Comando attivo
+</span>
+
+</div>
+
+<pre>{{ active_command }}</pre>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-title">
+
+<span
+ data-it="Ultime righe del log"
+ data-en="Latest log lines"
+>
+Ultime righe del log
+</span>
+
+</div>
+
+<pre>{{ journal }}</pre>
+
+</div>
+
+</form>
+
+{% endblock %}

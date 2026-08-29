@@ -1,0 +1,85 @@
+{
+  "gpio": {
+    "enabled": false,
+    "nss": "8",
+    "mosi": "10",
+    "miso": "9",
+    "sck": "11"
+  },
+  "radio": {
+    "lna_boost": {
+      "enabled": false
+    },
+    "ppm": {
+      "enabled": false,
+      "value": "0"
+    }
+  },
+  "frequency": {
+    "enabled": false,
+    "mode": "range",
+    "start_mhz": "430.0",
+    "end_mhz": "440.0",
+    "table": ""
+  },
+  "image": {
+    "filename": {
+      "enabled": false,
+      "value": ""
+    },
+    "xsize": {
+      "enabled": false,
+      "value": "256"
+    },
+    "ysize": {
+      "enabled": false,
+      "value": "256"
+    },
+    "roll": {
+      "enabled": false,
+      "value": ""
+    },
+    "spectrum": {
+      "enabled": false,
+      "value": ""
+    },
+    "delay": {
+      "enabled": false,
+      "value": "0"
+    },
+    "scale": {
+      "enabled": false
+    },
+    "timestamps": {
+      "enabled": false
+    },
+    "transparent": {
+      "enabled": false
+    },
+    "mirror": {
+      "enabled": false
+    }
+  },
+  "external": {
+    "colour_file": {
+      "enabled": false,
+      "value": ""
+    },
+    "gps": {
+      "enabled": false,
+      "value": ""
+    },
+    "level_file": {
+      "enabled": false,
+      "value": ""
+    }
+  },
+  "debug": {
+    "verbose": {
+      "enabled": false
+    },
+    "very_verbose": {
+      "enabled": false
+    }
+  }
+}

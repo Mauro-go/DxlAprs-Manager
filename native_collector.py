@@ -371,7 +371,7 @@ def connection_matches_socket(row, sock):
     # OUTBOUND APRS-IS
     #
     # Nel DB possiamo avere:
-    #     example.aprs.server
+    #     aprs.example.net
     #
     # mentre ss mostra:
     #     44.31.102.59
@@ -1320,9 +1320,9 @@ def parse_verbose_packet(line):
     #
     # Esempi:
     #
-    # CALL1-12: 47>S55YNA-12>...
-    # CALL2-10:134>S55YZA-10>...
-    # CALL2-10:dup:S55YNA-12>...
+    # RX1-10: 47>S55YNA-12>...
+    # RX2-10:134>S55YZA-10>...
+    # RX2-10:dup:S55YNA-12>...
     # ========================================================
 
     m = re.match(
@@ -1354,7 +1354,7 @@ def parse_verbose_packet(line):
     #
     # " 47>S55YNA-12>..."
     # "134>S55YZA-10>..."
-    # " 44>IV3IHD-10>..."
+    # " 44>REMOTE-10>..."
     #
     # Quel numero NON appartiene al pacchetto APRS.
     # ========================================================
@@ -1413,7 +1413,7 @@ def parse_verbose_packet(line):
     #
     # Esempio:
     #
-    # IV3IHD-10>...,qAR,CALL1-12:...
+    # REMOTE-10>...,qAR,RX1-10:...
     #                         ^^^^^^^^
     # ========================================================
 
@@ -1677,7 +1677,7 @@ def update_aprsis_rx(
     #
     # G: 66>S59DEM-11>...
     # G:128>IQ3FL-10>...
-    # G:  0>CALL3-7>...
+    # G:  0>MYCALL-7>...
     #
     # Il numero iniziale è diagnostico di udpgate4 e NON
     # appartiene al pacchetto APRS.

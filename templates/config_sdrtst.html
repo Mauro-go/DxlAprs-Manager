@@ -1,0 +1,1071 @@
+{% extends "base.html" %}
+
+{% block title %}
+
+<span class="page-icon">
+<svg viewBox="0 0 24 24">
+<rect x="4" y="4" width="6" height="6" rx="1"/>
+<rect x="14" y="4" width="6" height="6" rx="1"/>
+<rect x="4" y="14" width="6" height="6" rx="1"/>
+<rect x="14" y="14" width="6" height="6" rx="1"/>
+</svg>
+</span>
+
+<span>sdrtst</span>
+
+{% endblock %}
+
+
+{% macro value_option(name, state, flag, it, en, syntax, help_it, help_en) %}
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+<input
+ type="checkbox"
+ name="{{ name }}_enabled"
+ {% if state.get('enabled') %}checked{% endif %}
+>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge {% if state.get('enabled') %}badge-active{% else %}badge-off{% endif %}">
+{% if state.get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">NON CONFIGURATO</span>
+{% endif %}
+</div>
+
+</div>
+
+<div class="option-main">
+
+<label class="option-name">
+<span data-it="{{ it }}" data-en="{{ en }}">{{ it }}</span>
+<span class="param">{{ flag }}</span>
+</label>
+
+<input
+ name="{{ name }}"
+ value="{{ state.get('value','') }}"
+ spellcheck="false"
+>
+
+<div class="syntax">
+<span data-it="Sintassi:" data-en="Syntax:">Sintassi:</span>
+<code>{{ flag }} {{ syntax }}</code>
+</div>
+
+</div>
+
+<div class="option-help">
+<div data-it="{{ help_it }}" data-en="{{ help_en }}">
+{{ help_it }}
+</div>
+</div>
+
+</div>
+
+{% endmacro %}
+
+
+{% macro bool_option(name, state, flag, it, en, help_it, help_en) %}
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+<input
+ type="checkbox"
+ name="{{ name }}"
+ {% if state.get('enabled') %}checked{% endif %}
+>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge {% if state.get('enabled') %}badge-active{% else %}badge-off{% endif %}">
+{% if state.get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">NON CONFIGURATO</span>
+{% endif %}
+</div>
+
+</div>
+
+<div class="option-main">
+
+<label class="option-name">
+<span data-it="{{ it }}" data-en="{{ en }}">{{ it }}</span>
+<span class="param">{{ flag }}</span>
+</label>
+
+<div class="boolean-description">
+<span
+ data-it="Parametro senza valore: viene aggiunto quando attivo."
+ data-en="Value-less parameter: added when enabled."
+>
+Parametro senza valore: viene aggiunto quando attivo.
+</span>
+</div>
+
+</div>
+
+<div class="option-help">
+<div data-it="{{ help_it }}" data-en="{{ help_en }}">
+{{ help_it }}
+</div>
+</div>
+
+</div>
+
+{% endmacro %}
+
+
+{% block content %}
+
+<form method="post">
+
+
+<!-- ======================================================= -->
+<!-- STATO                                                   -->
+<!-- ======================================================= -->
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Stato sdrtst" data-en="sdrtst status">
+Stato sdrtst
+</span>
+</div>
+
+<div class="card-body">
+
+<div style="display:flex;gap:24px;flex-wrap:wrap;align-items:center;">
+
+<div>
+<strong data-it="Servizio:" data-en="Service:">
+Servizio:
+</strong>
+
+{% if running %}
+<span class="option-badge badge-active">
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+</span>
+{% else %}
+<span class="option-badge badge-off">
+<span data-it="FERMO" data-en="STOPPED">FERMO</span>
+</span>
+{% endif %}
+</div>
+
+<div>
+<strong
+ data-it="Avvio automatico:"
+ data-en="Automatic startup:"
+>
+Avvio automatico:
+</strong>
+
+{% if enabled %}
+<span data-it="abilitato" data-en="enabled">
+abilitato
+</span>
+{% else %}
+<span data-it="disabilitato" data-en="disabled">
+disabilitato
+</span>
+{% endif %}
+</div>
+
+</div>
+
+<div class="actions config-actions" style="margin-top:20px;">
+
+<button
+ type="submit"
+ class="save"
+ name="action"
+ value="start"
+ formnovalidate
+>
+<span data-it="Avvia sdrtst" data-en="Start sdrtst">
+Avvia sdrtst
+</span>
+</button>
+
+<button
+ type="submit"
+ name="action"
+ value="stop"
+ formnovalidate
+>
+<span data-it="Ferma sdrtst" data-en="Stop sdrtst">
+Ferma sdrtst
+</span>
+</button>
+
+<button
+ type="submit"
+ class="restart-udpgate"
+ name="action"
+ value="restart"
+ formnovalidate
+>
+<span data-it="Riavvia sdrtst" data-en="Restart sdrtst">
+Riavvia sdrtst
+</span>
+</button>
+
+</div>
+
+</div>
+</div>
+
+
+<!-- ======================================================= -->
+<!-- INGRESSO IQ                                             -->
+<!-- ======================================================= -->
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Ingresso IQ" data-en="IQ input">
+Ingresso IQ
+</span>
+</div>
+
+<div class="card-body">
+<div class="option-list">
+
+{{ value_option(
+    'input_source',
+    INPUT.get('source',{}),
+    '-t',
+    'Sorgente IQ',
+    'IQ source',
+    '&lt;host:port | filename:0&gt;',
+    'Server rtl_tcp oppure file contenente i dati IQ.',
+    'rtl_tcp server or file containing IQ data.'
+) }}
+
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+<input
+ type="checkbox"
+ name="input_format_enabled"
+ {% if INPUT.get('format',{}).get('enabled') %}checked{% endif %}
+>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge {% if INPUT.get('format',{}).get('enabled') %}badge-active{% else %}badge-off{% endif %}">
+{% if INPUT.get('format',{}).get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">NON CONFIGURATO</span>
+{% endif %}
+</div>
+
+</div>
+
+<div class="option-main">
+
+<label class="option-name">
+<span data-it="Formato dati IQ" data-en="IQ data format">
+Formato dati IQ
+</span>
+<span class="param">-f</span>
+</label>
+
+<select name="input_format">
+<option value="u8" {% if INPUT.get('format',{}).get('value','u8') == 'u8' %}selected{% endif %}>u8</option>
+<option value="i16" {% if INPUT.get('format',{}).get('value') == 'i16' %}selected{% endif %}>i16</option>
+<option value="f32" {% if INPUT.get('format',{}).get('value') == 'f32' %}selected{% endif %}>f32</option>
+</select>
+
+<div class="syntax">
+<code>-f u8|i16|f32</code>
+</div>
+
+</div>
+
+<div class="option-help">
+<div
+ data-it="Formato dei campioni IQ. f32 usa aritmetica floating point ed ammette sample rate da 1 a 3 MHz."
+ data-en="IQ sample format. f32 uses floating point arithmetic and accepts sample rates from 1 to 3 MHz."
+>
+Formato dei campioni IQ.
+</div>
+</div>
+
+</div>
+
+
+{{ value_option(
+    'input_iq_rate',
+    INPUT.get('iq_rate',{}),
+    '-i',
+    'Sample rate IQ',
+    'IQ sample rate',
+    '&lt;Hz&gt;',
+    'Per u8/i16: 1024000 oppure 2000000..2500000 Hz. Per f32: 1000000..3000000 Hz.',
+    'For u8/i16: 1024000 or 2000000..2500000 Hz. For f32: 1000000..3000000 Hz.'
+) }}
+
+{{ value_option(
+    'input_manual_tune',
+    INPUT.get('manual_tune',{}),
+    '-T',
+    'Sintonia manuale',
+    'Manual tuning',
+    '&lt;MHz&gt;',
+    'Imposta manualmente il centro della banda IQ, utile con ingresso da file.',
+    'Manually sets the IQ band centre, useful with file input.'
+) }}
+
+{{ value_option(
+    'input_center_offset',
+    INPUT.get('center_offset',{}),
+    '-O',
+    'Offset dal centro banda',
+    'Band centre offset',
+    '&lt;Hz&gt;',
+    'Allontana il centro dalla banda utilizzata per evitare il disturbo DC dell’ADC.',
+    'Moves the centre away from the used band to avoid ADC DC offset noise.'
+) }}
+
+{{ value_option(
+    'input_converter_offset',
+    INPUT.get('converter_offset',{}),
+    '-o',
+    'Offset convertitore',
+    'Converter offset',
+    '&lt;MHz&gt;',
+    'Offset applicato alle frequenze inserite quando viene utilizzato un convertitore.',
+    'Offset applied to entered frequencies when a converter is used.'
+) }}
+
+{{ bool_option(
+    'input_reconnect',
+    INPUT.get('reconnect',{}),
+    '-k',
+    'Riconnessione automatica',
+    'Automatic reconnect',
+    'Riconnette automaticamente il server rtl_tcp se la connessione cade.',
+    'Automatically reconnects to the rtl_tcp server if the connection is lost.'
+) }}
+
+</div>
+</div>
+</div>
+
+
+<!-- ======================================================= -->
+<!-- CONFIG CANALI                                           -->
+<!-- ======================================================= -->
+
+<div class="card">
+
+<div class="card-title">
+<span
+ data-it="Configurazione ricevitori"
+ data-en="Receiver configuration"
+>
+Configurazione ricevitori
+</span>
+</div>
+
+<div class="card-body">
+<div class="option-list">
+
+{{ value_option(
+    'channels_config_source',
+    CHANNELS.get('config_source',{}),
+    '-c',
+    'Configurazione canali',
+    'Channel configuration',
+    '&lt;filename | ip:port&gt;',
+    'File di configurazione dei ricevitori oppure ingresso UDP. Il file viene riletto periodicamente.',
+    'Receiver configuration file or UDP input. The file is periodically re-read.'
+) }}
+
+</div>
+
+<div class="syntax" style="margin-top:16px;">
+<code>p &lt;cmd&gt; &lt;value&gt;</code><br>
+<code>f &lt;MHz&gt; &lt;AFC&gt; &lt;squelch%&gt; &lt;lowpass%&gt; &lt;IF-width&gt;</code><br>
+<code>a &lt;MHz&gt; 0 &lt;squelch%&gt; &lt;lowpass%&gt; &lt;IF-width&gt;</code><br>
+<code>u &lt;MHz&gt; &lt;IF-shift&gt; &lt;AGC-limit&gt; &lt;AGC-speed&gt; &lt;IF-width&gt;</code><br>
+<code>l ...</code><br>
+<code>q &lt;MHz&gt; 0 0 &lt;lowpass%&gt; &lt;IF-width&gt;</code><br>
+<code>s &lt;from-MHz&gt; &lt;to-MHz&gt; &lt;step-Hz&gt; &lt;sleepsteps&gt; &lt;IF-width&gt;</code>
+</div>
+
+</div>
+</div>
+
+
+<!-- ======================================================= -->
+<!-- AUDIO                                                   -->
+<!-- ======================================================= -->
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Audio e uscita" data-en="Audio and output">
+Audio e uscita
+</span>
+</div>
+
+<div class="card-body">
+<div class="option-list">
+
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+<input
+ type="checkbox"
+ name="audio_output_enabled"
+ {% if AUDIO.get('output',{}).get('enabled') %}checked{% endif %}
+>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge {% if AUDIO.get('output',{}).get('enabled') %}badge-active{% else %}badge-off{% endif %}">
+{% if AUDIO.get('output',{}).get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">NON CONFIGURATO</span>
+{% endif %}
+</div>
+
+</div>
+
+<div class="option-main">
+
+<label class="option-name">
+<span data-it="Uscita audio" data-en="Audio output">
+Uscita audio
+</span>
+<span class="param">-s / -S / -A</span>
+</label>
+
+<select name="audio_output_mode">
+
+<option
+ value="s16"
+ {% if AUDIO.get('output',{}).get('mode','s16') == 's16' %}selected{% endif %}
+>
+16 bit signed PCM (-s)
+</option>
+
+<option
+ value="u8"
+ {% if AUDIO.get('output',{}).get('mode') == 'u8' %}selected{% endif %}
+>
+8 bit unsigned PCM (-S)
+</option>
+
+<option
+ value="alaw"
+ {% if AUDIO.get('output',{}).get('mode') == 'alaw' %}selected{% endif %}
+>
+ALAW G.711 (-A)
+</option>
+
+</select>
+
+<input
+ style="margin-top:10px;"
+ name="audio_output"
+ value="{{ AUDIO.get('output',{}).get('value','') }}"
+ placeholder="filename oppure ip:port"
+ spellcheck="false"
+>
+
+<div class="syntax">
+<code>-s|-S|-A &lt;filename | ip:port&gt;</code>
+</div>
+
+</div>
+
+<div class="option-help">
+<div
+ data-it="Seleziona il formato dell’unica uscita audio principale. La destinazione può essere file, pipe oppure UDP."
+ data-en="Selects the format of the main audio output. Destination may be a file, pipe or UDP."
+>
+Seleziona formato e destinazione dell’uscita audio.
+</div>
+</div>
+
+</div>
+
+
+{{ value_option(
+    'audio_sample_rate',
+    AUDIO.get('sample_rate',{}),
+    '-r',
+    'Sample rate audio',
+    'Audio sample rate',
+    '&lt;Hz&gt;',
+    'Sample rate IF/audio. Documentato 8000..256000 Hz; il parser impone il massimo di 256000 Hz.',
+    'IF/audio sample rate. Documented as 8000..256000 Hz; the parser enforces a maximum of 256000 Hz.'
+) }}
+
+{{ value_option(
+    'audio_downsample',
+    AUDIO.get('downsample',{}),
+    '-d',
+    'Downsample uscita',
+    'Output downsample',
+    '&lt;Hz&gt;',
+    'Sample rate finale mediante interpolazione lineare. Non può superare il valore di -r.',
+    'Final sample rate using linear interpolation. It cannot exceed -r.'
+) }}
+
+{{ value_option(
+    'audio_mix_channels',
+    AUDIO.get('mix_channels',{}),
+    '-m',
+    'Mix canali',
+    'Channel mixing',
+    '&lt;1|2&gt;',
+    'Mixa tutti i ricevitori verso uno o due canali audio, mono o stereo.',
+    'Mixes all receivers into one or two audio channels, mono or stereo.'
+) }}
+
+{{ value_option(
+    'audio_buffer_samples',
+    AUDIO.get('buffer_samples',{}),
+    '-B',
+    'Campioni per blocco',
+    'Samples per block',
+    '&lt;samples&gt;',
+    'Numero di campioni audio inviati per blocco. Massimo 1024; il programma forza un valore pari.',
+    'Number of audio samples sent per block. Maximum 1024; the program forces an even value.'
+) }}
+
+{{ bool_option(
+    'audio_stop_when_squelched',
+    AUDIO.get('stop_when_squelched',{}),
+    '-q',
+    'Sospendi audio con squelch chiuso',
+    'Stop audio when squelched',
+    'Non produce campioni audio quando tutti gli squelch sono chiusi.',
+    'Does not output audio samples when all squelches are closed.'
+) }}
+
+{{ bool_option(
+    'audio_watermark',
+    AUDIO.get('watermark',{}),
+    '-e',
+    'Metadati SDR nell’audio',
+    'SDR metadata in audio',
+    'Inserisce nei canali audio dati SDR nascosti come sintonia, AFC e RSSI.',
+    'Embeds hidden SDR data such as tuning, AFC and RSSI in the audio channels.'
+) }}
+
+</div>
+</div>
+</div>
+
+
+<!-- ======================================================= -->
+<!-- CPU / SQUELCH                                           -->
+<!-- ======================================================= -->
+
+<div class="card">
+
+<div class="card-title">
+<span
+ data-it="Ricevitori, squelch e CPU"
+ data-en="Receivers, squelch and CPU"
+>
+Ricevitori, squelch e CPU
+</span>
+</div>
+
+<div class="card-body">
+<div class="option-list">
+
+{{ value_option(
+    'receiver_max_active',
+    RECEIVER.get('max_active',{}),
+    '-a',
+    'Ricevitori attivi massimi',
+    'Maximum active receivers',
+    '&lt;number&gt;',
+    'Limita il numero massimo di ricevitori contemporaneamente attivi per ridurre il carico CPU.',
+    'Limits the maximum number of simultaneously active receivers to reduce CPU load.'
+) }}
+
+{{ value_option(
+    'receiver_max_awake',
+    RECEIVER.get('max_awake',{}),
+    '-w',
+    'Tempo massimo attivo',
+    'Maximum awake time',
+    '&lt;ms&gt;',
+    'Tempo massimo durante il quale un ricevitore continua a usare CPU dopo la chiusura dello squelch.',
+    'Maximum time a receiver continues using CPU after squelch closes.'
+) }}
+
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+<input
+ type="checkbox"
+ name="receiver_powersave_enabled"
+ {% if RECEIVER.get('powersave',{}).get('enabled') %}checked{% endif %}
+>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge {% if RECEIVER.get('powersave',{}).get('enabled') %}badge-active{% else %}badge-off{% endif %}">
+{% if RECEIVER.get('powersave',{}).get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">NON CONFIGURATO</span>
+{% endif %}
+</div>
+
+</div>
+
+<div class="option-main">
+
+<label class="option-name">
+<span data-it="Risparmio CPU" data-en="CPU power saving">
+Risparmio CPU
+</span>
+<span class="param">-z / -Z</span>
+</label>
+
+<select name="receiver_powersave_mode">
+
+<option
+ value="normal"
+ {% if RECEIVER.get('powersave',{}).get('mode','normal') == 'normal' %}selected{% endif %}
+>
+Normale (-z)
+</option>
+
+<option
+ value="fast"
+ {% if RECEIVER.get('powersave',{}).get('mode') == 'fast' %}selected{% endif %}
+>
+Apertura rapida decoder (-Z)
+</option>
+
+</select>
+
+<input
+ style="margin-top:10px;"
+ name="receiver_powersave"
+ value="{{ RECEIVER.get('powersave',{}).get('value','100') }}"
+>
+
+<div class="syntax">
+<code>-z &lt;ms&gt;</code><br>
+<code>-Z &lt;ms&gt;</code>
+</div>
+
+</div>
+
+<div class="option-help">
+<div
+ data-it="-z riduce l’uso CPU durante lo squelch chiuso. -Z usa apertura rapida senza quieting audio, adatta ai decoder."
+ data-en="-z reduces CPU usage while squelch is closed. -Z uses fast opening without audio quieting, suitable for decoders."
+>
+Le due modalità sono mutuamente esclusive.
+</div>
+</div>
+
+</div>
+
+
+{{ value_option(
+    'receiver_afc_speed',
+    RECEIVER.get('afc_speed',{}),
+    '-F',
+    'Velocità AFC',
+    'AFC speed',
+    '&lt;0..1000&gt;',
+    'Velocità AFC documentata da 0 a 1000. Valore predefinito documentato: 5.',
+    'Documented AFC speed from 0 to 1000. Documented default: 5.'
+) }}
+
+</div>
+</div>
+</div>
+
+
+<!-- ======================================================= -->
+<!-- TELEMETRIA                                              -->
+<!-- ======================================================= -->
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Telemetria UDP" data-en="UDP telemetry">
+Telemetria UDP
+</span>
+</div>
+
+<div class="card-body">
+
+
+<div class="option-name">
+<span data-it="Destinazioni livelli" data-en="Level destinations">
+Destinazioni livelli
+</span>
+<span class="param">-L</span>
+</div>
+
+<div id="level-list">
+
+{% for value in TELEMETRY.get('level_destinations',[]) %}
+
+<div class="dynamic-row" style="display:flex;gap:10px;margin:8px 0;">
+<input
+ name="level_destination"
+ value="{{ value }}"
+ placeholder="ip:port"
+ spellcheck="false"
+>
+<button type="button" onclick="this.parentElement.remove()">×</button>
+</div>
+
+{% endfor %}
+
+</div>
+
+<button type="button" onclick="addLevelDestination()">
+<span data-it="Aggiungi destinazione -L" data-en="Add -L destination">
+Aggiungi destinazione -L
+</span>
+</button>
+
+
+<hr style="margin:24px 0;">
+
+
+<div class="option-name">
+<span data-it="Destinazioni noise/squelch" data-en="Noise/squelch destinations">
+Destinazioni noise/squelch
+</span>
+<span class="param">-N</span>
+</div>
+
+<div id="noise-list">
+
+{% for value in TELEMETRY.get('noise_destinations',[]) %}
+
+<div class="dynamic-row" style="display:flex;gap:10px;margin:8px 0;">
+<input
+ name="noise_destination"
+ value="{{ value }}"
+ placeholder="ip:port"
+ spellcheck="false"
+>
+<button type="button" onclick="this.parentElement.remove()">×</button>
+</div>
+
+{% endfor %}
+
+</div>
+
+<button type="button" onclick="addNoiseDestination()">
+<span data-it="Aggiungi destinazione -N" data-en="Add -N destination">
+Aggiungi destinazione -N
+</span>
+</button>
+
+</div>
+</div>
+
+
+<!-- ======================================================= -->
+<!-- RTL TCP PARAMETERS                                      -->
+<!-- ======================================================= -->
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Parametri rtl_tcp" data-en="rtl_tcp parameters">
+Parametri rtl_tcp
+</span>
+</div>
+
+<div class="card-body">
+
+<div
+ data-it="Ogni riga genera -p &lt;cmd&gt; &lt;value&gt;. Il comando deve essere compreso tra 0 e 255 e non può essere duplicato."
+ data-en="Each row generates -p &lt;cmd&gt; &lt;value&gt;. Command must be between 0 and 255 and cannot be duplicated."
+>
+Ogni riga genera <code>-p &lt;cmd&gt; &lt;value&gt;</code>.
+</div>
+
+<div id="rtl-param-list" style="margin-top:14px;">
+
+{% for item in RTL.get('parameters',[]) %}
+
+<div class="dynamic-row" style="display:flex;gap:10px;margin:8px 0;align-items:center;">
+
+<label class="switch">
+<input
+ type="checkbox"
+ name="rtl_param_enabled"
+ value="1"
+ {% if item.get('enabled',True) %}checked{% endif %}
+>
+<span class="slider"></span>
+</label>
+
+<input
+ name="rtl_param_cmd"
+ value="{{ item.get('cmd','') }}"
+ placeholder="cmd"
+>
+
+<input
+ name="rtl_param_value"
+ value="{{ item.get('value','') }}"
+ placeholder="value"
+>
+
+<button type="button" onclick="this.parentElement.remove()">×</button>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+<button type="button" onclick="addRtlParam()">
+<span data-it="Aggiungi parametro -p" data-en="Add -p parameter">
+Aggiungi parametro -p
+</span>
+</button>
+
+</div>
+</div>
+
+
+<!-- ======================================================= -->
+<!-- DEBUG                                                   -->
+<!-- ======================================================= -->
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Debug" data-en="Debug">
+Debug
+</span>
+</div>
+
+<div class="card-body">
+<div class="option-list">
+
+{{ value_option(
+    'debug_iq_dump',
+    DEBUG.get('iq_dump',{}),
+    '-D',
+    'Salva dati IQ ricevuti',
+    'Save received IQ data',
+    '&lt;file&gt;',
+    'Scrive su file i dati IQ ricevuti dal collegamento TCP.',
+    'Writes IQ data received from the TCP connection to a file.'
+) }}
+
+{{ bool_option(
+    'debug_verbose',
+    DEBUG.get('verbose',{}),
+    '-v',
+    'Verbose',
+    'Verbose',
+    'Mostra RSSI in dB e AFC in kHz.',
+    'Shows RSSI in dB and AFC in kHz.'
+) }}
+
+</div>
+</div>
+</div>
+
+
+<!-- ======================================================= -->
+<!-- GESTIONE                                                -->
+<!-- ======================================================= -->
+
+<div class="card">
+
+<div class="card-title">
+<span
+ data-it="Gestione configurazione"
+ data-en="Configuration management"
+>
+Gestione configurazione
+</span>
+</div>
+
+<div class="card-body">
+
+<div class="actions config-actions">
+
+<button
+ type="submit"
+ class="save"
+ name="action"
+ value="save"
+>
+<span data-it="Salva configurazione" data-en="Save configuration">
+Salva configurazione
+</span>
+</button>
+
+<button
+ type="submit"
+ class="apply-config"
+ name="action"
+ value="apply"
+>
+<span data-it="Applica configurazione" data-en="Apply configuration">
+Applica configurazione
+</span>
+</button>
+
+</div>
+
+</div>
+</div>
+
+
+<div class="card">
+<div class="card-title">
+<span data-it="Anteprima comando salvato" data-en="Saved command preview">
+Anteprima comando salvato
+</span>
+</div>
+<pre>{{ command }}</pre>
+</div>
+
+
+<div class="card">
+<div class="card-title">
+<span data-it="Comando attivo" data-en="Active command">
+Comando attivo
+</span>
+</div>
+<pre>{{ active_command }}</pre>
+</div>
+
+
+<div class="card">
+<div class="card-title">
+<span data-it="Ultime righe del log" data-en="Latest log lines">
+Ultime righe del log
+</span>
+</div>
+<pre>{{ journal }}</pre>
+</div>
+
+
+</form>
+
+
+<script>
+
+function addLevelDestination() {
+
+    const root = document.getElementById("level-list");
+
+    const row = document.createElement("div");
+
+    row.className = "dynamic-row";
+    row.style.cssText =
+        "display:flex;gap:10px;margin:8px 0;";
+
+    row.innerHTML = `
+        <input name="level_destination"
+               placeholder="ip:port"
+               spellcheck="false">
+        <button type="button"
+                onclick="this.parentElement.remove()">×</button>
+    `;
+
+    root.appendChild(row);
+}
+
+
+function addNoiseDestination() {
+
+    const root = document.getElementById("noise-list");
+
+    const row = document.createElement("div");
+
+    row.className = "dynamic-row";
+    row.style.cssText =
+        "display:flex;gap:10px;margin:8px 0;";
+
+    row.innerHTML = `
+        <input name="noise_destination"
+               placeholder="ip:port"
+               spellcheck="false">
+        <button type="button"
+                onclick="this.parentElement.remove()">×</button>
+    `;
+
+    root.appendChild(row);
+}
+
+
+function addRtlParam() {
+
+    const root = document.getElementById("rtl-param-list");
+
+    const row = document.createElement("div");
+
+    row.className = "dynamic-row";
+
+    row.style.cssText =
+        "display:flex;gap:10px;margin:8px 0;align-items:center;";
+
+    row.innerHTML = `
+        <label class="switch">
+            <input type="checkbox"
+                   name="rtl_param_enabled"
+                   value="1"
+                   checked>
+            <span class="slider"></span>
+        </label>
+
+        <input name="rtl_param_cmd"
+               placeholder="cmd">
+
+        <input name="rtl_param_value"
+               placeholder="value">
+
+        <button type="button"
+                onclick="this.parentElement.remove()">×</button>
+    `;
+
+    root.appendChild(row);
+}
+
+</script>
+
+{% endblock %}

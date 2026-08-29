@@ -1,0 +1,74 @@
+{
+  "global": {
+    "poll": {
+      "enabled": false,
+      "rx_us": "30000",
+      "tx_us": "10000"
+    },
+    "json_udp": {
+      "enabled": false,
+      "value": ""
+    },
+    "verbose": {
+      "enabled": false
+    },
+    "very_verbose": {
+      "enabled": false
+    }
+  },
+  "chips": [
+    {
+      "enabled": false,
+      "gpio": {
+        "nss": "8",
+        "mosi": "10",
+        "miso": "9",
+        "sck": "11"
+      },
+      "rx": {
+        "frequency": {"enabled": false, "value": "433.775"},
+        "sf": {"enabled": false, "value": "12"},
+        "bandwidth": {"enabled": false, "value": "7"},
+        "coding_rate": {"enabled": false, "value": "5"},
+        "network_id": {"enabled": false, "value": "12"},
+        "gfsk_baud": {"enabled": false, "value": ""},
+        "lna_gain": {"enabled": false, "value": "1"},
+        "lna_boost": {"enabled": false, "value": "3"},
+        "rssi_correction": {"enabled": false, "value": "0"},
+        "optimize": {"enabled": false, "value": "-1"},
+        "ppm": {"enabled": false, "value": "0"},
+        "datarate": {"enabled": false, "value": "0"},
+        "preamble_limit": {"enabled": false, "value": "250"},
+        "pa_ramp": {"enabled": false, "value": "9"},
+        "ocp": {"enabled": false, "value": ""},
+        "agc": {"enabled": false},
+        "implicit": {"enabled": false},
+        "invert_iq": {"enabled": false}
+      },
+      "tx_contexts": [
+        {
+          "enabled": false,
+          "transport": "L",
+          "endpoint": "",
+          "frequency": {"enabled": false, "value": "433.775"},
+          "sf": {"enabled": false, "value": "12"},
+          "bandwidth": {"enabled": false, "value": "7"},
+          "coding_rate": {"enabled": false, "value": "5"},
+          "network_id": {"enabled": false, "value": "12"},
+          "power": {"enabled": false, "value": "10"},
+          "preamble": {"enabled": false, "value": "8"},
+          "tx_delay": {"enabled": false, "value": "6"},
+          "deviation": {"enabled": false, "value": "3000"},
+          "gfsk_baud": {"enabled": false, "value": ""},
+          "optimize": {"enabled": false, "value": "-1"},
+          "afsk": {"enabled": false},
+          "raw_fsk": {"enabled": false},
+          "raw_lora": {"enabled": false},
+          "implicit": {"enabled": false},
+          "dcd": {"enabled": false},
+          "invert_iq": {"enabled": false}
+        }
+      ]
+    }
+  ]
+}

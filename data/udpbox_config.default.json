@@ -1,0 +1,96 @@
+{
+  "component": "udpbox",
+  "options": {
+    "-a": {
+      "enabled": false,
+      "value": ""
+    },
+    "-b": {
+      "enabled": false,
+      "value": ""
+    },
+    "-c": {
+      "enabled": false,
+      "value": ""
+    },
+    "-D": {
+      "enabled": true
+    },
+    "-d": {
+      "enabled": false,
+      "value": ""
+    },
+    "-e": {
+      "enabled": false
+    },
+    "-f": {
+      "enabled": false,
+      "value": ""
+    },
+    "-k": {
+      "enabled": false,
+      "value": ""
+    },
+    "-L": {
+      "enabled": false,
+      "value": ""
+    },
+    "-l": {
+      "enabled": false,
+      "value": ""
+    },
+    "-M": {
+      "enabled": false,
+      "value": ""
+    },
+    "-m": {
+      "enabled": false,
+      "value": ""
+    },
+    "-n": {
+      "enabled": false,
+      "value": ""
+    },
+    "-p": {
+      "enabled": false,
+      "value": ""
+    },
+    "-P": {
+      "enabled": false,
+      "value": ""
+    },
+    "-R": {
+      "enabled": false,
+      "value": ""
+    },
+    "-r": {
+      "enabled": false,
+      "value": ""
+    },
+    "-S": {
+      "enabled": false
+    },
+    "-s": {
+      "enabled": false
+    },
+    "-t": {
+      "enabled": false,
+      "value": ""
+    },
+    "-u": {
+      "enabled": false,
+      "values": []
+    },
+    "-v": {
+      "enabled": true
+    },
+    "-X": {
+      "enabled": false,
+      "value": ""
+    },
+    "-x": {
+      "enabled": false,
+      "value": ""
+    }
+  }
+}

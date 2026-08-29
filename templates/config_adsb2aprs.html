@@ -1,0 +1,664 @@
+{% extends "base.html" %}
+
+{% block title %}
+<span class="page-icon">
+<svg viewBox="0 0 24 24">
+<rect x="4" y="4" width="6" height="6" rx="1"/>
+<rect x="14" y="4" width="6" height="6" rx="1"/>
+<rect x="4" y="14" width="6" height="6" rx="1"/>
+<rect x="14" y="14" width="6" height="6" rx="1"/>
+</svg>
+</span>
+<span>adsb2aprs</span>
+{% endblock %}
+
+
+{% macro value_option(name,state,flag,it,en,syntax,help_it,help_en) %}
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+<input type="checkbox"
+       name="{{name}}_enabled"
+       {% if state.get('enabled') %}checked{% endif %}>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge {% if state.get('enabled') %}badge-active{% else %}badge-off{% endif %}">
+{% if state.get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">NON CONFIGURATO</span>
+{% endif %}
+</div>
+
+</div>
+
+
+<div class="option-main">
+
+<label class="option-name">
+<span data-it="{{it}}" data-en="{{en}}">{{it}}</span>
+<span class="param">{{flag}}</span>
+</label>
+
+<input name="{{name}}"
+       value="{{state.get('value','')}}"
+       spellcheck="false">
+
+<div class="syntax">
+<code>{{flag}} {{syntax}}</code>
+</div>
+
+</div>
+
+
+<div class="option-help">
+<div data-it="{{help_it}}"
+     data-en="{{help_en}}">
+{{help_it}}
+</div>
+</div>
+
+</div>
+{% endmacro %}
+
+
+{% macro bool_option(name,state,flag,it,en,help_it,help_en) %}
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+<input type="checkbox"
+       name="{{name}}"
+       {% if state.get('enabled') %}checked{% endif %}>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge {% if state.get('enabled') %}badge-active{% else %}badge-off{% endif %}">
+{% if state.get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">NON CONFIGURATO</span>
+{% endif %}
+</div>
+
+</div>
+
+
+<div class="option-main">
+
+<label class="option-name">
+<span data-it="{{it}}" data-en="{{en}}">{{it}}</span>
+<span class="param">{{flag}}</span>
+</label>
+
+</div>
+
+
+<div class="option-help">
+<div data-it="{{help_it}}"
+     data-en="{{help_en}}">
+{{help_it}}
+</div>
+</div>
+
+</div>
+{% endmacro %}
+
+
+{% block content %}
+
+<form method="post">
+
+
+<!-- ========================================================
+     STATO
+     ======================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Stato adsb2aprs"
+      data-en="adsb2aprs status">
+Stato adsb2aprs
+</span>
+</div>
+
+<div class="card-body">
+
+<div style="display:flex;gap:24px;flex-wrap:wrap;align-items:center;">
+
+<div>
+
+<strong data-it="Servizio:"
+        data-en="Service:">
+Servizio:
+</strong>
+
+{% if running %}
+
+<span class="option-badge badge-active">
+<span data-it="ATTIVO"
+      data-en="ACTIVE">
+ATTIVO
+</span>
+</span>
+
+{% else %}
+
+<span class="option-badge badge-off">
+<span data-it="FERMO"
+      data-en="STOPPED">
+FERMO
+</span>
+</span>
+
+{% endif %}
+
+</div>
+
+
+<div>
+
+<strong data-it="Avvio automatico:"
+        data-en="Automatic startup:">
+Avvio automatico:
+</strong>
+
+{% if enabled %}
+
+<span data-it="abilitato"
+      data-en="enabled">
+abilitato
+</span>
+
+{% else %}
+
+<span data-it="disabilitato"
+      data-en="disabled">
+disabilitato
+</span>
+
+{% endif %}
+
+</div>
+
+</div>
+
+
+<div class="actions config-actions"
+     style="margin-top:20px;">
+
+<button type="submit"
+        class="save"
+        name="action"
+        value="start"
+        formnovalidate>
+
+<span data-it="Avvia adsb2aprs"
+      data-en="Start adsb2aprs">
+Avvia adsb2aprs
+</span>
+
+</button>
+
+
+<button type="submit"
+        name="action"
+        value="stop"
+        formnovalidate>
+
+<span data-it="Ferma adsb2aprs"
+      data-en="Stop adsb2aprs">
+Ferma adsb2aprs
+</span>
+
+</button>
+
+
+<button type="submit"
+        class="restart-udpgate"
+        name="action"
+        value="restart"
+        formnovalidate>
+
+<span data-it="Riavvia adsb2aprs"
+      data-en="Restart adsb2aprs">
+Riavvia adsb2aprs
+</span>
+
+</button>
+
+</div>
+
+</div>
+</div>
+
+
+<!-- ========================================================
+     DUMP1090
+     ======================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Sorgente dump1090"
+      data-en="dump1090 source">
+Sorgente dump1090
+</span>
+</div>
+
+<div class="card-body">
+<div class="option-list">
+
+{{ value_option(
+'dump_server',
+DUMP.get('server',{}),
+'-t',
+'Server TCP dump1090',
+'dump1090 TCP server',
+'&lt;host:port&gt;',
+'Server TCP in formato basestation di dump1090. Richiede dump1090 avviato con supporto rete.',
+'dump1090 basestation-format TCP server. Requires dump1090 running with network support.'
+) }}
+
+
+{{ bool_option(
+'dump_keep',
+DUMP.get('keep_connection',{}),
+'-k',
+'Mantieni connessione',
+'Keep connection',
+'Continua a gestire e ristabilire la connessione TCP verso dump1090.',
+'Keeps handling and reconnecting the TCP connection to dump1090.'
+) }}
+
+</div>
+</div>
+</div>
+
+
+<!-- ========================================================
+     APRS
+     ======================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Uscita APRS"
+      data-en="APRS output">
+Uscita APRS
+</span>
+</div>
+
+<div class="card-body">
+<div class="option-list">
+
+{{ value_option(
+'aprs_callsign',
+APRS.get('callsign',{}),
+'-I',
+'Nominativo mittente',
+'Sender callsign',
+'&lt;CALL-SSID&gt;',
+'Nominativo usato come mittente degli oggetti APRS.',
+'Callsign used as sender of APRS objects.'
+) }}
+
+
+{{ value_option(
+'aprs_destination',
+APRS.get('destination',{}),
+'-u',
+'Destinazione AXUDP',
+'AXUDP destination',
+'&lt;host:port&gt;',
+'Destinazione AXUDP per udpgate4, aprsmap o altro ricevitore compatibile.',
+'AXUDP destination for udpgate4, aprsmap or another compatible receiver.'
+) }}
+
+
+{{ value_option(
+'aprs_beacon',
+APRS.get('beacon_time',{}),
+'-b',
+'Intervallo minimo beacon',
+'Minimum beacon interval',
+'&lt;secondi&gt;',
+'Intervallo minimo tra gli aggiornamenti APRS degli aeromobili.',
+'Minimum interval between aircraft APRS updates.'
+) }}
+
+
+{{ value_option(
+'aprs_symbol',
+APRS.get('symbol',{}),
+'-s',
+'Simbolo APRS',
+'APRS symbol',
+'&lt;2 caratteri&gt;',
+'Simbolo APRS composto da esattamente due caratteri.',
+'APRS symbol consisting of exactly two characters.'
+) }}
+
+
+{{ value_option(
+'aprs_comment',
+APRS.get('comment',{}),
+'-c',
+'Commento',
+'Comment',
+'&lt;testo&gt;',
+'Testo aggiunto al beacon; abilita anche il campo Clb= previsto da adsb2aprs.',
+'Text appended to the beacon; also enables the Clb= field implemented by adsb2aprs.'
+) }}
+
+</div>
+</div>
+</div>
+
+
+<!-- ========================================================
+     POSIZIONE
+     ======================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Posizione, quota e terreno"
+      data-en="Position, altitude and terrain">
+Posizione, quota e terreno
+</span>
+</div>
+
+<div class="card-body">
+<div class="option-list">
+
+{{ value_option(
+'pos_home',
+POSITION.get('home',{}),
+'-P',
+'Posizione ricevitore',
+'Receiver position',
+'&lt;locator | lat long&gt;',
+'Posizione del ricevitore per calcolare distanza, azimut ed elevazione.',
+'Receiver position used to calculate distance, azimuth and elevation.'
+) }}
+
+
+{{ value_option(
+'pos_alt',
+POSITION.get('home_altitude',{}),
+'-A',
+'Quota ricevitore',
+'Receiver altitude',
+'&lt;metri&gt;',
+'Quota locale utilizzata per il calcolo dell’elevazione.',
+'Local altitude used for elevation calculation.'
+) }}
+
+
+{{ value_option(
+'pos_corr',
+POSITION.get('altitude_correction',{}),
+'-a',
+'Correzione quota ADS-B',
+'ADS-B altitude correction',
+'&lt;metri&gt;',
+'Correzione applicata alla quota degli aeromobili.',
+'Correction applied to aircraft altitude.'
+) }}
+
+
+{{ value_option(
+'pos_srtm',
+POSITION.get('srtm',{}),
+'-S',
+'Directory SRTM / EGM96',
+'SRTM / EGM96 directory',
+'&lt;pathname&gt;',
+'Directory contenente i dati SRTM e, se disponibile, WW15MGH.DAC.',
+'Directory containing SRTM data and, when available, WW15MGH.DAC.'
+) }}
+
+</div>
+</div>
+</div>
+
+
+<!-- ========================================================
+     DATABASE
+     ======================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Database aeromobili"
+      data-en="Aircraft database">
+Database aeromobili
+</span>
+</div>
+
+<div class="card-body">
+<div class="option-list">
+
+{{ value_option(
+'db_file',
+DATABASE.get('file',{}),
+'-D',
+'Database CSV',
+'CSV database',
+'&lt;filename&gt;',
+'Database CSV indicizzato sul codice ICAO dell’aeromobile.',
+'CSV database indexed by aircraft ICAO code.'
+) }}
+
+
+{{ value_option(
+'db_titles',
+DATABASE.get('titles',{}),
+'-f',
+'Campi da aggiungere',
+'Fields to append',
+'&lt;campo,campo,...&gt;',
+'Definisce i titoli delle colonne del database. I campi vuoti possono essere usati per saltare colonne.',
+'Defines database column titles. Empty fields may be used to skip columns.'
+) }}
+
+</div>
+</div>
+</div>
+
+
+<!-- ========================================================
+     DEBUG
+     ======================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Debug"
+      data-en="Debug">
+Debug
+</span>
+</div>
+
+<div class="card-body">
+
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+<input type="checkbox"
+       name="log_verbose"
+       {% if LOGGING.get('verbose') %}checked{% endif %}>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge {% if LOGGING.get('verbose') %}badge-active{% else %}badge-off{% endif %}">
+{% if LOGGING.get('verbose') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">NON CONFIGURATO</span>
+{% endif %}
+</div>
+
+</div>
+
+<div class="option-main">
+<label class="option-name">
+Verbose
+<span class="param">-v</span>
+</label>
+</div>
+
+<div class="option-help">
+<div data-it="Abilita l'output verbose."
+     data-en="Enables verbose output.">
+Abilita l'output verbose.
+</div>
+</div>
+
+</div>
+
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+<input type="checkbox"
+       name="log_very_verbose"
+       {% if LOGGING.get('very_verbose') %}checked{% endif %}>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge {% if LOGGING.get('very_verbose') %}badge-active{% else %}badge-off{% endif %}">
+{% if LOGGING.get('very_verbose') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">NON CONFIGURATO</span>
+{% endif %}
+</div>
+
+</div>
+
+<div class="option-main">
+<label class="option-name">
+Very verbose
+<span class="param">-V</span>
+</label>
+</div>
+
+<div class="option-help">
+<div data-it="Abilita il livello di diagnostica più dettagliato."
+     data-en="Enables the most detailed diagnostic level.">
+Abilita il livello di diagnostica più dettagliato.
+</div>
+</div>
+
+</div>
+
+
+</div>
+</div>
+
+
+<!-- ========================================================
+     GESTIONE CONFIGURAZIONE
+     ======================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Gestione configurazione"
+      data-en="Configuration management">
+Gestione configurazione
+</span>
+</div>
+
+<div class="card-body">
+
+<div class="actions config-actions">
+
+<button type="submit"
+        class="save"
+        name="action"
+        value="save">
+
+<span data-it="Salva configurazione"
+      data-en="Save configuration">
+Salva configurazione
+</span>
+
+</button>
+
+
+<button type="submit"
+        class="apply-config"
+        name="action"
+        value="apply">
+
+<span data-it="Applica configurazione"
+      data-en="Apply configuration">
+Applica configurazione
+</span>
+
+</button>
+
+</div>
+
+</div>
+</div>
+
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Anteprima comando salvato"
+      data-en="Saved command preview">
+Anteprima comando salvato
+</span>
+</div>
+
+<pre>{{command}}</pre>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Comando attivo"
+      data-en="Active command">
+Comando attivo
+</span>
+</div>
+
+<pre>{{active_command}}</pre>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Ultime righe del log"
+      data-en="Latest log lines">
+Ultime righe del log
+</span>
+</div>
+
+<pre>{{journal}}</pre>
+
+</div>
+
+
+</form>
+
+{% endblock %}

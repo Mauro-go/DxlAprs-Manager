@@ -1,0 +1,16 @@
+{
+  "general": {
+    "callsign": {
+      "enabled": false,
+      "value": ""
+    },
+    "tty": {
+      "enabled": false,
+      "value": ""
+    },
+    "verbose": {
+      "enabled": false
+    }
+  },
+  "axudp": []
+}

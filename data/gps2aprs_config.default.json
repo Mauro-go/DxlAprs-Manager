@@ -1,0 +1,61 @@
+{
+  "gps": {
+    "tty": {"enabled": false, "value": ""},
+    "usb_abort": {"enabled": false},
+    "ublox_raw": {"enabled": false},
+    "fixed_altitude": {
+      "enabled": false,
+      "altitude_cm": "",
+      "fix_mode": "4"
+    },
+    "dynamic_model": {"enabled": false, "value": ""},
+    "timepulse": {
+      "enabled": false,
+      "period_us": "",
+      "duration_us": ""
+    },
+    "config_strings": []
+  },
+
+  "aprs": {
+    "callsign": {"enabled": false, "value": ""},
+    "via": {"enabled": false, "value": ""},
+    "comment": {"enabled": false, "value": ""},
+    "symbol": {"enabled": false, "value": ""},
+    "format": {"enabled": false, "value": "0"},
+    "destination_ssid": {"enabled": false, "value": "0"},
+    "dao": {"enabled": false},
+    "altitude_off": {"enabled": false},
+    "speed_course_off": {"enabled": false},
+    "climb_off": {"enabled": false},
+    "checksum_off": {"enabled": false}
+  },
+
+  "beacon": {
+    "standing_time": {"enabled": false, "value": "600"},
+    "driving_time": {"enabled": false, "value": "20"},
+    "navigation_time": {"enabled": false, "value": "2"},
+    "drive_speed": {"enabled": false, "value": "4"},
+    "comment_interval": {"enabled": false, "value": "5"},
+    "double_drive_time": {"enabled": false},
+    "balloon": {"enabled": false},
+    "meshcom4": {"enabled": false, "value": "4"}
+  },
+
+  "outputs": {
+    "monitor": [],
+    "axudp": [],
+    "navigation_axudp": []
+  },
+
+  "system": {
+    "gps_log": {"enabled": false, "value": ""},
+    "time_set": {
+      "enabled": false,
+      "mode": "continue",
+      "offset": "0"
+    },
+    "verbose": {"enabled": false},
+    "verbose_satellites": {"enabled": false}
+  }
+}

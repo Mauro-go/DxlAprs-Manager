@@ -1,0 +1,2544 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+
+<span class="page-icon">
+<svg viewBox="0 0 24 24">
+<rect x="4" y="4" width="6" height="6" rx="1"/>
+<rect x="14" y="4" width="6" height="6" rx="1"/>
+<rect x="4" y="14" width="6" height="6" rx="1"/>
+<rect x="14" y="14" width="6" height="6" rx="1"/>
+</svg>
+</span>
+
+<span>lorarx</span>
+
+{% endblock %}
+
+
+{% block content %}
+
+{% set G = cfg["global"] %}
+
+
+<form method="post"
+      id="lorarx-form"
+      onsubmit="reindexLorarxDemods()">
+
+
+<!-- ==========================================================
+     STATO
+     ========================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+
+<span
+ data-it="Stato lorarx"
+ data-en="lorarx status"
+>
+Stato lorarx
+</span>
+
+</div>
+
+
+<div class="card-body">
+
+<div style="
+ display:flex;
+ gap:24px;
+ flex-wrap:wrap;
+ align-items:center;
+">
+
+<div>
+
+<strong
+ data-it="Servizio:"
+ data-en="Service:"
+>
+Servizio:
+</strong>
+
+{% if service_state == "active" %}
+
+<span class="option-badge badge-active">
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+</span>
+
+{% else %}
+
+<span class="option-badge badge-off">
+<span data-it="FERMO" data-en="STOPPED">FERMO</span>
+</span>
+
+{% endif %}
+
+</div>
+
+
+<div>
+
+<strong
+ data-it="Avvio automatico:"
+ data-en="Automatic startup:"
+>
+Avvio automatico:
+</strong>
+
+{% if service_enabled == "enabled" %}
+
+<span data-it="abilitato" data-en="enabled">
+abilitato
+</span>
+
+{% else %}
+
+<span data-it="disabilitato" data-en="disabled">
+disabilitato
+</span>
+
+{% endif %}
+
+</div>
+
+</div>
+
+
+<div class="actions config-actions"
+     style="margin-top:20px;">
+
+<button
+ type="submit"
+ class="save"
+ name="action"
+ value="start"
+ formnovalidate
+>
+<span data-it="Avvia lorarx" data-en="Start lorarx">
+Avvia lorarx
+</span>
+</button>
+
+
+<button
+ type="submit"
+ name="action"
+ value="stop"
+ formnovalidate
+>
+<span data-it="Ferma lorarx" data-en="Stop lorarx">
+Ferma lorarx
+</span>
+</button>
+
+
+<button
+ type="submit"
+ class="restart-udpgate"
+ name="action"
+ value="restart"
+ formnovalidate
+>
+<span data-it="Riavvia lorarx" data-en="Restart lorarx">
+Riavvia lorarx
+</span>
+</button>
+
+</div>
+
+</div>
+</div>
+
+
+
+<!-- ==========================================================
+     INGRESSO IQ
+     ========================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+
+<span
+ data-it="Ingresso IQ e campionamento"
+ data-en="IQ input and sampling"
+>
+Ingresso IQ e campionamento
+</span>
+
+</div>
+
+
+<div class="card-body">
+
+<div class="option-list">
+
+
+<!-- -i -->
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+
+<input
+ type="checkbox"
+ name="g_input_file_enabled"
+ {% if G["input_file"]["enabled"] %}checked{% endif %}
+>
+
+<span class="slider"></span>
+
+</label>
+
+<div class="option-badge
+ {% if G["input_file"]["enabled"] %}badge-active{% else %}badge-off{% endif %}
+">
+
+{% if G["input_file"]["enabled"] %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">
+NON CONFIGURATO
+</span>
+{% endif %}
+
+</div>
+
+</div>
+
+
+<div class="option-main">
+
+<label class="option-name">
+
+<span
+ data-it="File o pipe IQ"
+ data-en="IQ file or pipe"
+>
+File o pipe IQ
+</span>
+
+<span class="param">-i</span>
+
+</label>
+
+<input
+ name="g_input_file_value"
+ value="{{ G['input_file']['value'] }}"
+ spellcheck="false"
+>
+
+<div class="syntax">
+<span data-it="Sintassi:" data-en="Syntax:">Sintassi:</span>
+<code>-i &lt;file/pipe&gt;</code>
+</div>
+
+</div>
+
+
+<div class="option-help">
+
+<div
+ data-it="File, dispositivo o pipe contenente il flusso IQ."
+ data-en="File, device or pipe containing the IQ stream."
+>
+File, dispositivo o pipe contenente il flusso IQ.
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- -f -->
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+
+<input
+ type="checkbox"
+ name="g_format_enabled"
+ {% if G["format"]["enabled"] %}checked{% endif %}
+>
+
+<span class="slider"></span>
+
+</label>
+
+<div class="option-badge
+ {% if G["format"]["enabled"] %}badge-active{% else %}badge-off{% endif %}
+">
+
+{% if G["format"]["enabled"] %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">
+NON CONFIGURATO
+</span>
+{% endif %}
+
+</div>
+
+</div>
+
+
+<div class="option-main">
+
+<label class="option-name">
+
+<span data-it="Formato IQ" data-en="IQ format">
+Formato IQ
+</span>
+
+<span class="param">-f</span>
+
+</label>
+
+<select name="g_format_value">
+
+<option value="u8"
+ {% if G["format"]["value"] == "u8" %}selected{% endif %}>
+u8
+</option>
+
+<option value="i16"
+ {% if G["format"]["value"] == "i16" %}selected{% endif %}>
+i16
+</option>
+
+<option value="f32"
+ {% if G["format"]["value"] == "f32" %}selected{% endif %}>
+f32
+</option>
+
+</select>
+
+<div class="syntax">
+<span data-it="Sintassi:" data-en="Syntax:">Sintassi:</span>
+<code>-f u8|i16|f32</code>
+</div>
+
+</div>
+
+
+<div class="option-help">
+
+<div
+ data-it="Formato dei campioni IQ in ingresso."
+ data-en="Input IQ sample format."
+>
+Formato dei campioni IQ in ingresso.
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- -b -->
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+
+<input
+ type="checkbox"
+ name="g_bandwidth_enabled"
+ {% if G["bandwidth"]["enabled"] %}checked{% endif %}
+>
+
+<span class="slider"></span>
+
+</label>
+
+<div class="option-badge
+ {% if G["bandwidth"]["enabled"] %}badge-active{% else %}badge-off{% endif %}
+">
+
+{% if G["bandwidth"]["enabled"] %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">
+NON CONFIGURATO
+</span>
+{% endif %}
+
+</div>
+
+</div>
+
+
+<div class="option-main">
+
+<label class="option-name">
+
+<span data-it="Bandwidth" data-en="Bandwidth">
+Bandwidth
+</span>
+
+<span class="param">-b</span>
+
+</label>
+
+<select name="g_bandwidth_value">
+
+{% for v,t in [
+("0","7.8 kHz"),
+("1","10.4 kHz"),
+("2","15.6 kHz"),
+("3","20.8 kHz"),
+("4","31.25 kHz"),
+("5","41.7 kHz"),
+("6","62.5 kHz"),
+("7","125 kHz"),
+("8","250 kHz"),
+("9","500 kHz")
+] %}
+
+<option value="{{ v }}"
+ {% if G["bandwidth"]["value"] == v %}selected{% endif %}>
+{{ v }} - {{ t }}
+</option>
+
+{% endfor %}
+
+</select>
+
+<div class="syntax">
+<span data-it="Sintassi:" data-en="Syntax:">Sintassi:</span>
+<code>-b 0..9</code>
+</div>
+
+</div>
+
+
+<div class="option-help">
+
+<div
+ data-it="Larghezza di banda LoRa. È globale e deve essere unica per il flusso IQ."
+ data-en="LoRa bandwidth. It is global and must be unique for the IQ stream."
+>
+Larghezza di banda LoRa. È globale e deve essere unica per il flusso IQ.
+</div>
+
+</div>
+
+</div>
+
+
+
+{% for key,flag,it,en,syntax,help_it,help_en in [
+
+("sample_rate","-r",
+"Samplerate ingresso",
+"Input samplerate",
+"<Hz>",
+"Samplerate esatto del flusso IQ in Hz.",
+"Exact IQ input samplerate in Hz."),
+
+("fir_length","-w",
+"Lunghezza FIR",
+"FIR length",
+"<8..4096>",
+"Lunghezza del filtro FIR di downsampling.",
+"Downsampling FIR filter length."),
+
+("offset","-o",
+"Shift banda IQ",
+"IQ band shift",
+"<Hz>",
+"Sposta la banda IQ della frequenza indicata.",
+"Shifts the IQ band by the specified frequency."),
+
+("gain_correction","-g",
+"Correzione livello segnale",
+"Signal level correction",
+"<dB>",
+"Correzione aggiunta al livello di segnale misurato.",
+"Correction added to the measured signal level."),
+
+("frequency_mhz","-M",
+"Frequenza RX nei metadata",
+"RX frequency in metadata",
+"<MHz>",
+"Frequenza ricevuta da riportare nei metadata JSON o AXUDPv2.",
+"Receive frequency passed to JSON or AXUDPv2 metadata.")
+
+] %}
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+
+<input
+ type="checkbox"
+ name="g_{{ key }}_enabled"
+ {% if G[key]["enabled"] %}checked{% endif %}
+>
+
+<span class="slider"></span>
+
+</label>
+
+<div class="option-badge
+ {% if G[key]["enabled"] %}badge-active{% else %}badge-off{% endif %}
+">
+
+{% if G[key]["enabled"] %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">
+NON CONFIGURATO
+</span>
+{% endif %}
+
+</div>
+
+</div>
+
+
+<div class="option-main">
+
+<label class="option-name">
+
+<span data-it="{{ it }}" data-en="{{ en }}">
+{{ it }}
+</span>
+
+<span class="param">{{ flag }}</span>
+
+</label>
+
+<input
+ name="g_{{ key }}_value"
+ value="{{ G[key]['value'] }}"
+ spellcheck="false"
+>
+
+<div class="syntax">
+
+<span data-it="Sintassi:" data-en="Syntax:">
+Sintassi:
+</span>
+
+<code>{{ flag }} {{ syntax }}</code>
+
+</div>
+
+</div>
+
+
+<div class="option-help">
+
+<div data-it="{{ help_it }}" data-en="{{ help_en }}">
+{{ help_it }}
+</div>
+
+</div>
+
+</div>
+
+{% endfor %}
+
+
+</div>
+</div>
+</div>
+
+
+
+<!-- ==========================================================
+     FILTRI E DSP
+     ========================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+
+<span
+ data-it="Filtri e DSP"
+ data-en="Filters and DSP"
+>
+Filtri e DSP
+</span>
+
+</div>
+
+
+<div class="card-body">
+
+<div class="option-list">
+
+
+<!-- -n -->
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+
+<input
+ type="checkbox"
+ name="g_notch_enabled"
+ {% if G["notch"]["enabled"] %}checked{% endif %}
+>
+
+<span class="slider"></span>
+
+</label>
+
+<div class="option-badge
+ {% if G["notch"]["enabled"] %}badge-active{% else %}badge-off{% endif %}
+">
+
+{% if G["notch"]["enabled"] %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">
+NON CONFIGURATO
+</span>
+{% endif %}
+
+</div>
+
+</div>
+
+
+<div class="option-main">
+
+<label class="option-name">
+
+<span data-it="Notch filter" data-en="Notch filter">
+Notch filter
+</span>
+
+<span class="param">-n</span>
+
+</label>
+
+<textarea
+ name="g_notch_values"
+ rows="4"
+ spellcheck="false"
+>{% for x in G["notch"]["values"] %}{{ x }}{% if not loop.last %}
+{% endif %}{% endfor %}</textarea>
+
+<div class="help">
+
+<span
+ data-it="Una coppia di frequenze per riga. Il parametro -n viene ripetuto automaticamente."
+ data-en="One frequency pair per line. The -n parameter is repeated automatically."
+>
+Una coppia di frequenze per riga. Il parametro -n viene ripetuto automaticamente.
+</span>
+
+</div>
+
+<div class="syntax">
+<span data-it="Sintassi:" data-en="Syntax:">Sintassi:</span>
+<code>-n &lt;from Hz&gt; &lt;to Hz&gt;</code>
+</div>
+
+</div>
+
+
+<div class="option-help">
+
+<div
+ data-it="Filtro notch in banda base. Può essere configurato più volte."
+ data-en="Baseband notch filter. May be configured multiple times."
+>
+Filtro notch in banda base. Può essere configurato più volte.
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- -W -->
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+
+<input
+ type="checkbox"
+ name="g_autonotch_enabled"
+ {% if G["autonotch"]["enabled"] %}checked{% endif %}
+>
+
+<span class="slider"></span>
+
+</label>
+
+<div class="option-badge
+ {% if G["autonotch"]["enabled"] %}badge-active{% else %}badge-off{% endif %}
+">
+
+{% if G["autonotch"]["enabled"] %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">
+NON CONFIGURATO
+</span>
+{% endif %}
+
+</div>
+
+</div>
+
+
+<div class="option-main">
+
+<label class="option-name">
+<span>Auto notch</span>
+<span class="param">-W</span>
+</label>
+
+<input
+ name="g_autonotch_value"
+ value="{{ G['autonotch']['value'] }}"
+ spellcheck="false"
+>
+
+<div class="syntax">
+<span data-it="Sintassi:" data-en="Syntax:">Sintassi:</span>
+<code>-W &lt;n&gt;</code>
+</div>
+
+</div>
+
+
+<div class="option-help">
+
+<div
+ data-it="Aggiorna automaticamente il filtro notch ogni n × FIR length campioni."
+ data-en="Automatically updates the notch filter every n × FIR length samples."
+>
+Aggiorna automaticamente il filtro notch ogni n × FIR length campioni.
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- -Z -->
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+
+<input
+ type="checkbox"
+ name="g_noise_blanker_enabled"
+ {% if G["noise_blanker"]["enabled"] %}checked{% endif %}
+>
+
+<span class="slider"></span>
+
+</label>
+
+<div class="option-badge
+ {% if G["noise_blanker"]["enabled"] %}badge-active{% else %}badge-off{% endif %}
+">
+
+{% if G["noise_blanker"]["enabled"] %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">
+NON CONFIGURATO
+</span>
+{% endif %}
+
+</div>
+
+</div>
+
+
+<div class="option-main">
+
+<label class="option-name">
+<span>Noise blanker</span>
+<span class="param">-Z</span>
+</label>
+
+<div style="display:flex;gap:10px;">
+
+<input
+ name="g_noise_blanker_up"
+ value="{{ G['noise_blanker']['up'] }}"
+ placeholder="upspeed"
+ spellcheck="false"
+>
+
+<input
+ name="g_noise_blanker_down"
+ value="{{ G['noise_blanker']['down'] }}"
+ placeholder="downspeed"
+ spellcheck="false"
+>
+
+</div>
+
+<div class="syntax">
+<span data-it="Sintassi:" data-en="Syntax:">Sintassi:</span>
+<code>-Z &lt;upspeed&gt; &lt;downspeed&gt;</code>
+</div>
+
+</div>
+
+
+<div class="option-help">
+
+<div
+ data-it="Filtro per rumore impulsivo con velocità di salita e discesa."
+ data-en="Pulse noise filter with configurable up and down speed."
+>
+Filtro per rumore impulsivo con velocità di salita e discesa.
+</div>
+
+</div>
+
+</div>
+
+
+
+{% for key,flag,it,en,help_it,help_en in [
+
+("no_multipath","-R",
+"Disabilita riparazione multipath",
+"Disable multipath repair",
+"Disabilita la correzione multipath o della distorsione di fase del filtro IF.",
+"Disables multipath or IF-filter phase distortion repair."),
+
+("no_crc_repair","-E",
+"Disabilita riparazione CRC",
+"Disable CRC repair",
+"Disabilita il tentativo di riparazione di un chirp usando il controllo CRC.",
+"Disables one-chirp repair using CRC checking."),
+
+("no_max_block_fec","-F",
+"Disabilita max block energy FEC",
+"Disable max block energy FEC",
+"Disabilita questa parte della correzione FEC mantenendo il codice Hamming.",
+"Disables max block energy FEC while retaining Hamming FEC.")
+
+] %}
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+
+<input
+ type="checkbox"
+ name="g_{{ key }}_enabled"
+ {% if G[key]["enabled"] %}checked{% endif %}
+>
+
+<span class="slider"></span>
+
+</label>
+
+<div class="option-badge
+ {% if G[key]["enabled"] %}badge-active{% else %}badge-off{% endif %}
+">
+
+{% if G[key]["enabled"] %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">
+NON CONFIGURATO
+</span>
+{% endif %}
+
+</div>
+
+</div>
+
+
+<div class="option-main">
+
+<label class="option-name">
+
+<span data-it="{{ it }}" data-en="{{ en }}">
+{{ it }}
+</span>
+
+<span class="param">{{ flag }}</span>
+
+</label>
+
+<div class="boolean-description">
+
+<span
+ data-it="Parametro senza valore: viene aggiunto quando attivo."
+ data-en="Value-less parameter: added when enabled."
+>
+Parametro senza valore: viene aggiunto quando attivo.
+</span>
+
+</div>
+
+</div>
+
+
+<div class="option-help">
+
+<div data-it="{{ help_it }}" data-en="{{ help_en }}">
+{{ help_it }}
+</div>
+
+</div>
+
+</div>
+
+{% endfor %}
+
+
+</div>
+</div>
+</div>
+
+
+
+<!-- ==========================================================
+     OUTPUT GLOBALE
+     ========================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+
+<span
+ data-it="Output globale e monitor"
+ data-en="Global output and monitor"
+>
+Output globale e monitor
+</span>
+
+</div>
+
+
+<div class="card-body">
+
+<div class="option-list">
+
+
+<!-- -J -->
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+
+<input
+ type="checkbox"
+ name="g_json_udp_enabled"
+ {% if G["json_udp"]["enabled"] %}checked{% endif %}
+>
+
+<span class="slider"></span>
+
+</label>
+
+<div class="option-badge
+ {% if G["json_udp"]["enabled"] %}badge-active{% else %}badge-off{% endif %}
+">
+
+{% if G["json_udp"]["enabled"] %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">
+NON CONFIGURATO
+</span>
+{% endif %}
+
+</div>
+
+</div>
+
+
+<div class="option-main">
+
+<label class="option-name">
+
+<span
+ data-it="Output JSON UDP"
+ data-en="JSON UDP output"
+>
+Output JSON UDP
+</span>
+
+<span class="param">-J</span>
+
+</label>
+
+<input
+ name="g_json_udp_value"
+ value="{{ G['json_udp']['value'] }}"
+ placeholder="x.x.x.x:port"
+ spellcheck="false"
+>
+
+<div class="syntax">
+<span data-it="Sintassi:" data-en="Syntax:">Sintassi:</span>
+<code>-J &lt;ip&gt;:&lt;port&gt;</code>
+</div>
+
+</div>
+
+
+<div class="option-help">
+
+<div
+ data-it="Invia dati demodulati Base64 e metadata in formato JSON via UDP."
+ data-en="Sends demodulated Base64 data and metadata as JSON over UDP."
+>
+Invia dati demodulati Base64 e metadata in formato JSON via UDP.
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- -Y -->
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+
+<input
+ type="checkbox"
+ name="g_debug_iq_enabled"
+ {% if G["debug_iq"]["enabled"] %}checked{% endif %}
+>
+
+<span class="slider"></span>
+
+</label>
+
+<div class="option-badge
+ {% if G["debug_iq"]["enabled"] %}badge-active{% else %}badge-off{% endif %}
+">
+
+{% if G["debug_iq"]["enabled"] %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">
+NON CONFIGURATO
+</span>
+{% endif %}
+
+</div>
+
+</div>
+
+
+<div class="option-main">
+
+<label class="option-name">
+
+<span
+ data-it="Output debug IQ"
+ data-en="IQ debug output"
+>
+Output debug IQ
+</span>
+
+<span class="param">-Y</span>
+
+</label>
+
+<div style="display:flex;gap:10px;">
+
+<select name="g_debug_iq_mode">
+
+<option value="d"
+ {% if G["debug_iq"]["mode"] == "d" %}selected{% endif %}>
+d - dechirped
+</option>
+
+<option value="f"
+ {% if G["debug_iq"]["mode"] == "f" %}selected{% endif %}>
+f - filtered
+</option>
+
+<option value="b"
+ {% if G["debug_iq"]["mode"] == "b" %}selected{% endif %}>
+b - bins
+</option>
+
+</select>
+
+<input
+ name="g_debug_iq_value"
+ value="{{ G['debug_iq']['value'] }}"
+ spellcheck="false"
+>
+
+</div>
+
+<div class="syntax">
+<span data-it="Sintassi:" data-en="Syntax:">Sintassi:</span>
+<code>-Y d|f|b &lt;value&gt;</code>
+</div>
+
+</div>
+
+
+<div class="option-help">
+
+<div
+ data-it="Output IQ di debug dechirped, filtrato oppure visualizzazione bins."
+ data-en="IQ debug output: dechirped, filtered, or bins view."
+>
+Output IQ di debug dechirped, filtrato oppure visualizzazione bins.
+</div>
+
+</div>
+
+</div>
+
+
+
+{% for key,flag,it,en in [
+
+("ascii","-H",
+"ASCII se stampabile",
+"ASCII when printable"),
+
+("newline","-N",
+"Riga vuota dopo i dati",
+"Empty line after data"),
+
+("crc_only","-Q",
+"Verbose solo frame CRC validi",
+"Verbose only CRC-valid frames"),
+
+("verbose","-v",
+"Verbose",
+"Verbose"),
+
+("very_verbose","-V",
+"Molto verbose",
+"Very verbose")
+
+] %}
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+
+<input
+ type="checkbox"
+ name="g_{{ key }}_enabled"
+ {% if G[key]["enabled"] %}checked{% endif %}
+>
+
+<span class="slider"></span>
+
+</label>
+
+<div class="option-badge
+ {% if G[key]["enabled"] %}badge-active{% else %}badge-off{% endif %}
+">
+
+{% if G[key]["enabled"] %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">
+NON CONFIGURATO
+</span>
+{% endif %}
+
+</div>
+
+</div>
+
+
+<div class="option-main">
+
+<label class="option-name">
+
+<span data-it="{{ it }}" data-en="{{ en }}">
+{{ it }}
+</span>
+
+<span class="param">{{ flag }}</span>
+
+</label>
+
+
+<div class="boolean-description">
+
+<span
+ data-it="Parametro senza valore: viene aggiunto quando attivo."
+ data-en="Value-less parameter: added when enabled."
+>
+Parametro senza valore: viene aggiunto quando attivo.
+</span>
+
+</div>
+
+</div>
+
+
+<div class="option-help">
+
+<div
+ data-it="Opzione globale di visualizzazione e monitor."
+ data-en="Global display and monitoring option."
+>
+Opzione globale di visualizzazione e monitor.
+</div>
+
+</div>
+
+</div>
+
+{% endfor %}
+
+
+</div>
+</div>
+</div>
+
+
+
+<!-- ==========================================================
+     DEMODULATORI
+     ========================================================== -->
+
+<div class="card">
+
+<div class="card-title"
+     style="
+       display:flex;
+       justify-content:space-between;
+       align-items:center;
+       gap:15px;
+     ">
+
+<span
+ data-it="Demodulatori LoRa"
+ data-en="LoRa demodulators"
+>
+Demodulatori LoRa
+</span>
+
+
+<button
+ type="button"
+ class="save"
+ onclick="addLorarxDemod()"
+ style="width:auto;"
+>
+<span
+ data-it="+ Aggiungi demodulatore"
+ data-en="+ Add demodulator"
+>
++ Aggiungi demodulatore
+</span>
+</button>
+
+</div>
+
+
+<div class="card-body">
+
+<div class="help"
+     style="margin-bottom:18px;">
+
+<span
+ data-it="Ogni demodulatore genera prima il proprio -s e successivamente tutte le opzioni associate. L'ordine dei blocchi corrisponde all'ordine nella riga di comando."
+ data-en="Each demodulator generates its own -s first, followed by all associated options. Block order matches command-line order."
+>
+Ogni demodulatore genera prima il proprio -s e successivamente tutte le opzioni associate. L'ordine dei blocchi corrisponde all'ordine nella riga di comando.
+</span>
+
+</div>
+
+
+<input
+ type="hidden"
+ id="demod_count"
+ name="demod_count"
+ value="{{ cfg['demodulators']|length }}"
+>
+
+
+<div id="lorarx-demods">
+
+
+{% for D in cfg["demodulators"] %}
+
+<div class="card lorarx-demod"
+     style="margin-bottom:20px;">
+
+<div class="card-title"
+     style="
+       display:flex;
+       justify-content:space-between;
+       align-items:center;
+       gap:15px;
+     ">
+
+<span>
+
+<span
+ data-it="Demodulatore"
+ data-en="Demodulator"
+>
+Demodulatore
+</span>
+
+<span class="lorarx-demod-number">
+{{ loop.index }}
+</span>
+
+</span>
+
+
+<button
+ type="button"
+ onclick="removeLorarxDemod(this)"
+ style="width:auto;"
+>
+<span data-it="Rimuovi" data-en="Remove">
+Rimuovi
+</span>
+</button>
+
+</div>
+
+
+<div class="card-body">
+
+<div class="option-list">
+
+
+<!-- ENABLE -->
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+
+<input
+ type="checkbox"
+ data-field="enabled"
+ name="d_{{ loop.index0 }}_enabled"
+ {% if D["enabled"] %}checked{% endif %}
+>
+
+<span class="slider"></span>
+
+</label>
+
+<div class="option-badge
+ {% if D["enabled"] %}badge-active{% else %}badge-off{% endif %}
+">
+
+{% if D["enabled"] %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">
+NON CONFIGURATO
+</span>
+{% endif %}
+
+</div>
+
+</div>
+
+
+<div class="option-main">
+
+<label class="option-name">
+
+<span
+ data-it="Abilita demodulatore"
+ data-en="Enable demodulator"
+>
+Abilita demodulatore
+</span>
+
+</label>
+
+<div class="boolean-description">
+
+<span
+ data-it="Se disabilitato, questo intero blocco non viene inserito nel comando."
+ data-en="When disabled, this entire block is omitted from the command."
+>
+Se disabilitato, questo intero blocco non viene inserito nel comando.
+</span>
+
+</div>
+
+</div>
+
+
+<div class="option-help">
+
+<div
+ data-it="Permette di preparare più demodulatori e abilitarli singolarmente."
+ data-en="Allows multiple demodulators to be prepared and individually enabled."
+>
+Permette di preparare più demodulatori e abilitarli singolarmente.
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- SF -->
+
+<div class="option-row">
+
+<div class="option-state">
+
+<div class="option-badge badge-active">
+<span>SF</span>
+</div>
+
+</div>
+
+
+<div class="option-main">
+
+<label class="option-name">
+
+<span>Spread Factor</span>
+
+<span class="param">-s</span>
+
+</label>
+
+<select
+ data-field="sf"
+ name="d_{{ loop.index0 }}_sf"
+>
+
+{% for sf in [
+"12","11","10","9","8","7","6","5",
+"-12","-11","-10","-9","-8","-7","-6","-5"
+] %}
+
+<option value="{{ sf }}"
+ {% if D["sf"] == sf %}selected{% endif %}>
+{{ sf }}
+</option>
+
+{% endfor %}
+
+</select>
+
+<div class="syntax">
+<span data-it="Sintassi:" data-en="Syntax:">Sintassi:</span>
+<code>-s [-]&lt;5..12&gt;</code>
+</div>
+
+</div>
+
+
+<div class="option-help">
+
+<div
+ data-it="Spread factor del demodulatore. Un valore negativo seleziona chirp inversi o I/Q scambiati."
+ data-en="Demodulator spread factor. A negative value selects inverse chirps or swapped I/Q."
+>
+Spread factor del demodulatore. Un valore negativo seleziona chirp inversi o I/Q scambiati.
+</div>
+
+</div>
+
+</div>
+
+
+
+{% for key,flag,it,en,syntax,help_it,help_en in [
+
+("afc","-a",
+"Velocità AFC",
+"AFC speed",
+"<speed>",
+"Segue automaticamente la deriva di frequenza.",
+"Automatically follows frequency drift."),
+
+("coding_rate","-c",
+"Coding rate",
+"Coding rate",
+"<4..8>",
+"Imposta il coding rate e abilita l'header implicito.",
+"Sets coding rate and enables implicit header."),
+
+("data_length","-l",
+"Lunghezza dati",
+"Data length",
+"<2..255>",
+"Lunghezza fissa dei dati per header implicito.",
+"Fixed data length for implicit header."),
+
+("squelch","-S",
+"Livello squelch",
+"Squelch level",
+"<level>",
+"Modifica il livello di squelch del demodulatore.",
+"Changes the demodulator squelch level."),
+
+("network_id","-X",
+"Filtro Network ID",
+"Network ID filter",
+"<netid>",
+"Filtro Network ID / sync LoRa.",
+"LoRa Network ID / sync filter."),
+
+("optimize","-O",
+"Optimize",
+"Optimize",
+"<0|1>",
+"Forza optimize on/off invece della selezione automatica.",
+"Forces optimize on/off instead of automatic selection."),
+
+("ppm","-P",
+"Correzione datarate",
+"Datarate correction",
+"<ppm>",
+"Correzione o preset automatico del datarate in ppm.",
+"Datarate correction or automatic preset in ppm.")
+
+] %}
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+
+<input
+ type="checkbox"
+ data-field="{{ key }}_enabled"
+ name="d_{{ loop.index0 }}_{{ key }}_enabled"
+ {% if D[key]["enabled"] %}checked{% endif %}
+>
+
+<span class="slider"></span>
+
+</label>
+
+<div class="option-badge
+ {% if D[key]["enabled"] %}badge-active{% else %}badge-off{% endif %}
+">
+
+{% if D[key]["enabled"] %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">
+NON CONFIGURATO
+</span>
+{% endif %}
+
+</div>
+
+</div>
+
+
+<div class="option-main">
+
+<label class="option-name">
+
+<span data-it="{{ it }}" data-en="{{ en }}">
+{{ it }}
+</span>
+
+<span class="param">{{ flag }}</span>
+
+</label>
+
+<input
+ data-field="{{ key }}_value"
+ name="d_{{ loop.index0 }}_{{ key }}_value"
+ value="{{ D[key]['value'] }}"
+ spellcheck="false"
+>
+
+<div class="syntax">
+<span data-it="Sintassi:" data-en="Syntax:">Sintassi:</span>
+<code>{{ flag }} {{ syntax }}</code>
+</div>
+
+</div>
+
+
+<div class="option-help">
+
+<div data-it="{{ help_it }}" data-en="{{ help_en }}">
+{{ help_it }}
+</div>
+
+</div>
+
+</div>
+
+{% endfor %}
+
+
+
+{% for key,flag,it,en,help_it,help_en in [
+
+("frame_chaining","-A",
+"Frame chaining AX.25",
+"AX.25 frame chaining",
+"Abilita il concatenamento dei frame AX.25 lunghi.",
+"Enables AX.25 long-frame chaining."),
+
+("implicit_crc","-C",
+"CRC header implicito",
+"Implicit header CRC",
+"Utilizza CRC anche con header implicito.",
+"Uses CRC with implicit header."),
+
+("continue_dcd","-D",
+"Continua dopo perdita DCD",
+"Continue after DCD loss",
+"Continua la decodifica fino al limite di lunghezza anche dopo la perdita del DCD.",
+"Continues decoding up to frame length limit after DCD loss."),
+
+("disable_collision","-d",
+"Disabilita collision detection",
+"Disable collision detection",
+"Riduce l'uso CPU ma può perdere frame più forti iniziati durante un frame debole.",
+"Reduces CPU use but may lose stronger frames starting during a weaker frame."),
+
+("invert_iq","-q",
+"Inverti chirp / I-Q",
+"Invert chirps / I-Q",
+"Usa chirp inversi o I/Q scambiati.",
+"Uses inverse chirps or swapped I/Q.")
+
+] %}
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+
+<input
+ type="checkbox"
+ data-field="{{ key }}"
+ name="d_{{ loop.index0 }}_{{ key }}"
+ {% if D[key] %}checked{% endif %}
+>
+
+<span class="slider"></span>
+
+</label>
+
+<div class="option-badge
+ {% if D[key] %}badge-active{% else %}badge-off{% endif %}
+">
+
+{% if D[key] %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">
+NON CONFIGURATO
+</span>
+{% endif %}
+
+</div>
+
+</div>
+
+
+<div class="option-main">
+
+<label class="option-name">
+
+<span data-it="{{ it }}" data-en="{{ en }}">
+{{ it }}
+</span>
+
+<span class="param">{{ flag }}</span>
+
+</label>
+
+<div class="boolean-description">
+
+<span
+ data-it="Parametro senza valore: viene aggiunto quando attivo."
+ data-en="Value-less parameter: added when enabled."
+>
+Parametro senza valore: viene aggiunto quando attivo.
+</span>
+
+</div>
+
+</div>
+
+
+<div class="option-help">
+
+<div data-it="{{ help_it }}" data-en="{{ help_en }}">
+{{ help_it }}
+</div>
+
+</div>
+
+</div>
+
+{% endfor %}
+
+
+
+<!-- AXUDP -->
+
+<div class="option-row">
+
+<div class="option-state">
+
+<div class="option-badge
+ {% if D["axudp"]["mode"] %}badge-active{% else %}badge-off{% endif %}
+">
+
+{% if D["axudp"]["mode"] %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">
+NON CONFIGURATO
+</span>
+{% endif %}
+
+</div>
+
+</div>
+
+
+<div class="option-main">
+
+<label class="option-name">
+
+<span
+ data-it="Output AXUDP"
+ data-en="AXUDP output"
+>
+Output AXUDP
+</span>
+
+<span class="param">-U / -L</span>
+
+</label>
+
+<div style="display:flex;gap:10px;">
+
+<select
+ data-field="axudp_mode"
+ name="d_{{ loop.index0 }}_axudp_mode"
+>
+
+<option value=""
+ {% if not D["axudp"]["mode"] %}selected{% endif %}>
+Off
+</option>
+
+<option value="U"
+ {% if D["axudp"]["mode"] == "U" %}selected{% endif %}>
+-U AXUDP
+</option>
+
+<option value="L"
+ {% if D["axudp"]["mode"] == "L" %}selected{% endif %}>
+-L AXUDPv2 + metadata
+</option>
+
+</select>
+
+<input
+ data-field="axudp_value"
+ name="d_{{ loop.index0 }}_axudp_value"
+ value="{{ D['axudp']['value'] }}"
+ placeholder="x.x.x.x:port"
+ spellcheck="false"
+>
+
+</div>
+
+<div class="syntax">
+<span data-it="Sintassi:" data-en="Syntax:">Sintassi:</span>
+<code>-U|-L &lt;ip&gt;:&lt;port&gt;</code>
+</div>
+
+</div>
+
+
+<div class="option-help">
+
+<div
+ data-it="-U invia AXUDP normale; -L usa AXUDPv2 con metadata per iGate. Le due modalità sono alternative nello stesso demodulatore."
+ data-en="-U sends standard AXUDP; -L uses AXUDPv2 with metadata for iGate. The two modes are mutually exclusive within one demodulator."
+>
+-U invia AXUDP normale; -L usa AXUDPv2 con metadata per iGate. Le due modalità sono alternative nello stesso demodulatore.
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- RAW UDP -->
+
+<div class="option-row">
+
+<div class="option-state">
+
+<div class="option-badge
+ {% if D["raw_udp"]["mode"] %}badge-active{% else %}badge-off{% endif %}
+">
+
+{% if D["raw_udp"]["mode"] %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">
+NON CONFIGURATO
+</span>
+{% endif %}
+
+</div>
+
+</div>
+
+
+<div class="option-main">
+
+<label class="option-name">
+
+<span
+ data-it="Output UDP raw"
+ data-en="Raw UDP output"
+>
+Output UDP raw
+</span>
+
+<span class="param">-u / -t</span>
+
+</label>
+
+<div style="display:flex;gap:10px;">
+
+<select
+ data-field="raw_udp_mode"
+ name="d_{{ loop.index0 }}_raw_udp_mode"
+>
+
+<option value=""
+ {% if not D["raw_udp"]["mode"] %}selected{% endif %}>
+Off
+</option>
+
+<option value="u"
+ {% if D["raw_udp"]["mode"] == "u" %}selected{% endif %}>
+-u raw frame
+</option>
+
+<option value="t"
+ {% if D["raw_udp"]["mode"] == "t" %}selected{% endif %}>
+-t CRC OK
+</option>
+
+</select>
+
+<input
+ data-field="raw_udp_value"
+ name="d_{{ loop.index0 }}_raw_udp_value"
+ value="{{ D['raw_udp']['value'] }}"
+ placeholder="x.x.x.x:port"
+ spellcheck="false"
+>
+
+</div>
+
+<div class="syntax">
+<span data-it="Sintassi:" data-en="Syntax:">Sintassi:</span>
+<code>-u|-t &lt;ip&gt;:&lt;port&gt;</code>
+</div>
+
+</div>
+
+
+<div class="option-help">
+
+<div
+ data-it="-u invia tutti i frame raw; -t invia soltanto frame con CRC presente e valido."
+ data-en="-u sends all raw frames; -t sends only frames with present and valid CRC."
+>
+-u invia tutti i frame raw; -t invia soltanto frame con CRC presente e valido.
+</div>
+
+</div>
+
+</div>
+
+
+</div>
+</div>
+</div>
+
+{% endfor %}
+
+
+</div>
+</div>
+</div>
+
+
+
+<!-- ==========================================================
+     GESTIONE CONFIGURAZIONE
+     ========================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+
+<span
+ data-it="Gestione configurazione"
+ data-en="Configuration management"
+>
+Gestione configurazione
+</span>
+
+</div>
+
+
+<div class="card-body">
+
+<div class="actions config-actions">
+
+<button
+ type="submit"
+ class="save"
+ name="action"
+ value="save"
+>
+
+<span
+ data-it="Salva configurazione"
+ data-en="Save configuration"
+>
+Salva configurazione
+</span>
+
+</button>
+
+
+<button
+ type="submit"
+ class="apply-config"
+ name="action"
+ value="apply"
+>
+
+<span
+ data-it="Applica configurazione"
+ data-en="Apply configuration"
+>
+Applica configurazione
+</span>
+
+</button>
+
+</div>
+
+</div>
+</div>
+
+
+
+<!-- ==========================================================
+     COMANDI
+     ========================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+
+<span
+ data-it="Anteprima comando salvato"
+ data-en="Saved command preview"
+>
+Anteprima comando salvato
+</span>
+
+</div>
+
+<pre>{{ saved_command }}</pre>
+
+</div>
+
+
+
+<div class="card">
+
+<div class="card-title">
+
+<span
+ data-it="Comando attivo"
+ data-en="Active command"
+>
+Comando attivo
+</span>
+
+</div>
+
+<pre>{{ active_command }}</pre>
+
+</div>
+
+
+
+<div class="card">
+
+<div class="card-title">
+
+<span
+ data-it="Ultime righe del log"
+ data-en="Latest log lines"
+>
+Ultime righe del log
+</span>
+
+</div>
+
+<pre>{{ journal }}</pre>
+
+</div>
+
+
+</form>
+
+
+
+<!-- ==========================================================
+     TEMPLATE JS NUOVO DEMODULATORE
+     ========================================================== -->
+
+<script>
+
+function lrxValueOption(
+    key,
+    flag,
+    label,
+    syntax
+) {
+
+    return `
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+<input type="checkbox"
+       data-field="${key}_enabled">
+<span class="slider"></span>
+</label>
+
+<div class="option-badge badge-off">
+NON CONFIGURATO
+</div>
+
+</div>
+
+<div class="option-main">
+
+<label class="option-name">
+<span>${label}</span>
+<span class="param">${flag}</span>
+</label>
+
+<input
+ data-field="${key}_value"
+ spellcheck="false"
+>
+
+<div class="syntax">
+Sintassi / Syntax:
+<code>${flag} ${syntax}</code>
+</div>
+
+</div>
+
+<div class="option-help">
+Parametro del demodulatore / Demodulator parameter
+</div>
+
+</div>`;
+}
+
+
+function lrxBoolOption(
+    key,
+    flag,
+    label
+) {
+
+    return `
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+<input type="checkbox"
+       data-field="${key}">
+<span class="slider"></span>
+</label>
+
+<div class="option-badge badge-off">
+NON CONFIGURATO
+</div>
+
+</div>
+
+<div class="option-main">
+
+<label class="option-name">
+<span>${label}</span>
+<span class="param">${flag}</span>
+</label>
+
+<div class="boolean-description">
+Parametro senza valore / Value-less parameter
+</div>
+
+</div>
+
+<div class="option-help">
+Opzione del demodulatore / Demodulator option
+</div>
+
+</div>`;
+}
+
+
+function lrxNewDemodHtml() {
+
+    return `
+<div class="card lorarx-demod"
+     style="margin-bottom:20px;">
+
+<div class="card-title"
+     style="
+       display:flex;
+       justify-content:space-between;
+       align-items:center;
+       gap:15px;
+     ">
+
+<span>
+Demodulatore / Demodulator
+<span class="lorarx-demod-number"></span>
+</span>
+
+<button
+ type="button"
+ onclick="removeLorarxDemod(this)"
+ style="width:auto;"
+>
+Rimuovi / Remove
+</button>
+
+</div>
+
+
+<div class="card-body">
+
+<div class="option-list">
+
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+<input type="checkbox"
+       data-field="enabled">
+<span class="slider"></span>
+</label>
+
+<div class="option-badge badge-off">
+NON CONFIGURATO
+</div>
+
+</div>
+
+<div class="option-main">
+
+<label class="option-name">
+Abilita demodulatore / Enable demodulator
+</label>
+
+<div class="boolean-description">
+Il blocco viene aggiunto solo quando attivo.
+</div>
+
+</div>
+
+<div class="option-help">
+Enable or disable this demodulator.
+</div>
+
+</div>
+
+
+
+<div class="option-row">
+
+<div class="option-state">
+
+<div class="option-badge badge-active">
+SF
+</div>
+
+</div>
+
+<div class="option-main">
+
+<label class="option-name">
+Spread Factor
+<span class="param">-s</span>
+</label>
+
+<select data-field="sf">
+
+<option>12</option>
+<option>11</option>
+<option>10</option>
+<option>9</option>
+<option>8</option>
+<option>7</option>
+<option>6</option>
+<option>5</option>
+<option>-12</option>
+<option>-11</option>
+<option>-10</option>
+<option>-9</option>
+<option>-8</option>
+<option>-7</option>
+<option>-6</option>
+<option>-5</option>
+
+</select>
+
+<div class="syntax">
+Sintassi / Syntax:
+<code>-s [-]&lt;5..12&gt;</code>
+</div>
+
+</div>
+
+<div class="option-help">
+Spread Factor del demodulatore.
+</div>
+
+</div>
+
+
+${lrxValueOption(
+    "afc",
+    "-a",
+    "Velocità AFC / AFC speed",
+    "<speed>"
+)}
+
+${lrxValueOption(
+    "coding_rate",
+    "-c",
+    "Coding rate",
+    "<4..8>"
+)}
+
+${lrxValueOption(
+    "data_length",
+    "-l",
+    "Lunghezza dati / Data length",
+    "<2..255>"
+)}
+
+${lrxValueOption(
+    "squelch",
+    "-S",
+    "Squelch",
+    "<level>"
+)}
+
+${lrxValueOption(
+    "network_id",
+    "-X",
+    "Network ID",
+    "<netid>"
+)}
+
+${lrxValueOption(
+    "optimize",
+    "-O",
+    "Optimize",
+    "<0|1>"
+)}
+
+${lrxValueOption(
+    "ppm",
+    "-P",
+    "Datarate ppm",
+    "<ppm>"
+)}
+
+
+${lrxBoolOption(
+    "frame_chaining",
+    "-A",
+    "AX.25 frame chaining"
+)}
+
+${lrxBoolOption(
+    "implicit_crc",
+    "-C",
+    "Implicit CRC"
+)}
+
+${lrxBoolOption(
+    "continue_dcd",
+    "-D",
+    "Continue after DCD loss"
+)}
+
+${lrxBoolOption(
+    "disable_collision",
+    "-d",
+    "Disable collision detection"
+)}
+
+${lrxBoolOption(
+    "invert_iq",
+    "-q",
+    "Invert I/Q"
+)}
+
+
+
+<div class="option-row">
+
+<div class="option-state">
+
+<div class="option-badge badge-off">
+NON CONFIGURATO
+</div>
+
+</div>
+
+<div class="option-main">
+
+<label class="option-name">
+Output AXUDP
+<span class="param">-U / -L</span>
+</label>
+
+<div style="display:flex;gap:10px;">
+
+<select data-field="axudp_mode">
+<option value="">Off</option>
+<option value="U">-U AXUDP</option>
+<option value="L">-L AXUDPv2 + metadata</option>
+</select>
+
+<input
+ data-field="axudp_value"
+ placeholder="x.x.x.x:port"
+ spellcheck="false"
+>
+
+</div>
+
+</div>
+
+<div class="option-help">
+AXUDP oppure AXUDPv2 con metadata.
+</div>
+
+</div>
+
+
+
+<div class="option-row">
+
+<div class="option-state">
+
+<div class="option-badge badge-off">
+NON CONFIGURATO
+</div>
+
+</div>
+
+<div class="option-main">
+
+<label class="option-name">
+Output UDP raw
+<span class="param">-u / -t</span>
+</label>
+
+<div style="display:flex;gap:10px;">
+
+<select data-field="raw_udp_mode">
+<option value="">Off</option>
+<option value="u">-u raw frame</option>
+<option value="t">-t CRC OK</option>
+</select>
+
+<input
+ data-field="raw_udp_value"
+ placeholder="x.x.x.x:port"
+ spellcheck="false"
+>
+
+</div>
+
+</div>
+
+<div class="option-help">
+Raw UDP output.
+</div>
+
+</div>
+
+
+</div>
+</div>
+</div>`;
+}
+
+
+
+function reindexLorarxDemods() {
+
+    const demods =
+        document.querySelectorAll(
+            "#lorarx-demods .lorarx-demod"
+        );
+
+    demods.forEach(
+        (block,index) => {
+
+            const number =
+                block.querySelector(
+                    ".lorarx-demod-number"
+                );
+
+            if (number) {
+                number.textContent =
+                    index + 1;
+            }
+
+
+            block.querySelectorAll(
+                "[data-field]"
+            ).forEach(
+                element => {
+
+                    const field =
+                        element.getAttribute(
+                            "data-field"
+                        );
+
+                    element.name =
+                        `d_${index}_${field}`;
+                }
+            );
+
+        }
+    );
+
+
+    document.getElementById(
+        "demod_count"
+    ).value =
+        demods.length;
+}
+
+
+
+function addLorarxDemod() {
+
+    document.getElementById(
+        "lorarx-demods"
+    ).insertAdjacentHTML(
+        "beforeend",
+        lrxNewDemodHtml()
+    );
+
+    reindexLorarxDemods();
+}
+
+
+
+function removeLorarxDemod(button) {
+
+    const block =
+        button.closest(
+            ".lorarx-demod"
+        );
+
+    if (block) {
+        block.remove();
+    }
+
+    reindexLorarxDemods();
+}
+
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    reindexLorarxDemods
+);
+
+</script>
+
+
+{% endblock %}

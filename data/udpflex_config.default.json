@@ -1,0 +1,56 @@
+{
+  "options": {
+    "-A": {
+      "enabled": false
+    },
+    "-a": {
+      "enabled": false
+    },
+    "-d": {
+      "enabled": false,
+      "value": ""
+    },
+    "-i": {
+      "enabled": false,
+      "value": ""
+    },
+    "-K": {
+      "enabled": false,
+      "value": ""
+    },
+    "-k": {
+      "enabled": false
+    },
+    "-p": {
+      "enabled": false,
+      "values": []
+    },
+    "-r": {
+      "enabled": false
+    },
+    "-s": {
+      "enabled": false
+    },
+    "-t": {
+      "enabled": false,
+      "value": ""
+    },
+    "-T": {
+      "enabled": false,
+      "value": ""
+    },
+    "-U": {
+      "enabled": false,
+      "values": []
+    },
+    "-u": {
+      "enabled": false
+    },
+    "-v": {
+      "enabled": false
+    },
+    "-V": {
+      "enabled": false
+    }
+  }
+}

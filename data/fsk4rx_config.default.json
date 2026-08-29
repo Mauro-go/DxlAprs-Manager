@@ -1,0 +1,41 @@
+{
+  "global": {
+    "input": {"enabled": false, "value": ""},
+    "format": {"enabled": false, "value": "u8"},
+    "sample_rate": {"enabled": false, "value": ""},
+    "callsign": {"enabled": false, "value": ""},
+    "json_udp": {"enabled": false, "value": ""},
+    "axudp": {"enabled": false, "values": []},
+    "ais_file": {"enabled": false, "value": ""},
+    "callbook": {"enabled": false, "value": ""},
+    "country_db": {"enabled": false, "value": ""},
+    "ship_beacon": {"enabled": false, "value": ""},
+    "squelch": {"enabled": false, "value": "8"},
+    "verbose": {"enabled": false},
+    "very_verbose": {"enabled": false}
+  },
+  "demodulators": [
+    {
+      "enabled": false,
+      "mode": "4",
+      "tune": "0",
+      "afc": "0",
+      "frequency_mhz": "0",
+      "bfo": "1500",
+      "baud": "100",
+      "spacing": "270",
+      "if_width": "3240",
+      "afsk_baud": "1200",
+      "afsk_low": "1200",
+      "afsk_high": "2200",
+      "fsk_baud": "9600",
+      "fsk_if_width": "16000",
+      "scramble": "1",
+      "audio_rate": "16000",
+      "audio_if_width": "12500",
+      "audio_squelch": "0",
+      "audio_mode": "",
+      "audio_file": ""
+    }
+  ]
+}

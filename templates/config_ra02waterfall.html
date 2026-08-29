@@ -1,0 +1,744 @@
+{% extends "base.html" %}
+
+{% block title %}
+
+<span class="page-icon">
+<svg viewBox="0 0 24 24">
+<rect x="4" y="4" width="6" height="6" rx="1"/>
+<rect x="14" y="4" width="6" height="6" rx="1"/>
+<rect x="4" y="14" width="6" height="6" rx="1"/>
+<rect x="14" y="14" width="6" height="6" rx="1"/>
+</svg>
+</span>
+
+<span>ra02waterfall</span>
+
+{% endblock %}
+
+
+{% macro value_option(name, state, flag, it, en, syntax, help_it, help_en) %}
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+<input
+ type="checkbox"
+ name="{{ name }}_enabled"
+ {% if state.get('enabled') %}checked{% endif %}
+>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge {% if state.get('enabled') %}badge-active{% else %}badge-off{% endif %}">
+{% if state.get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">NON CONFIGURATO</span>
+{% endif %}
+</div>
+
+</div>
+
+<div class="option-main">
+
+<label class="option-name">
+<span data-it="{{ it }}" data-en="{{ en }}">{{ it }}</span>
+<span class="param">{{ flag }}</span>
+</label>
+
+<input
+ name="{{ name }}"
+ value="{{ state.get('value','') }}"
+ spellcheck="false"
+>
+
+<div class="syntax">
+<span data-it="Sintassi:" data-en="Syntax:">Sintassi:</span>
+<code>{{ flag }} {{ syntax }}</code>
+</div>
+
+</div>
+
+<div class="option-help">
+<div data-it="{{ help_it }}" data-en="{{ help_en }}">
+{{ help_it }}
+</div>
+</div>
+
+</div>
+
+{% endmacro %}
+
+
+{% macro bool_option(name, state, flag, it, en, help_it, help_en) %}
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+<input
+ type="checkbox"
+ name="{{ name }}"
+ {% if state.get('enabled') %}checked{% endif %}
+>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge {% if state.get('enabled') %}badge-active{% else %}badge-off{% endif %}">
+{% if state.get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">NON CONFIGURATO</span>
+{% endif %}
+</div>
+
+</div>
+
+<div class="option-main">
+
+<label class="option-name">
+<span data-it="{{ it }}" data-en="{{ en }}">{{ it }}</span>
+<span class="param">{{ flag }}</span>
+</label>
+
+<div class="boolean-description">
+<span
+ data-it="Parametro senza valore: viene aggiunto quando attivo."
+ data-en="Value-less parameter: added when enabled."
+>
+Parametro senza valore: viene aggiunto quando attivo.
+</span>
+</div>
+
+</div>
+
+<div class="option-help">
+<div data-it="{{ help_it }}" data-en="{{ help_en }}">
+{{ help_it }}
+</div>
+</div>
+
+</div>
+
+{% endmacro %}
+
+
+{% block content %}
+
+<form method="post">
+
+
+<!-- ======================================================= -->
+<!-- STATO                                                   -->
+<!-- ======================================================= -->
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Stato ra02waterfall" data-en="ra02waterfall status">
+Stato ra02waterfall
+</span>
+</div>
+
+<div class="card-body">
+
+<div style="display:flex;gap:24px;flex-wrap:wrap;align-items:center;">
+
+<div>
+<strong data-it="Servizio:" data-en="Service:">Servizio:</strong>
+
+{% if running %}
+<span class="option-badge badge-active">
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+</span>
+{% else %}
+<span class="option-badge badge-off">
+<span data-it="FERMO" data-en="STOPPED">FERMO</span>
+</span>
+{% endif %}
+</div>
+
+<div>
+<strong
+ data-it="Avvio automatico:"
+ data-en="Automatic startup:"
+>
+Avvio automatico:
+</strong>
+
+{% if enabled %}
+<span data-it="abilitato" data-en="enabled">abilitato</span>
+{% else %}
+<span data-it="disabilitato" data-en="disabled">disabilitato</span>
+{% endif %}
+</div>
+
+</div>
+
+<div class="actions config-actions" style="margin-top:20px;">
+
+<button
+ type="submit"
+ class="save"
+ name="action"
+ value="start"
+ formnovalidate
+>
+<span data-it="Avvia ra02waterfall" data-en="Start ra02waterfall">
+Avvia ra02waterfall
+</span>
+</button>
+
+<button
+ type="submit"
+ name="action"
+ value="stop"
+ formnovalidate
+>
+<span data-it="Ferma ra02waterfall" data-en="Stop ra02waterfall">
+Ferma ra02waterfall
+</span>
+</button>
+
+<button
+ type="submit"
+ class="restart-udpgate"
+ name="action"
+ value="restart"
+ formnovalidate
+>
+<span data-it="Riavvia ra02waterfall" data-en="Restart ra02waterfall">
+Riavvia ra02waterfall
+</span>
+</button>
+
+</div>
+
+</div>
+</div>
+
+
+<!-- ======================================================= -->
+<!-- HARDWARE                                                -->
+<!-- ======================================================= -->
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Hardware SX127x" data-en="SX127x hardware">
+Hardware SX127x
+</span>
+</div>
+
+<div class="card-body">
+<div class="option-list">
+
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+<input
+ type="checkbox"
+ name="gpio_enabled"
+ {% if GPIO.get('enabled') %}checked{% endif %}
+>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge {% if GPIO.get('enabled') %}badge-active{% else %}badge-off{% endif %}">
+{% if GPIO.get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">NON CONFIGURATO</span>
+{% endif %}
+</div>
+
+</div>
+
+<div class="option-main">
+
+<label class="option-name">
+<span data-it="Interfaccia GPIO" data-en="GPIO interface">
+Interfaccia GPIO
+</span>
+<span class="param">-p</span>
+</label>
+
+<div style="display:flex;gap:10px;flex-wrap:wrap;">
+
+<input name="gpio_nss" value="{{ GPIO.get('nss','8') }}" placeholder="NSS">
+<input name="gpio_mosi" value="{{ GPIO.get('mosi','10') }}" placeholder="MOSI">
+<input name="gpio_miso" value="{{ GPIO.get('miso','9') }}" placeholder="MISO">
+<input name="gpio_sck" value="{{ GPIO.get('sck','11') }}" placeholder="SCK">
+
+</div>
+
+<div class="syntax">
+<span data-it="Sintassi:" data-en="Syntax:">Sintassi:</span>
+<code>-p &lt;nss&gt; &lt;mosi&gt; &lt;miso&gt; &lt;sck&gt;</code>
+</div>
+
+</div>
+
+<div class="option-help">
+<div
+ data-it="Numeri GPIO utilizzati per comunicare con il chip SX127x."
+ data-en="GPIO numbers used to communicate with the SX127x chip."
+>
+Numeri GPIO utilizzati per comunicare con il chip SX127x.
+</div>
+</div>
+
+</div>
+
+
+{{ bool_option(
+    'radio_lna_boost',
+    RADIO.get('lna_boost',{}),
+    '-l',
+    'LNA boost',
+    'LNA boost',
+    'Abilita LNA boost per migliorare IP3 aumentando il consumo.',
+    'Enables LNA boost for improved IP3 at increased current consumption.'
+) }}
+
+
+{{ value_option(
+    'radio_ppm',
+    RADIO.get('ppm',{}),
+    '-P',
+    'Correzione quarzo',
+    'Crystal correction',
+    '&lt;ppm&gt;',
+    'Correzione del quarzo. Il parser corrente accetta valori da -133 a +133 ppm.',
+    'Crystal correction. The current parser accepts values from -133 to +133 ppm.'
+) }}
+
+
+</div>
+</div>
+</div>
+
+
+<!-- ======================================================= -->
+<!-- FREQUENZE                                               -->
+<!-- ======================================================= -->
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Scansione frequenze" data-en="Frequency scan">
+Scansione frequenze
+</span>
+</div>
+
+<div class="card-body">
+<div class="option-list">
+
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+<input
+ type="checkbox"
+ name="frequency_enabled"
+ {% if FREQ.get('enabled') %}checked{% endif %}
+>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge {% if FREQ.get('enabled') %}badge-active{% else %}badge-off{% endif %}">
+{% if FREQ.get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">NON CONFIGURATO</span>
+{% endif %}
+</div>
+
+</div>
+
+
+<div class="option-main">
+
+<label class="option-name">
+<span data-it="Modalità scansione" data-en="Scan mode">
+Modalità scansione
+</span>
+<span class="param">-f</span>
+</label>
+
+<select name="frequency_mode">
+
+<option
+ value="range"
+ {% if FREQ.get('mode','range') == 'range' %}selected{% endif %}
+>
+Intervallo / Range
+</option>
+
+<option
+ value="table"
+ {% if FREQ.get('mode') == 'table' %}selected{% endif %}
+>
+Tabella frequenze / Frequency table
+</option>
+
+</select>
+
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
+
+<input
+ name="frequency_start"
+ value="{{ FREQ.get('start_mhz','430.0') }}"
+ placeholder="MHz iniziale"
+>
+
+<input
+ name="frequency_end"
+ value="{{ FREQ.get('end_mhz','440.0') }}"
+ placeholder="MHz finale"
+>
+
+</div>
+
+<input
+ style="margin-top:10px;"
+ name="frequency_table"
+ value="{{ FREQ.get('table','') }}"
+ placeholder="433.500/125000,433.775/125000"
+ spellcheck="false"
+>
+
+<div class="syntax">
+<code>-f &lt;MHz&gt; &lt;MHz&gt;</code><br>
+<code>-f &lt;MHz&gt;/&lt;bw&gt;,&lt;MHz&gt;/&lt;bw&gt;,...</code>
+</div>
+
+</div>
+
+
+<div class="option-help">
+<div
+ data-it="Intervallo continuo oppure tabella di frequenze/bandwidth. Le due modalità sono mutuamente esclusive."
+ data-en="Continuous range or frequency/bandwidth table. The two modes are mutually exclusive."
+>
+Intervallo continuo oppure tabella frequenze/bandwidth.
+</div>
+</div>
+
+</div>
+
+
+</div>
+</div>
+</div>
+
+
+<!-- ======================================================= -->
+<!-- IMMAGINE                                                -->
+<!-- ======================================================= -->
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Immagine waterfall" data-en="Waterfall image">
+Immagine waterfall
+</span>
+</div>
+
+<div class="card-body">
+<div class="option-list">
+
+
+{{ value_option(
+    'image_filename',
+    IMAGE.get('filename',{}),
+    '-w',
+    'File immagine PNG',
+    'PNG image file',
+    '&lt;filename&gt;',
+    'Percorso e nome del file PNG generato.',
+    'Path and filename of the generated PNG image.'
+) }}
+
+{{ value_option(
+    'image_xsize',
+    IMAGE.get('xsize',{}),
+    '-x',
+    'Larghezza immagine',
+    'Image width',
+    '&lt;pixel&gt;',
+    'Larghezza da 32 a 31999 pixel.',
+    'Width from 32 to 31999 pixels.'
+) }}
+
+{{ value_option(
+    'image_ysize',
+    IMAGE.get('ysize',{}),
+    '-y',
+    'Altezza immagine',
+    'Image height',
+    '&lt;pixel&gt;',
+    'Altezza da 1 a 31999 pixel, oltre allo spettro.',
+    'Height from 1 to 31999 pixels, plus spectrum height.'
+) }}
+
+{{ value_option(
+    'image_roll',
+    IMAGE.get('roll',{}),
+    '-r',
+    'Aggiornamento immagine',
+    'Image update interval',
+    '&lt;lines&gt;',
+    'Scrive una nuova immagine ogni N righe. Il valore 100000 è speciale: genera il test colori e termina.',
+    'Writes a new image every N lines. Value 100000 is special: it generates the colour test image and exits.'
+) }}
+
+{{ value_option(
+    'image_spectrum',
+    IMAGE.get('spectrum',{}),
+    '-s',
+    'Altezza spettro',
+    'Spectrum height',
+    '&lt;lines&gt;',
+    'Disegna lo spettro sopra il waterfall. Il parser accetta da 32 a 255 righe.',
+    'Draws the spectrum above the waterfall. The parser accepts 32 to 255 lines.'
+) }}
+
+{{ value_option(
+    'image_delay',
+    IMAGE.get('delay',{}),
+    '-d',
+    'Intervallo tra le righe',
+    'Delay between lines',
+    '&lt;seconds&gt;',
+    'Secondi tra una riga e la successiva. Zero significa massima velocità.',
+    'Seconds between lines. Zero means as fast as possible.'
+) }}
+
+{{ bool_option(
+    'image_scale',
+    IMAGE.get('scale',{}),
+    '-R',
+    'Scala MHz',
+    'MHz scale',
+    'Aggiunge la scala delle frequenze in MHz.',
+    'Adds the frequency scale in MHz.'
+) }}
+
+{{ bool_option(
+    'image_timestamps',
+    IMAGE.get('timestamps',{}),
+    '-T',
+    'Timestamp',
+    'Timestamps',
+    'Aggiunge i riferimenti temporali al waterfall.',
+    'Adds timestamps to the waterfall.'
+) }}
+
+{{ bool_option(
+    'image_transparent',
+    IMAGE.get('transparent',{}),
+    '-t',
+    'Area non riempita trasparente',
+    'Transparent unfilled area',
+    'Rende trasparente la parte dell’immagine non ancora riempita.',
+    'Makes the not-yet-filled portion of the image transparent.'
+) }}
+
+{{ bool_option(
+    'image_mirror',
+    IMAGE.get('mirror',{}),
+    '-m',
+    'Waterfall verso il basso',
+    'Downward waterfall',
+    'Specchia verticalmente il waterfall.',
+    'Vertically mirrors the waterfall.'
+) }}
+
+
+</div>
+</div>
+</div>
+
+
+<!-- ======================================================= -->
+<!-- DATI ESTERNI                                            -->
+<!-- ======================================================= -->
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Dati esterni e file" data-en="External data and files">
+Dati esterni e file
+</span>
+</div>
+
+<div class="card-body">
+<div class="option-list">
+
+
+{{ value_option(
+    'external_colour_file',
+    EXTERNAL.get('colour_file',{}),
+    '-c',
+    'File palette colori',
+    'Colour palette file',
+    '&lt;file&gt;',
+    'File con righe indice, rosso, verde e blu. Gli intervalli mancanti vengono interpolati.',
+    'File containing index, red, green and blue values. Missing ranges are interpolated.'
+) }}
+
+{{ value_option(
+    'external_gps',
+    EXTERNAL.get('gps',{}),
+    '-g',
+    'GPS seriale',
+    'Serial GPS',
+    '&lt;tty:baud&gt;',
+    'Legge il GPS seriale e aggiunge posizione e rotta ai dati JSON.',
+    'Reads serial GPS and adds position and course to JSON data.'
+) }}
+
+{{ value_option(
+    'external_level_file',
+    EXTERNAL.get('level_file',{}),
+    '-j',
+    'File livelli/GPS',
+    'Level/GPS file',
+    '&lt;filename&gt;',
+    'Scrive in append la tabella dei livelli e gli eventuali dati GPS.',
+    'Appends the level table and optional GPS data.'
+) }}
+
+
+</div>
+</div>
+</div>
+
+
+<!-- ======================================================= -->
+<!-- DEBUG                                                   -->
+<!-- ======================================================= -->
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Debug" data-en="Debug">Debug</span>
+</div>
+
+<div class="card-body">
+<div class="option-list">
+
+{{ bool_option(
+    'debug_verbose',
+    DEBUG.get('verbose',{}),
+    '-v',
+    'Verbose',
+    'Verbose',
+    'Mostra informazioni diagnostiche su stdout.',
+    'Shows diagnostic information on stdout.'
+) }}
+
+{{ bool_option(
+    'debug_very_verbose',
+    DEBUG.get('very_verbose',{}),
+    '-V',
+    'Verbose esteso',
+    'Extended verbose',
+    'Mostra informazioni diagnostiche più dettagliate.',
+    'Shows more detailed diagnostic information.'
+) }}
+
+</div>
+</div>
+</div>
+
+
+<!-- ======================================================= -->
+<!-- GESTIONE                                                -->
+<!-- ======================================================= -->
+
+<div class="card">
+
+<div class="card-title">
+<span
+ data-it="Gestione configurazione"
+ data-en="Configuration management"
+>
+Gestione configurazione
+</span>
+</div>
+
+<div class="card-body">
+
+<div class="actions config-actions">
+
+<button
+ type="submit"
+ class="save"
+ name="action"
+ value="save"
+>
+<span data-it="Salva configurazione" data-en="Save configuration">
+Salva configurazione
+</span>
+</button>
+
+<button
+ type="submit"
+ class="apply-config"
+ name="action"
+ value="apply"
+>
+<span data-it="Applica configurazione" data-en="Apply configuration">
+Applica configurazione
+</span>
+</button>
+
+</div>
+
+</div>
+</div>
+
+
+<div class="card">
+<div class="card-title">
+<span data-it="Anteprima comando salvato" data-en="Saved command preview">
+Anteprima comando salvato
+</span>
+</div>
+<pre>{{ command }}</pre>
+</div>
+
+
+<div class="card">
+<div class="card-title">
+<span data-it="Comando attivo" data-en="Active command">
+Comando attivo
+</span>
+</div>
+<pre>{{ active_command }}</pre>
+</div>
+
+
+<div class="card">
+<div class="card-title">
+<span data-it="Ultime righe del log" data-en="Latest log lines">
+Ultime righe del log
+</span>
+</div>
+<pre>{{ journal }}</pre>
+</div>
+
+
+</form>
+
+{% endblock %}

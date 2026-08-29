@@ -1,0 +1,650 @@
+{% extends "base.html" %}
+
+{% block title %}
+<span class="page-icon">
+<svg viewBox="0 0 24 24">
+<rect x="4" y="4" width="6" height="6" rx="1"/>
+<rect x="14" y="4" width="6" height="6" rx="1"/>
+<rect x="4" y="14" width="6" height="6" rx="1"/>
+<rect x="14" y="14" width="6" height="6" rx="1"/>
+</svg>
+</span>
+<span>ttytee</span>
+{% endblock %}
+
+
+{% block content %}
+
+<form method="post">
+
+
+<!-- ========================================================
+     STATO
+     ======================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Stato ttytee"
+      data-en="ttytee status">
+Stato ttytee
+</span>
+</div>
+
+<div class="card-body">
+
+<div style="display:flex;gap:24px;flex-wrap:wrap;align-items:center;">
+
+<div>
+
+<strong data-it="Servizio:"
+        data-en="Service:">
+Servizio:
+</strong>
+
+{% if running %}
+
+<span class="option-badge badge-active">
+<span data-it="ATTIVO"
+      data-en="ACTIVE">
+ATTIVO
+</span>
+</span>
+
+{% else %}
+
+<span class="option-badge badge-off">
+<span data-it="FERMO"
+      data-en="STOPPED">
+FERMO
+</span>
+</span>
+
+{% endif %}
+
+</div>
+
+
+<div>
+
+<strong data-it="Avvio automatico:"
+        data-en="Automatic startup:">
+Avvio automatico:
+</strong>
+
+{% if enabled %}
+
+<span data-it="abilitato"
+      data-en="enabled">
+abilitato
+</span>
+
+{% else %}
+
+<span data-it="disabilitato"
+      data-en="disabled">
+disabilitato
+</span>
+
+{% endif %}
+
+</div>
+
+</div>
+
+
+<div class="actions config-actions"
+     style="margin-top:20px;">
+
+<button type="submit"
+        class="save"
+        name="action"
+        value="start"
+        formnovalidate>
+
+<span data-it="Avvia ttytee"
+      data-en="Start ttytee">
+Avvia ttytee
+</span>
+
+</button>
+
+
+<button type="submit"
+        name="action"
+        value="stop"
+        formnovalidate>
+
+<span data-it="Ferma ttytee"
+      data-en="Stop ttytee">
+Ferma ttytee
+</span>
+
+</button>
+
+
+<button type="submit"
+        class="restart-udpgate"
+        name="action"
+        value="restart"
+        formnovalidate>
+
+<span data-it="Riavvia ttytee"
+      data-en="Restart ttytee">
+Riavvia ttytee
+</span>
+
+</button>
+
+</div>
+
+</div>
+</div>
+
+
+<!-- ========================================================
+     SERIALE
+     ======================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+
+<span data-it="Porta seriale"
+      data-en="Serial port">
+Porta seriale
+</span>
+
+<span class="param">-t</span>
+
+</div>
+
+
+<div class="card-body">
+
+<div class="option-list">
+
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+
+<input type="checkbox"
+       name="serial_enabled"
+       {% if SERIAL.get('enabled') %}checked{% endif %}>
+
+<span class="slider"></span>
+
+</label>
+
+
+<div class="option-badge {% if SERIAL.get('enabled') %}badge-active{% else %}badge-off{% endif %}">
+
+{% if SERIAL.get('enabled') %}
+
+<span data-it="ATTIVO"
+      data-en="ACTIVE">
+ATTIVO
+</span>
+
+{% else %}
+
+<span data-it="NON CONFIGURATO"
+      data-en="NOT CONFIGURED">
+NON CONFIGURATO
+</span>
+
+{% endif %}
+
+</div>
+
+</div>
+
+
+<div class="option-main">
+
+<label class="option-name">
+
+<span data-it="Dispositivo seriale"
+      data-en="Serial device">
+Dispositivo seriale
+</span>
+
+<span class="param">-t</span>
+
+</label>
+
+
+<input name="serial_device"
+       value="{{SERIAL.get('device','')}}"
+       placeholder="/dev/tty..."
+       spellcheck="false">
+
+
+<label class="option-name"
+       style="margin-top:12px;">
+
+<span data-it="Baud rate"
+      data-en="Baud rate">
+Baud rate
+</span>
+
+</label>
+
+
+<input name="serial_baud"
+       value="{{SERIAL.get('baud','')}}"
+       inputmode="numeric"
+       spellcheck="false">
+
+
+<div class="syntax">
+
+<code>
+-t &lt;tty&gt;:&lt;baud&gt;
+</code>
+
+</div>
+
+</div>
+
+
+<div class="option-help">
+
+<div data-it="Porta seriale da leggere. Il programma accetta dispositivo e baud separati da due punti."
+     data-en="Serial port to read. The program accepts device and baud separated by a colon.">
+
+Porta seriale da leggere. Il programma accetta dispositivo e baud separati da due punti.
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+
+<input type="checkbox"
+       name="serial_abort"
+       {% if SERIAL.get('abort_on_usb_error') %}checked{% endif %}>
+
+<span class="slider"></span>
+
+</label>
+
+
+<div class="option-badge {% if SERIAL.get('abort_on_usb_error') %}badge-active{% else %}badge-off{% endif %}">
+
+{% if SERIAL.get('abort_on_usb_error') %}
+
+<span data-it="ATTIVO"
+      data-en="ACTIVE">
+ATTIVO
+</span>
+
+{% else %}
+
+<span data-it="NON CONFIGURATO"
+      data-en="NOT CONFIGURED">
+NON CONFIGURATO
+</span>
+
+{% endif %}
+
+</div>
+
+</div>
+
+
+<div class="option-main">
+
+<label class="option-name">
+
+<span data-it="Termina su errore USB"
+      data-en="Abort on USB error">
+Termina su errore USB
+</span>
+
+<span class="param">-u</span>
+
+</label>
+
+</div>
+
+
+<div class="option-help">
+
+<div data-it="Con -u ttytee termina se la porta USB non è disponibile, invece di continuare a tentare la riapertura."
+     data-en="With -u, ttytee exits if the USB serial port is unavailable instead of continuing to retry opening it.">
+
+Con -u ttytee termina se la porta USB non è disponibile, invece di continuare a tentare la riapertura.
+
+</div>
+
+</div>
+
+</div>
+
+
+</div>
+</div>
+</div>
+
+
+<!-- ========================================================
+     USCITE
+     ======================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+
+<span data-it="Pipe di uscita"
+      data-en="Output pipes">
+Pipe di uscita
+</span>
+
+<span class="param">-p</span>
+
+</div>
+
+
+<div class="card-body">
+
+<p data-it="Una stessa porta seriale può essere distribuita a più pipe. L'opzione -p può essere ripetuta."
+   data-en="One serial port can be distributed to multiple pipes. The -p option may be repeated.">
+
+Una stessa porta seriale può essere distribuita a più pipe. L'opzione -p può essere ripetuta.
+
+</p>
+
+
+<div id="pipe-list">
+
+{% for value in OUTPUTS %}
+
+<div style="display:flex;gap:10px;margin:8px 0;">
+
+<input name="pipe_destination"
+       value="{{value}}"
+       placeholder="/path/to/pipe"
+       spellcheck="false">
+
+<button type="button"
+        onclick="this.parentElement.remove()">
+×
+</button>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+
+<button type="button"
+        onclick="addPipe()">
+
+<span data-it="Aggiungi pipe"
+      data-en="Add pipe">
+Aggiungi pipe
+</span>
+
+</button>
+
+
+<div class="syntax"
+     style="margin-top:15px;">
+
+<code>
+-p &lt;pipename&gt;
+</code>
+
+</div>
+
+
+<div class="option-help"
+     style="margin-top:15px;">
+
+<div data-it="Le FIFO devono esistere prima dell'avvio di ttytee. Per usare stdout può essere indicato /dev/stdout."
+     data-en="FIFO files must already exist before ttytee starts. Use /dev/stdout to send data to standard output.">
+
+Le FIFO devono esistere prima dell'avvio di ttytee. Per usare stdout può essere indicato /dev/stdout.
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+
+<!-- ========================================================
+     DEBUG
+     ======================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+
+<span data-it="Debug"
+      data-en="Debug">
+Debug
+</span>
+
+</div>
+
+
+<div class="card-body">
+
+<div class="option-row">
+
+<div class="option-state">
+
+<label class="switch">
+
+<input type="checkbox"
+       name="log_verbose"
+       {% if LOGGING.get('verbose') %}checked{% endif %}>
+
+<span class="slider"></span>
+
+</label>
+
+
+<div class="option-badge {% if LOGGING.get('verbose') %}badge-active{% else %}badge-off{% endif %}">
+
+{% if LOGGING.get('verbose') %}
+
+<span data-it="ATTIVO"
+      data-en="ACTIVE">
+ATTIVO
+</span>
+
+{% else %}
+
+<span data-it="NON CONFIGURATO"
+      data-en="NOT CONFIGURED">
+NON CONFIGURATO
+</span>
+
+{% endif %}
+
+</div>
+
+</div>
+
+
+<div class="option-main">
+
+<label class="option-name">
+
+<span data-it="Verbose"
+      data-en="Verbose">
+Verbose
+</span>
+
+<span class="param">-v</span>
+
+</label>
+
+</div>
+
+
+<div class="option-help">
+
+<div data-it="Abilita i messaggi verbose di ttytee."
+     data-en="Enables ttytee verbose messages.">
+
+Abilita i messaggi verbose di ttytee.
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+
+<!-- ========================================================
+     GESTIONE CONFIG
+     ======================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+
+<span data-it="Gestione configurazione"
+      data-en="Configuration management">
+Gestione configurazione
+</span>
+
+</div>
+
+
+<div class="card-body">
+
+<div class="actions config-actions">
+
+<button type="submit"
+        class="save"
+        name="action"
+        value="save">
+
+<span data-it="Salva configurazione"
+      data-en="Save configuration">
+Salva configurazione
+</span>
+
+</button>
+
+
+<button type="submit"
+        class="apply-config"
+        name="action"
+        value="apply">
+
+<span data-it="Applica configurazione"
+      data-en="Apply configuration">
+Applica configurazione
+</span>
+
+</button>
+
+</div>
+
+</div>
+</div>
+
+
+<!-- ========================================================
+     COMANDI
+     ======================================================== -->
+
+<div class="card">
+
+<div class="card-title">
+
+<span data-it="Anteprima comando salvato"
+      data-en="Saved command preview">
+Anteprima comando salvato
+</span>
+
+</div>
+
+<pre>{{command}}</pre>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-title">
+
+<span data-it="Comando attivo"
+      data-en="Active command">
+Comando attivo
+</span>
+
+</div>
+
+<pre>{{active_command}}</pre>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-title">
+
+<span data-it="Ultime righe del log"
+      data-en="Latest log lines">
+Ultime righe del log
+</span>
+
+</div>
+
+<pre>{{journal}}</pre>
+
+</div>
+
+
+</form>
+
+
+<script>
+
+function addPipe() {
+
+    const root=
+        document.getElementById(
+            "pipe-list"
+        );
+
+    const row=
+        document.createElement(
+            "div"
+        );
+
+    row.style.cssText=
+        "display:flex;gap:10px;margin:8px 0;";
+
+    row.innerHTML=
+        '<input name="pipe_destination" placeholder="/path/to/pipe" spellcheck="false">' +
+        '<button type="button" onclick="this.parentElement.remove()">×</button>';
+
+    root.appendChild(row);
+}
+
+</script>
+
+{% endblock %}

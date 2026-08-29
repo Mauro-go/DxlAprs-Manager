@@ -1,0 +1,101 @@
+{
+  "input": {
+    "source": {
+      "enabled": false,
+      "value": ""
+    },
+    "format": {
+      "enabled": false,
+      "value": "u8"
+    },
+    "iq_rate": {
+      "enabled": false,
+      "value": "2048000"
+    },
+    "manual_tune": {
+      "enabled": false,
+      "value": ""
+    },
+    "center_offset": {
+      "enabled": false,
+      "value": "10000"
+    },
+    "converter_offset": {
+      "enabled": false,
+      "value": ""
+    },
+    "reconnect": {
+      "enabled": false
+    }
+  },
+  "channels": {
+    "config_source": {
+      "enabled": false,
+      "value": ""
+    }
+  },
+  "audio": {
+    "output": {
+      "enabled": false,
+      "mode": "s16",
+      "value": ""
+    },
+    "sample_rate": {
+      "enabled": false,
+      "value": "16000"
+    },
+    "downsample": {
+      "enabled": false,
+      "value": ""
+    },
+    "mix_channels": {
+      "enabled": false,
+      "value": "1"
+    },
+    "buffer_samples": {
+      "enabled": false,
+      "value": ""
+    },
+    "stop_when_squelched": {
+      "enabled": false
+    },
+    "watermark": {
+      "enabled": false
+    }
+  },
+  "receiver": {
+    "max_active": {
+      "enabled": false,
+      "value": ""
+    },
+    "max_awake": {
+      "enabled": false,
+      "value": "2000"
+    },
+    "powersave": {
+      "enabled": false,
+      "mode": "normal",
+      "value": "100"
+    },
+    "afc_speed": {
+      "enabled": false,
+      "value": "5"
+    }
+  },
+  "telemetry": {
+    "level_destinations": [],
+    "noise_destinations": []
+  },
+  "rtl_tcp": {
+    "parameters": []
+  },
+  "debug": {
+    "iq_dump": {
+      "enabled": false,
+      "value": ""
+    },
+    "verbose": {
+      "enabled": false
+    }
+  }
+}

@@ -1,0 +1,15 @@
+[Unit]
+Description=DxlAprs Manager - lorarx
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /opt/dxlaprs-manager/run_lorarx.py
+Restart=on-failure
+RestartSec=5
+KillSignal=SIGTERM
+TimeoutStopSec=15
+
+[Install]
+WantedBy=multi-user.target

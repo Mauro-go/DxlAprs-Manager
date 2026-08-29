@@ -371,23 +371,15 @@ if [ "$FAILED" -eq 0 ]; then
         "$MANAGER_DIR/data" \
         "$MANAGER_DIR/backup"
 
-    # Moduli Python principali.
-    cp -a \
-        "$SCRIPT_DIR/manager.py" \
-        "$SCRIPT_DIR/monitor_heard.py" \
-        "$SCRIPT_DIR/monitor_messages.py" \
-        "$SCRIPT_DIR/monitor_raw.py" \
-        "$SCRIPT_DIR/monitor_traffic.py" \
-        "$SCRIPT_DIR/native_collector.py" \
-        "$SCRIPT_DIR/run_udpgate.py" \
-        "$SCRIPT_DIR/web_router.py" \
-        "$MANAGER_DIR/"
+    # Moduli Python del Manager e wrapper dei programmi dxlAPRS.
+    # Tutti i file Python presenti nella release vengono installati
+    # automaticamente.
+    cp -a "$SCRIPT_DIR"/*.py "$MANAGER_DIR/"
 
     if [ $? -ne 0 ]; then
         fail "Copia dei moduli DxlAprs Manager fallita."
     fi
 fi
-
 
 if [ "$FAILED" -eq 0 ]; then
 
@@ -410,13 +402,9 @@ if [ "$FAILED" -eq 0 ]; then
             "$MANAGER_DIR/static/"
     fi
 
-    cp -a \
-        "$SCRIPT_DIR/data/options.json" \
-        "$MANAGER_DIR/data/options.json"
-
-    cp -a \
-        "$SCRIPT_DIR/data/config.default.json" \
-        "$MANAGER_DIR/data/config.default.json"
+    # Copia i file pubblici/default della release.
+    # Le configurazioni runtime locali non fanno parte del repository.
+    cp -a "$SCRIPT_DIR/data/." "$MANAGER_DIR/data/"
 
     if [ $? -ne 0 ]; then
         fail "Copia dei file di configurazione base fallita."
@@ -454,6 +442,7 @@ with default_file.open("r", encoding="utf-8") as f:
 dx = cfg.setdefault("dxlaprs", {})
 
 dx["binary"] = str(dxl_bin / "udpgate4")
+dx["bin_dir"] = str(dxl_bin)
 dx["web_interface"] = "manager"
 
 # ------------------------------------------------------------
@@ -539,22 +528,56 @@ fi
 
 
 # ============================================================
+# CONFIGURAZIONI PROGRAMMI DXLAPRS
+# ============================================================
+
+if [ "$FAILED" -eq 0 ]; then
+
+    # Per ogni <programma>_config.default.json vengono creati,
+    # solo se non esistono gia:
+    #
+    #   <programma>_config.json
+    #   <programma>_active_config.json
+    #
+    # In questo modo un aggiornamento conserva le configurazioni
+    # gia presenti sulla macchina.
+
+    for DEFAULT_FILE in "$MANAGER_DIR"/data/*_config.default.json; do
+
+        [ -f "$DEFAULT_FILE" ] || continue
+
+        NAME=$(basename "$DEFAULT_FILE" "_config.default.json")
+
+        CONFIG_FILE="$MANAGER_DIR/data/${NAME}_config.json"
+        ACTIVE_FILE="$MANAGER_DIR/data/${NAME}_active_config.json"
+
+        if [ ! -f "$CONFIG_FILE" ]; then
+            cp -a "$DEFAULT_FILE" "$CONFIG_FILE"
+        fi
+
+        if [ ! -f "$ACTIVE_FILE" ]; then
+            cp -a "$CONFIG_FILE" "$ACTIVE_FILE"
+        fi
+
+    done
+fi
+
+
+# ============================================================
 # PERMESSI MANAGER
 # ============================================================
 
 if [ "$FAILED" -eq 0 ]; then
 
-    chmod 755 \
-        "$MANAGER_DIR/manager.py" \
-        "$MANAGER_DIR/native_collector.py" \
-        "$MANAGER_DIR/run_udpgate.py" \
-        "$MANAGER_DIR/web_router.py"
+    # Tutti i moduli/wrapper Python devono essere eseguibili.
+    chmod 755 "$MANAGER_DIR"/*.py
 
-    chmod 644 \
-        "$MANAGER_DIR/data/options.json" \
-        "$MANAGER_DIR/data/config.default.json" \
-        "$MANAGER_DIR/data/config.json" \
-        "$MANAGER_DIR/data/active_config.json"
+    # Tutti i JSON del Manager sono file di configurazione.
+    find "$MANAGER_DIR/data" \
+        -maxdepth 1 \
+        -type f \
+        -name "*.json" \
+        -exec chmod 644 {} \;
 
     echo
     echo "DxlAprs Manager installato in:"
@@ -574,15 +597,9 @@ if [ "$FAILED" -eq 0 ]; then
 
     banner "INSTALLAZIONE SYSTEMD"
 
-    cp -a \
-        "$SCRIPT_DIR/systemd/dxlaprs-collector.service" \
-        "$SCRIPT_DIR/systemd/dxlaprs-manager.service" \
-        "$SCRIPT_DIR/systemd/dxlaprs-reconcile.service" \
-        "$SCRIPT_DIR/systemd/dxlaprs-reconcile.timer" \
-        "$SCRIPT_DIR/systemd/dxlaprs-udpgate.service" \
-        "$SCRIPT_DIR/systemd/dxlaprs-web-router.path" \
-        "$SCRIPT_DIR/systemd/dxlaprs-web-router.service" \
-        /etc/systemd/system/
+    # Installa tutte le unit systemd distribuite con la release,
+    # comprese quelle dei programmi dxlAPRS aggiuntivi.
+    cp -a "$SCRIPT_DIR/systemd/." /etc/systemd/system/
 
     if [ $? -ne 0 ]; then
         fail "Installazione unit systemd fallita."

@@ -1,0 +1,62 @@
+{
+  "global": {
+    "abort_sound_error": {"enabled": false},
+    "maxchannels": {"enabled": false, "value": "1"},
+    "debug_output": {"enabled": false, "value": ""},
+    "sample_rate": {"enabled": false, "value": "22050"},
+    "dfm_old_threshold": {"enabled": false, "value": "1"},
+    "dfm_change_threshold": {"enabled": false, "value": "3"},
+    "dfm_id_threshold": {"enabled": false, "value": "1"},
+    "sleep_seconds": {"enabled": false, "value": ""},
+    "sound_buffer": {"enabled": false, "value": "1024"},
+    "sound_device": {"enabled": false, "value": ""},
+    "receiver_label": {"enabled": false, "value": ""},
+    "disable_sdr_data": {"enabled": false},
+    "dfm_swap": {"enabled": false},
+    "dfm_old_name": {"enabled": false},
+    "dfm_name_mode": {
+      "enabled": false,
+      "mode": "N",
+      "value": "0"
+    },
+    "monitor_udp": [],
+    "verbose": false,
+    "very_verbose": false
+  },
+  "channels": [
+    {
+      "enabled": false,
+      "channel": 0,
+      "equalizer": {"enabled": false, "value": "0"},
+      "callsign": {"enabled": false, "value": ""},
+      "afsk_mid": {"enabled": false, "value": "3800"},
+      "udp": [],
+      "decoders": {
+        "m10_m20": "default",
+        "mrz_meisei": "default",
+        "c34_c50": "default",
+        "rs41": "default",
+        "dfm": "default",
+        "imet": "default",
+        "rs92": "default"
+      }
+    },
+    {
+      "enabled": false,
+      "channel": 1,
+      "equalizer": {"enabled": false, "value": "0"},
+      "callsign": {"enabled": false, "value": ""},
+      "afsk_mid": {"enabled": false, "value": "3800"},
+      "udp": [],
+      "decoders": {
+        "m10_m20": "default",
+        "mrz_meisei": "default",
+        "c34_c50": "default",
+        "rs41": "default",
+        "dfm": "default",
+        "imet": "default",
+        "rs92": "default"
+      }
+    }
+  ]
+}

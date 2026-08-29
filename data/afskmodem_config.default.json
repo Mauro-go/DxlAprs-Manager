@@ -1,0 +1,19 @@
+{
+  "global": {
+    "abort_sound_error": {"enabled": false},
+    "tx_dac_buffers": {"enabled": false, "value": "10"},
+    "bad_sound_driver": {"enabled": false},
+    "max_channels": {"enabled": false, "value": "1"},
+    "debug_file": {"enabled": false, "value": ""},
+    "ptt_hold_buffers": {"enabled": false, "value": "1"},
+    "sample_rate": {"enabled": false, "value": "16000"},
+    "kiss_pipe": {"enabled": false, "value": ""},
+    "kiss_buffers": {"enabled": false, "value": "60"},
+    "adc_buffer_length": {"enabled": false, "value": "256"},
+    "mixer": {"enabled": false, "value": ""},
+    "sound_device": {"enabled": false, "value": ""},
+    "fragment_size": {"enabled": false, "value": "9"}
+  },
+  "channels": [],
+  "modems": []
+}

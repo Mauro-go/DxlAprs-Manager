@@ -1,0 +1,1103 @@
+{% extends "base.html" %}
+
+{% block title %}
+
+<span class="page-icon">
+<svg viewBox="0 0 24 24">
+<rect x="4" y="4" width="16" height="16" rx="2"/>
+<path d="M8 8h8"/>
+<path d="M8 12h8"/>
+<path d="M8 16h5"/>
+</svg>
+</span>
+
+<span
+ data-it="Servizi"
+ data-en="Services"
+>
+Servizi
+</span>
+
+{% endblock %}
+
+
+{% block content %}
+
+<style>
+
+.services-summary {
+    display: grid;
+    grid-template-columns: repeat(3,minmax(0,1fr));
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.services-summary-card {
+    background: #171f26;
+    border: 1px solid #303b44;
+    border-radius: 9px;
+    padding: 18px;
+}
+
+.services-summary-label {
+    color: #7d8c97;
+    font-size: 11px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.services-summary-value {
+    color: #edf3f7;
+    font-size: 27px;
+    font-weight: bold;
+}
+
+.services-card {
+    background: #171f26;
+    border: 1px solid #303b44;
+    border-radius: 9px;
+    overflow: hidden;
+}
+
+.services-table-wrap {
+    overflow-x: auto;
+}
+
+.services-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.services-table th {
+    padding: 11px 13px;
+    background: #121a20;
+    color: #778995;
+    font-size: 11px;
+    text-align: left;
+    border-bottom: 1px solid #303b44;
+    white-space: nowrap;
+}
+
+.services-table td {
+    padding: 13px;
+    color: #cbd5dc;
+    border-bottom: 1px solid #283139;
+    vertical-align: middle;
+}
+
+.services-table tbody tr:hover {
+    background: #19232b;
+}
+
+.service-group-row td {
+    background: #10171d;
+    border-top: 2px solid #3a4b57;
+    border-bottom: 1px solid #303b44;
+    padding: 10px 13px;
+}
+
+.service-group-title {
+    color: #7fbce8;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.service-group-row:hover {
+    background: #10171d !important;
+}
+
+.service-name {
+    color: #edf3f7;
+    font-weight: bold;
+}
+
+.service-unit {
+    margin-top: 3px;
+    color: #71828d;
+    font-size: 11px;
+    font-family: Consolas, monospace;
+}
+
+.service-badge {
+    display: inline-block;
+    min-width: 82px;
+    padding: 5px 9px;
+    border-radius: 12px;
+    text-align: center;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+.service-running {
+    color: #9bf0ba;
+    background: #173c2a;
+    border: 1px solid #286343;
+}
+
+.service-stopped {
+    color: #bbc7ce;
+    background: #29323a;
+    border: 1px solid #46535d;
+}
+
+.service-failed {
+    color: #ffabb2;
+    background: #482126;
+    border: 1px solid #71343b;
+}
+
+.service-enabled {
+    color: #9bf0ba;
+    background: #173c2a;
+    border: 1px solid #286343;
+}
+
+.service-disabled {
+    color: #c5cfd5;
+    background: #29323a;
+    border: 1px solid #46535d;
+}
+
+.service-static {
+    color: #f0cf7c;
+    background: #40351d;
+    border: 1px solid #695828;
+}
+
+.service-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.service-action-form {
+    display: inline;
+    margin: 0;
+}
+
+.service-btn {
+    border-radius: 5px;
+    border: 1px solid #46535d;
+    background: #293640;
+    color: #dce5ea;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 11px;
+}
+
+.service-btn:hover {
+    background: #354550;
+}
+
+.service-btn-start {
+    border-color: #326247;
+    background: #204a33;
+}
+
+.service-btn-stop {
+    border-color: #704047;
+    background: #4a292e;
+}
+
+.service-btn-boot {
+    border-color: #345e77;
+    background: #243f50;
+}
+
+.service-protected {
+    color: #71828d;
+    font-size: 11px;
+}
+
+.service-message {
+    padding: 12px 14px;
+    margin-bottom: 18px;
+    border-radius: 7px;
+}
+
+.service-message-ok {
+    background: #173c2a;
+    border: 1px solid #286343;
+    color: #a6efbf;
+}
+
+.service-message-error {
+    background: #482126;
+    border: 1px solid #71343b;
+    color: #ffabb2;
+}
+
+.service-pid {
+    font-family: Consolas, monospace;
+}
+
+.services-note {
+    margin-top: 15px;
+    color: #71828d;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+@media(max-width:900px) {
+    .services-summary {
+        grid-template-columns: 1fr;
+    }
+}
+
+</style>
+
+
+{% if message %}
+
+<div class="service-message {% if ok %}service-message-ok{% else %}service-message-error{% endif %}">
+{{ message }}
+</div>
+
+{% endif %}
+
+
+<div class="services-summary">
+
+<div class="services-summary-card">
+<div
+ class="services-summary-label"
+ data-it="SERVIZI ATTIVI"
+ data-en="ACTIVE SERVICES"
+>
+SERVIZI ATTIVI
+</div>
+<div class="services-summary-value">
+{{ totals.active }}
+</div>
+</div>
+
+
+<div class="services-summary-card">
+<div
+ class="services-summary-label"
+ data-it="SERVIZI FERMI"
+ data-en="STOPPED SERVICES"
+>
+SERVIZI FERMI
+</div>
+<div class="services-summary-value">
+{{ totals.inactive }}
+</div>
+</div>
+
+
+<div class="services-summary-card">
+<div
+ class="services-summary-label"
+ data-it="AVVIO AUTOMATICO"
+ data-en="AUTOMATIC START"
+>
+AVVIO AUTOMATICO
+</div>
+<div class="services-summary-value">
+{{ totals.enabled }}
+</div>
+</div>
+
+</div>
+
+
+<div class="services-card">
+
+<div class="services-table-wrap">
+
+<table class="services-table">
+
+<thead>
+<tr>
+
+<th>
+<span data-it="Programma" data-en="Program">Programma</span>
+</th>
+
+<th>
+<span data-it="Stato" data-en="Status">Stato</span>
+</th>
+
+<th>
+<span data-it="Avvio al boot" data-en="Start at boot">Avvio al boot</span>
+</th>
+
+<th>PID</th>
+
+<th>
+<span data-it="Controlli" data-en="Controls">Controlli</span>
+</th>
+
+</tr>
+</thead>
+
+
+<tbody>
+
+
+
+{# ==========================================================
+   SERVIZI DXLAPRS MANAGER
+   ========================================================== #}
+
+<tr class="service-group-row">
+<td colspan="5">
+<span
+ class="service-group-title"
+ data-it="Servizi DxlAprs Manager"
+ data-en="DxlAprs Manager Services"
+>
+Servizi DxlAprs Manager
+</span>
+</td>
+</tr>
+
+{% for s in services %}
+{% if s.key in ["manager", "collector"] %}
+
+<tr>
+
+<td>
+
+<div class="service-name">
+{{ s.name }}
+</div>
+
+<div class="service-unit">
+{{ s.unit }}
+</div>
+
+</td>
+
+
+<td>
+
+{% if s.active == "active" %}
+
+<span
+ class="service-badge service-running"
+ data-it="ATTIVO"
+ data-en="RUNNING"
+>
+ATTIVO
+</span>
+
+{% elif s.active == "failed" %}
+
+<span
+ class="service-badge service-failed"
+ data-it="ERRORE"
+ data-en="FAILED"
+>
+ERRORE
+</span>
+
+{% else %}
+
+<span
+ class="service-badge service-stopped"
+ data-it="FERMO"
+ data-en="STOPPED"
+>
+FERMO
+</span>
+
+{% endif %}
+
+</td>
+
+
+<td>
+
+{% if s.enabled == "enabled" %}
+
+<span
+ class="service-badge service-enabled"
+ data-it="ABILITATO"
+ data-en="ENABLED"
+>
+ABILITATO
+</span>
+
+{% elif s.enabled == "static" %}
+
+<span class="service-badge service-static">
+STATICO
+</span>
+
+{% else %}
+
+<span
+ class="service-badge service-disabled"
+ data-it="DISABILITATO"
+ data-en="DISABLED"
+>
+DISABILITATO
+</span>
+
+{% endif %}
+
+</td>
+
+
+<td class="service-pid">
+
+{% if s.pid and s.pid != "0" %}
+{{ s.pid }}
+{% else %}
+—
+{% endif %}
+
+</td>
+
+
+<td>
+
+{% if s.managed %}
+
+<div class="service-actions">
+
+<form
+ class="service-action-form"
+ method="post"
+ action="/monitor/services/action"
+>
+<input type="hidden" name="service" value="{{ s.key }}">
+<input type="hidden" name="action" value="start">
+
+<button
+ class="service-btn service-btn-start"
+ type="submit"
+ data-it="Avvia"
+ data-en="Start"
+>
+Avvia
+</button>
+
+</form>
+
+
+<form
+ class="service-action-form"
+ method="post"
+ action="/monitor/services/action"
+>
+<input type="hidden" name="service" value="{{ s.key }}">
+<input type="hidden" name="action" value="stop">
+
+<button
+ class="service-btn service-btn-stop"
+ type="submit"
+ data-it="Ferma"
+ data-en="Stop"
+>
+Ferma
+</button>
+
+</form>
+
+
+<form
+ class="service-action-form"
+ method="post"
+ action="/monitor/services/action"
+>
+<input type="hidden" name="service" value="{{ s.key }}">
+<input type="hidden" name="action" value="restart">
+
+<button
+ class="service-btn"
+ type="submit"
+ data-it="Riavvia"
+ data-en="Restart"
+>
+Riavvia
+</button>
+
+</form>
+
+
+{% if s.enabled == "enabled" %}
+
+<form
+ class="service-action-form"
+ method="post"
+ action="/monitor/services/action"
+>
+<input type="hidden" name="service" value="{{ s.key }}">
+<input type="hidden" name="action" value="disable">
+
+<button
+ class="service-btn service-btn-boot"
+ type="submit"
+ data-it="Disabilita boot"
+ data-en="Disable boot"
+>
+Disabilita boot
+</button>
+
+</form>
+
+{% elif s.enabled != "static" %}
+
+<form
+ class="service-action-form"
+ method="post"
+ action="/monitor/services/action"
+>
+<input type="hidden" name="service" value="{{ s.key }}">
+<input type="hidden" name="action" value="enable">
+
+<button
+ class="service-btn service-btn-boot"
+ type="submit"
+ data-it="Abilita boot"
+ data-en="Enable boot"
+>
+Abilita boot
+</button>
+
+</form>
+
+{% endif %}
+
+</div>
+
+{% else %}
+
+<span
+ class="service-protected"
+ data-it="Servizio di sistema protetto"
+ data-en="Protected system service"
+>
+Servizio di sistema protetto
+</span>
+
+{% endif %}
+
+</td>
+
+</tr>
+
+{% endif %}
+{% endfor %}
+
+
+{# ==========================================================
+   SERVIZI BASE
+   ========================================================== #}
+
+<tr class="service-group-row">
+<td colspan="5">
+<span
+ class="service-group-title"
+ data-it="Servizi base"
+ data-en="Base Services"
+>
+Servizi base
+</span>
+</td>
+</tr>
+
+{% for s in services %}
+{% if s.key == "udpgate4" %}
+
+<tr>
+
+<td>
+
+<div class="service-name">
+{{ s.name }}
+</div>
+
+<div class="service-unit">
+{{ s.unit }}
+</div>
+
+</td>
+
+
+<td>
+
+{% if s.active == "active" %}
+
+<span
+ class="service-badge service-running"
+ data-it="ATTIVO"
+ data-en="RUNNING"
+>
+ATTIVO
+</span>
+
+{% elif s.active == "failed" %}
+
+<span
+ class="service-badge service-failed"
+ data-it="ERRORE"
+ data-en="FAILED"
+>
+ERRORE
+</span>
+
+{% else %}
+
+<span
+ class="service-badge service-stopped"
+ data-it="FERMO"
+ data-en="STOPPED"
+>
+FERMO
+</span>
+
+{% endif %}
+
+</td>
+
+
+<td>
+
+{% if s.enabled == "enabled" %}
+
+<span
+ class="service-badge service-enabled"
+ data-it="ABILITATO"
+ data-en="ENABLED"
+>
+ABILITATO
+</span>
+
+{% elif s.enabled == "static" %}
+
+<span class="service-badge service-static">
+STATICO
+</span>
+
+{% else %}
+
+<span
+ class="service-badge service-disabled"
+ data-it="DISABILITATO"
+ data-en="DISABLED"
+>
+DISABILITATO
+</span>
+
+{% endif %}
+
+</td>
+
+
+<td class="service-pid">
+
+{% if s.pid and s.pid != "0" %}
+{{ s.pid }}
+{% else %}
+—
+{% endif %}
+
+</td>
+
+
+<td>
+
+{% if s.managed %}
+
+<div class="service-actions">
+
+<form
+ class="service-action-form"
+ method="post"
+ action="/monitor/services/action"
+>
+<input type="hidden" name="service" value="{{ s.key }}">
+<input type="hidden" name="action" value="start">
+
+<button
+ class="service-btn service-btn-start"
+ type="submit"
+ data-it="Avvia"
+ data-en="Start"
+>
+Avvia
+</button>
+
+</form>
+
+
+<form
+ class="service-action-form"
+ method="post"
+ action="/monitor/services/action"
+>
+<input type="hidden" name="service" value="{{ s.key }}">
+<input type="hidden" name="action" value="stop">
+
+<button
+ class="service-btn service-btn-stop"
+ type="submit"
+ data-it="Ferma"
+ data-en="Stop"
+>
+Ferma
+</button>
+
+</form>
+
+
+<form
+ class="service-action-form"
+ method="post"
+ action="/monitor/services/action"
+>
+<input type="hidden" name="service" value="{{ s.key }}">
+<input type="hidden" name="action" value="restart">
+
+<button
+ class="service-btn"
+ type="submit"
+ data-it="Riavvia"
+ data-en="Restart"
+>
+Riavvia
+</button>
+
+</form>
+
+
+{% if s.enabled == "enabled" %}
+
+<form
+ class="service-action-form"
+ method="post"
+ action="/monitor/services/action"
+>
+<input type="hidden" name="service" value="{{ s.key }}">
+<input type="hidden" name="action" value="disable">
+
+<button
+ class="service-btn service-btn-boot"
+ type="submit"
+ data-it="Disabilita boot"
+ data-en="Disable boot"
+>
+Disabilita boot
+</button>
+
+</form>
+
+{% elif s.enabled != "static" %}
+
+<form
+ class="service-action-form"
+ method="post"
+ action="/monitor/services/action"
+>
+<input type="hidden" name="service" value="{{ s.key }}">
+<input type="hidden" name="action" value="enable">
+
+<button
+ class="service-btn service-btn-boot"
+ type="submit"
+ data-it="Abilita boot"
+ data-en="Enable boot"
+>
+Abilita boot
+</button>
+
+</form>
+
+{% endif %}
+
+</div>
+
+{% else %}
+
+<span
+ class="service-protected"
+ data-it="Servizio di sistema protetto"
+ data-en="Protected system service"
+>
+Servizio di sistema protetto
+</span>
+
+{% endif %}
+
+</td>
+
+</tr>
+
+{% endif %}
+{% endfor %}
+
+
+{# ==========================================================
+   PROGRAMMI AGGIUNTIVI
+   ========================================================== #}
+
+<tr class="service-group-row">
+<td colspan="5">
+<span
+ class="service-group-title"
+ data-it="Programmi aggiuntivi"
+ data-en="Additional Programs"
+>
+Programmi aggiuntivi
+</span>
+</td>
+</tr>
+
+{% for s in services %}
+{% if s.key not in ["manager", "collector", "udpgate4", "reconcile", "web-router"] %}
+
+<tr>
+
+<td>
+
+<div class="service-name">
+{{ s.name }}
+</div>
+
+<div class="service-unit">
+{{ s.unit }}
+</div>
+
+</td>
+
+
+<td>
+
+{% if s.active == "active" %}
+
+<span
+ class="service-badge service-running"
+ data-it="ATTIVO"
+ data-en="RUNNING"
+>
+ATTIVO
+</span>
+
+{% elif s.active == "failed" %}
+
+<span
+ class="service-badge service-failed"
+ data-it="ERRORE"
+ data-en="FAILED"
+>
+ERRORE
+</span>
+
+{% else %}
+
+<span
+ class="service-badge service-stopped"
+ data-it="FERMO"
+ data-en="STOPPED"
+>
+FERMO
+</span>
+
+{% endif %}
+
+</td>
+
+
+<td>
+
+{% if s.enabled == "enabled" %}
+
+<span
+ class="service-badge service-enabled"
+ data-it="ABILITATO"
+ data-en="ENABLED"
+>
+ABILITATO
+</span>
+
+{% elif s.enabled == "static" %}
+
+<span class="service-badge service-static">
+STATICO
+</span>
+
+{% else %}
+
+<span
+ class="service-badge service-disabled"
+ data-it="DISABILITATO"
+ data-en="DISABLED"
+>
+DISABILITATO
+</span>
+
+{% endif %}
+
+</td>
+
+
+<td class="service-pid">
+
+{% if s.pid and s.pid != "0" %}
+{{ s.pid }}
+{% else %}
+—
+{% endif %}
+
+</td>
+
+
+<td>
+
+{% if s.managed %}
+
+<div class="service-actions">
+
+<form
+ class="service-action-form"
+ method="post"
+ action="/monitor/services/action"
+>
+<input type="hidden" name="service" value="{{ s.key }}">
+<input type="hidden" name="action" value="start">
+
+<button
+ class="service-btn service-btn-start"
+ type="submit"
+ data-it="Avvia"
+ data-en="Start"
+>
+Avvia
+</button>
+
+</form>
+
+
+<form
+ class="service-action-form"
+ method="post"
+ action="/monitor/services/action"
+>
+<input type="hidden" name="service" value="{{ s.key }}">
+<input type="hidden" name="action" value="stop">
+
+<button
+ class="service-btn service-btn-stop"
+ type="submit"
+ data-it="Ferma"
+ data-en="Stop"
+>
+Ferma
+</button>
+
+</form>
+
+
+<form
+ class="service-action-form"
+ method="post"
+ action="/monitor/services/action"
+>
+<input type="hidden" name="service" value="{{ s.key }}">
+<input type="hidden" name="action" value="restart">
+
+<button
+ class="service-btn"
+ type="submit"
+ data-it="Riavvia"
+ data-en="Restart"
+>
+Riavvia
+</button>
+
+</form>
+
+
+{% if s.enabled == "enabled" %}
+
+<form
+ class="service-action-form"
+ method="post"
+ action="/monitor/services/action"
+>
+<input type="hidden" name="service" value="{{ s.key }}">
+<input type="hidden" name="action" value="disable">
+
+<button
+ class="service-btn service-btn-boot"
+ type="submit"
+ data-it="Disabilita boot"
+ data-en="Disable boot"
+>
+Disabilita boot
+</button>
+
+</form>
+
+{% elif s.enabled != "static" %}
+
+<form
+ class="service-action-form"
+ method="post"
+ action="/monitor/services/action"
+>
+<input type="hidden" name="service" value="{{ s.key }}">
+<input type="hidden" name="action" value="enable">
+
+<button
+ class="service-btn service-btn-boot"
+ type="submit"
+ data-it="Abilita boot"
+ data-en="Enable boot"
+>
+Abilita boot
+</button>
+
+</form>
+
+{% endif %}
+
+</div>
+
+{% else %}
+
+<span
+ class="service-protected"
+ data-it="Servizio di sistema protetto"
+ data-en="Protected system service"
+>
+Servizio di sistema protetto
+</span>
+
+{% endif %}
+
+</td>
+
+</tr>
+
+{% endif %}
+{% endfor %}
+
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+<div class="services-note">
+
+<span
+ data-it="Avvia/Ferma modifica lo stato corrente. Abilita boot/Disabilita boot decide invece se systemd avvierà automaticamente il servizio al prossimo riavvio della macchina."
+ data-en="Start/Stop changes the current state. Enable boot/Disable boot determines whether systemd will automatically start the service at the next machine reboot."
+>
+Avvia/Ferma modifica lo stato corrente. Abilita boot/Disabilita boot decide invece se systemd avvierà automaticamente il servizio al prossimo riavvio della macchina.
+</span>
+
+</div>
+
+{% endblock %}

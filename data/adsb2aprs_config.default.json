@@ -1,0 +1,69 @@
+{
+  "dump1090": {
+    "server": {
+      "enabled": false,
+      "value": ""
+    },
+    "keep_connection": {
+      "enabled": false
+    }
+  },
+
+  "aprs": {
+    "callsign": {
+      "enabled": false,
+      "value": ""
+    },
+    "destination": {
+      "enabled": false,
+      "value": ""
+    },
+    "beacon_time": {
+      "enabled": false,
+      "value": "20"
+    },
+    "symbol": {
+      "enabled": false,
+      "value": "/^"
+    },
+    "comment": {
+      "enabled": false,
+      "value": ""
+    }
+  },
+
+  "position": {
+    "home": {
+      "enabled": false,
+      "value": ""
+    },
+    "home_altitude": {
+      "enabled": false,
+      "value": ""
+    },
+    "altitude_correction": {
+      "enabled": false,
+      "value": "0"
+    },
+    "srtm": {
+      "enabled": false,
+      "value": ""
+    }
+  },
+
+  "aircraft_database": {
+    "file": {
+      "enabled": false,
+      "value": ""
+    },
+    "titles": {
+      "enabled": false,
+      "value": ""
+    }
+  },
+
+  "logging": {
+    "verbose": false,
+    "very_verbose": false
+  }
+}

@@ -1,0 +1,338 @@
+{% extends "base.html" %}
+
+{% block title %}
+<span class="page-icon">
+<svg viewBox="0 0 24 24">
+<rect x="4" y="4" width="6" height="6" rx="1"/>
+<rect x="14" y="4" width="6" height="6" rx="1"/>
+<rect x="4" y="14" width="6" height="6" rx="1"/>
+<rect x="14" y="14" width="6" height="6" rx="1"/>
+</svg>
+</span>
+<span>afskmodem</span>
+{% endblock %}
+
+
+{% macro val(name,state,flag,it,en,syntax,help_it,help_en) %}
+<div class="option-row">
+<div class="option-state">
+<label class="switch">
+<input type="checkbox" name="{{name}}_enabled"
+{% if state.get('enabled') %}checked{% endif %}>
+<span class="slider"></span>
+</label>
+<div class="option-badge {% if state.get('enabled') %}badge-active{% else %}badge-off{% endif %}">
+{% if state.get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">NON CONFIGURATO</span>
+{% endif %}
+</div>
+</div>
+
+<div class="option-main">
+<label class="option-name">
+<span data-it="{{it}}" data-en="{{en}}">{{it}}</span>
+<span class="param">{{flag}}</span>
+</label>
+<input name="{{name}}" value="{{state.get('value','')}}" spellcheck="false">
+<div class="syntax"><code>{{flag}} {{syntax}}</code></div>
+</div>
+
+<div class="option-help">
+<div data-it="{{help_it}}" data-en="{{help_en}}">{{help_it}}</div>
+</div>
+</div>
+{% endmacro %}
+
+
+{% macro boo(name,state,flag,it,en,help_it,help_en) %}
+<div class="option-row">
+<div class="option-state">
+<label class="switch">
+<input type="checkbox" name="{{name}}"
+{% if state.get('enabled') %}checked{% endif %}>
+<span class="slider"></span>
+</label>
+<div class="option-badge {% if state.get('enabled') %}badge-active{% else %}badge-off{% endif %}">
+{% if state.get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">NON CONFIGURATO</span>
+{% endif %}
+</div>
+</div>
+
+<div class="option-main">
+<label class="option-name">
+<span data-it="{{it}}" data-en="{{en}}">{{it}}</span>
+<span class="param">{{flag}}</span>
+</label>
+<div class="boolean-description"
+data-it="Parametro senza valore: viene aggiunto quando attivo."
+data-en="Value-less parameter: added when enabled.">
+Parametro senza valore: viene aggiunto quando attivo.
+</div>
+</div>
+
+<div class="option-help">
+<div data-it="{{help_it}}" data-en="{{help_en}}">{{help_it}}</div>
+</div>
+</div>
+{% endmacro %}
+
+
+{% block content %}
+<form method="post">
+
+<div class="card">
+<div class="card-title">
+<span data-it="Stato afskmodem" data-en="afskmodem status">Stato afskmodem</span>
+</div>
+<div class="card-body">
+
+<div style="display:flex;gap:24px;flex-wrap:wrap;align-items:center;">
+<div>
+<strong data-it="Servizio:" data-en="Service:">Servizio:</strong>
+{% if running %}
+<span class="option-badge badge-active"><span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span></span>
+{% else %}
+<span class="option-badge badge-off"><span data-it="FERMO" data-en="STOPPED">FERMO</span></span>
+{% endif %}
+</div>
+
+<div>
+<strong data-it="Avvio automatico:" data-en="Automatic startup:">Avvio automatico:</strong>
+{% if enabled %}
+<span data-it="abilitato" data-en="enabled">abilitato</span>
+{% else %}
+<span data-it="disabilitato" data-en="disabled">disabilitato</span>
+{% endif %}
+</div>
+</div>
+
+<div class="actions config-actions" style="margin-top:20px;">
+<button type="submit" class="save" name="action" value="start" formnovalidate>
+<span data-it="Avvia afskmodem" data-en="Start afskmodem">Avvia afskmodem</span>
+</button>
+<button type="submit" name="action" value="stop" formnovalidate>
+<span data-it="Ferma afskmodem" data-en="Stop afskmodem">Ferma afskmodem</span>
+</button>
+<button type="submit" class="restart-udpgate" name="action" value="restart" formnovalidate>
+<span data-it="Riavvia afskmodem" data-en="Restart afskmodem">Riavvia afskmodem</span>
+</button>
+</div>
+
+</div>
+</div>
+
+
+<div class="card">
+<div class="card-title">
+<span data-it="Configurazione generale" data-en="General configuration">
+Configurazione generale
+</span>
+</div>
+<div class="card-body">
+<div class="option-list">
+
+{{ boo('g_abort',G.abort_sound_error,'-a','Interrompi su errore audio','Abort on audio error',
+'Termina il programma se il dispositivo audio genera un errore.',
+'Terminates the program if the audio device reports an error.') }}
+
+{{ val('g_buffers',G.tx_dac_buffers,'-b','Buffer DAC TX','TX DAC buffers','&lt;numero&gt;',
+'Numero di buffer DAC trasmissione.','Number of transmit DAC buffers.') }}
+
+{{ boo('g_bad',G.bad_sound_driver,'-B','Riparazione driver audio','Bad sound driver repair',
+'Invia silenzio continuo per driver audio che perdono campioni durante start/stop.',
+'Sends continuous silence for sound drivers losing samples during start/stop.') }}
+
+{{ val('g_channels',G.max_channels,'-c','Canali audio','Audio channels','&lt;1|2&gt;',
+'Uno per mono, due per stereo.','One for mono, two for stereo.') }}
+
+{{ val('g_debug',G.debug_file,'-D','Dump debug','Debug dump','&lt;file&gt;',
+'File o pipe per dati audio grezzi; .txt abilita il dump dei bit demodulati.',
+'File or pipe for raw audio; .txt enables demodulated bit output.') }}
+
+{{ val('g_hold',G.ptt_hold_buffers,'-e','Ritardo PTT aggiuntivo','Additional PTT hold','&lt;buffer&gt;',
+'Ritardo PTT aggiuntivo espresso in buffer ADC.','Additional PTT delay expressed in ADC buffers.') }}
+
+{{ val('g_rate',G.sample_rate,'-f','Sample rate audio','Audio sample rate','&lt;8000..96000&gt;',
+'Sample rate globale della scheda audio.','Global sound-card sample rate.') }}
+
+{{ val('g_kisspipe',G.kiss_pipe,'-i','Pipe KISS','KISS pipe','&lt;file&gt;',
+'Nome della pipe/dispositivo KISS.','KISS pipe/device name.') }}
+
+{{ val('g_kissbuf',G.kiss_buffers,'-k','Buffer KISS TX','TX KISS buffers','&lt;numero&gt;',
+'Numero di buffer KISS di trasmissione.','Number of transmit KISS buffers.') }}
+
+{{ val('g_adcbuf',G.adc_buffer_length,'-l','Lunghezza buffer ADC','ADC buffer length','&lt;16..4096&gt;',
+'Buffer maggiore riduce il carico ma aumenta il tempo di reazione.',
+'Larger buffer reduces load but increases reaction time.') }}
+
+{{ val('g_mixer',G.mixer,'-m','Mixer OSS','OSS mixer','[device:]channel:left:right',
+'Configurazione mixer OSS.','OSS mixer configuration.') }}
+
+{{ val('g_sound',G.sound_device,'-o','Dispositivo audio','Sound device','&lt;device | input,output&gt;',
+'Dispositivo OSS oppure coppia input/output per pipe.',
+'OSS device or input/output pipe pair.') }}
+
+{{ val('g_fragment',G.fragment_size,'-s','Dimensione frammento','Fragment size','&lt;n&gt;',
+'Dimensione frammento audio espressa come potenza di due.',
+'Audio fragment size expressed as a power of two.') }}
+
+</div>
+</div>
+</div>
+
+
+<div class="card">
+<div class="card-title">
+<span data-it="Canali audio / PTT" data-en="Audio channels / PTT">
+Canali audio / PTT
+</span>
+</div>
+<div class="card-body">
+
+<div data-it="Sono disponibili al massimo due canali, numerati 0 e 1."
+data-en="Up to two channels are available, numbered 0 and 1.">
+Sono disponibili al massimo due canali, numerati 0 e 1.
+</div>
+
+{% for c in CHANNELS %}
+<div style="margin-top:22px;padding-top:18px;border-top:1px solid rgba(255,255,255,.12);">
+
+<div class="option-name">
+Canale {{c.number}}
+<span class="param">-C {{c.number}}</span>
+</div>
+
+<label class="switch">
+<input type="checkbox" name="ch{{c.number}}_enabled" {% if c.enabled %}checked{% endif %}>
+<span class="slider"></span>
+</label>
+
+<div style="margin-top:15px;">
+<label>PTT <span class="param">-p</span></label>
+<input name="ch{{c.number}}_ptt_device" value="{{c.ptt.value if c.ptt is defined else ''}}" placeholder="device">
+<input name="ch{{c.number}}_ptt_bit" value="{{c.ptt.bit if c.ptt is defined else ''}}" placeholder="bit">
+</div>
+
+<label><input type="checkbox" name="ch{{c.number}}_ptt_enabled"
+{% if c.ptt is defined and c.ptt.enabled %}checked{% endif %}> PTT attivo</label>
+
+<label><input type="checkbox" name="ch{{c.number}}_close"
+{% if c.close_ptt_tty is defined and c.close_ptt_tty.enabled %}checked{% endif %}>
+-u close PTT tty</label>
+
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;">
+<div><label>Duplex <span class="param">-f</span></label><input name="ch{{c.number}}_duplex" value="{{c.duplex.value if c.duplex is defined else '0'}}"></div>
+<div><label>GM900 ms <span class="param">-g</span></label><input name="ch{{c.number}}_gm" value="{{c.gm900_delay.value if c.gm900_delay is defined else '0'}}"></div>
+<div><label>Random wait ms <span class="param">-r</span></label><input name="ch{{c.number}}_random" value="{{c.random_wait.value if c.random_wait is defined else '800'}}"></div>
+</div>
+
+</div>
+{% endfor %}
+
+</div>
+</div>
+
+
+<div class="card">
+<div class="card-title">
+<span data-it="Modem" data-en="Modems">Modem</span>
+</div>
+<div class="card-body">
+
+<div data-it="Sono disponibili fino a otto modem, numerati da 0 a 7."
+data-en="Up to eight modems are available, numbered 0 through 7.">
+Sono disponibili fino a otto modem, numerati da 0 a 7.
+</div>
+
+{% for m in MODEMS %}
+<div style="margin-top:22px;padding-top:18px;border-top:1px solid rgba(255,255,255,.12);">
+
+<div class="option-name">
+Modem {{m.number}}
+<span class="param">-M {{m.number}}</span>
+</div>
+
+<label class="switch">
+<input type="checkbox" name="m{{m.number}}_enabled" {% if m.enabled %}checked{% endif %}>
+<span class="slider"></span>
+</label>
+
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:15px;">
+
+<div><label>Baud <span class="param">-b</span></label><input name="m{{m.number}}_baud" value="{{m.baud.value}}"></div>
+<div><label>Canale <span class="param">-c</span></label><input name="m{{m.number}}_channel" value="{{m.audio_channel.value}}"></div>
+<div><label>DCD <span class="param">-d</span></label><input name="m{{m.number}}_dcd" value="{{m.dcd_level.value}}"></div>
+
+<div><label>Equalizer <span class="param">-e</span></label><input name="m{{m.number}}_eq" value="{{m.equalizer.value}}"></div>
+<div><label>AFSK mid Hz <span class="param">-f</span></label><input name="m{{m.number}}_mid" value="{{m.afsk_mid.value}}"></div>
+<div><label>TX highpass <span class="param">-H</span></label><input name="m{{m.number}}_hp" value="{{m.tx_highpass.value}}"></div>
+
+<div><label>KISS port <span class="param">-k</span></label><input name="m{{m.number}}_kiss" value="{{m.kiss_port.value}}"></div>
+<div><label>Monitor <span class="param">-m</span></label><input name="m{{m.number}}_monitor" value="{{m.monitor.value}}"></div>
+<div><label>Nyquist % <span class="param">-n</span></label><input name="m{{m.number}}_nyquist" value="{{m.nyquist.value}}"></div>
+
+<div><label>PLL <span class="param">-p</span></label><input name="m{{m.number}}_pll" value="{{m.pll_speed.value}}"></div>
+<div><label>Quiet <span class="param">-q</span></label><input name="m{{m.number}}_quiet" value="{{m.quiet_level.value}}"></div>
+<div><label>AFSK shift Hz <span class="param">-s</span></label><input name="m{{m.number}}_shift" value="{{m.afsk_shift.value}}"></div>
+
+<div><label>TX delay ms <span class="param">-t</span></label><input name="m{{m.number}}_txdelay" value="{{m.txdelay.value}}"></div>
+<div><label>Timeout s <span class="param">-T</span></label><input name="m{{m.number}}_timeout" value="{{m.tx_timeout.value}}"></div>
+<div><label>TX volume <span class="param">-v</span></label><input name="m{{m.number}}_volume" value="{{m.tx_volume.value}}"></div>
+
+<div><label>Pattern <span class="param">-w</span></label><input name="m{{m.number}}_pattern" value="{{m.txdelay_pattern.value}}"></div>
+<div><label>TX tail ms <span class="param">-x</span></label><input name="m{{m.number}}_tail" value="{{m.txtail.value}}"></div>
+<div><label>DC clamp <span class="param">-z</span></label><input name="m{{m.number}}_clamp" value="{{m.dc_clamp.value}}"></div>
+
+<div><label>BERT kbyte <span class="param">-B</span></label><input name="m{{m.number}}_bert" value="{{m.bert.value}}"></div>
+
+</div>
+
+<div style="margin-top:12px;">
+<label><input type="checkbox" name="m{{m.number}}_fsk" {% if m.fsk.enabled %}checked{% endif %}> FSK <span class="param">-a</span></label>
+<label><input type="checkbox" name="m{{m.number}}_scrambler" {% if m.scrambler.enabled %}checked{% endif %}> G3RUH <span class="param">-g</span></label>
+<label><input type="checkbox" name="m{{m.number}}_ignore" {% if m.ignore_kiss_parameters.enabled %}checked{% endif %}> Ignore KISS <span class="param">-i</span></label>
+</div>
+
+<div style="margin-top:16px;">
+<label>AXUDP <span class="param">-U / -L / -P</span></label>
+<select name="m{{m.number}}_axmode">
+<option value="U" {% if m.axudp.mode == 'U' %}selected{% endif %}>AXUDP (-U)</option>
+<option value="L" {% if m.axudp.mode == 'L' %}selected{% endif %}>AXUDP2 (-L)</option>
+<option value="P" {% if m.axudp.mode == 'P' %}selected{% endif %}>AXUDP2 + DCD/TX status (-P)</option>
+</select>
+<input name="m{{m.number}}_axudp" value="{{m.axudp.value}}" placeholder="host:destport:listenport">
+<label><input type="checkbox" name="m{{m.number}}_axenabled" {% if m.axudp.enabled %}checked{% endif %}> Attivo</label>
+</div>
+
+</div>
+{% endfor %}
+
+</div>
+</div>
+
+
+<div class="card">
+<div class="card-title"><span data-it="Gestione configurazione" data-en="Configuration management">Gestione configurazione</span></div>
+<div class="card-body">
+<div class="actions config-actions">
+<button type="submit" class="save" name="action" value="save">
+<span data-it="Salva configurazione" data-en="Save configuration">Salva configurazione</span>
+</button>
+<button type="submit" class="apply-config" name="action" value="apply">
+<span data-it="Applica configurazione" data-en="Apply configuration">Applica configurazione</span>
+</button>
+</div>
+</div>
+</div>
+
+<div class="card"><div class="card-title"><span data-it="Anteprima comando salvato" data-en="Saved command preview">Anteprima comando salvato</span></div><pre>{{command}}</pre></div>
+<div class="card"><div class="card-title"><span data-it="Comando attivo" data-en="Active command">Comando attivo</span></div><pre>{{active_command}}</pre></div>
+<div class="card"><div class="card-title"><span data-it="Ultime righe del log" data-en="Latest log lines">Ultime righe del log</span></div><pre>{{journal}}</pre></div>
+
+</form>
+{% endblock %}

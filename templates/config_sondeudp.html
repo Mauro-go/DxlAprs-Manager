@@ -1,0 +1,565 @@
+{% extends "base.html" %}
+
+{% block title %}
+<span class="page-icon">
+<svg viewBox="0 0 24 24">
+<rect x="4" y="4" width="6" height="6" rx="1"/>
+<rect x="14" y="4" width="6" height="6" rx="1"/>
+<rect x="4" y="14" width="6" height="6" rx="1"/>
+<rect x="14" y="14" width="6" height="6" rx="1"/>
+</svg>
+</span>
+<span>sondeudp</span>
+{% endblock %}
+
+
+{% macro value_option(name,state,flag,it,en,syntax,help_it,help_en) %}
+<div class="option-row">
+
+<div class="option-state">
+<label class="switch">
+<input type="checkbox" name="{{name}}_enabled"
+{% if state.get('enabled') %}checked{% endif %}>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge {% if state.get('enabled') %}badge-active{% else %}badge-off{% endif %}">
+{% if state.get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">NON CONFIGURATO</span>
+{% endif %}
+</div>
+</div>
+
+<div class="option-main">
+<label class="option-name">
+<span data-it="{{it}}" data-en="{{en}}">{{it}}</span>
+<span class="param">{{flag}}</span>
+</label>
+
+<input name="{{name}}" value="{{state.get('value','')}}" spellcheck="false">
+<div class="syntax"><code>{{flag}} {{syntax}}</code></div>
+</div>
+
+<div class="option-help">
+<div data-it="{{help_it}}" data-en="{{help_en}}">{{help_it}}</div>
+</div>
+
+</div>
+{% endmacro %}
+
+
+{% macro bool_option(name,state,flag,it,en,help_it,help_en) %}
+<div class="option-row">
+
+<div class="option-state">
+<label class="switch">
+<input type="checkbox" name="{{name}}"
+{% if state.get('enabled') %}checked{% endif %}>
+<span class="slider"></span>
+</label>
+
+<div class="option-badge {% if state.get('enabled') %}badge-active{% else %}badge-off{% endif %}">
+{% if state.get('enabled') %}
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+{% else %}
+<span data-it="NON CONFIGURATO" data-en="NOT CONFIGURED">NON CONFIGURATO</span>
+{% endif %}
+</div>
+</div>
+
+<div class="option-main">
+<label class="option-name">
+<span data-it="{{it}}" data-en="{{en}}">{{it}}</span>
+<span class="param">{{flag}}</span>
+</label>
+</div>
+
+<div class="option-help">
+<div data-it="{{help_it}}" data-en="{{help_en}}">{{help_it}}</div>
+</div>
+
+</div>
+{% endmacro %}
+
+
+{% block content %}
+<form method="post">
+
+
+<div class="card">
+<div class="card-title">
+<span data-it="Stato sondeudp" data-en="sondeudp status">Stato sondeudp</span>
+</div>
+
+<div class="card-body">
+
+<div style="display:flex;gap:24px;flex-wrap:wrap;align-items:center;">
+
+<div>
+<strong data-it="Servizio:" data-en="Service:">Servizio:</strong>
+{% if running %}
+<span class="option-badge badge-active">
+<span data-it="ATTIVO" data-en="ACTIVE">ATTIVO</span>
+</span>
+{% else %}
+<span class="option-badge badge-off">
+<span data-it="FERMO" data-en="STOPPED">FERMO</span>
+</span>
+{% endif %}
+</div>
+
+<div>
+<strong data-it="Avvio automatico:" data-en="Automatic startup:">
+Avvio automatico:
+</strong>
+{% if enabled %}
+<span data-it="abilitato" data-en="enabled">abilitato</span>
+{% else %}
+<span data-it="disabilitato" data-en="disabled">disabilitato</span>
+{% endif %}
+</div>
+
+</div>
+
+<div class="actions config-actions" style="margin-top:20px;">
+
+<button type="submit" class="save" name="action" value="start" formnovalidate>
+<span data-it="Avvia sondeudp" data-en="Start sondeudp">Avvia sondeudp</span>
+</button>
+
+<button type="submit" name="action" value="stop" formnovalidate>
+<span data-it="Ferma sondeudp" data-en="Stop sondeudp">Ferma sondeudp</span>
+</button>
+
+<button type="submit" class="restart-udpgate" name="action" value="restart" formnovalidate>
+<span data-it="Riavvia sondeudp" data-en="Restart sondeudp">Riavvia sondeudp</span>
+</button>
+
+</div>
+</div>
+</div>
+
+
+<div class="card">
+<div class="card-title">
+<span data-it="Audio e acquisizione" data-en="Audio and acquisition">
+Audio e acquisizione
+</span>
+</div>
+
+<div class="card-body">
+<div class="option-list">
+
+{{ bool_option('g_abort',G.get('abort_sound_error',{}),'-a',
+'Abort su errore audio','Abort on audio error',
+'Termina su errore del dispositivo audio invece di tentare la riapertura.',
+'Terminates on sound-device error instead of retrying.') }}
+
+{{ value_option('g_maxchannels',G.get('maxchannels',{}),'-c',
+'Numero canali','Channel count','&lt;0..62&gt;',
+'Numero massimo di canali; 0 abilita il riconoscimento automatico da sdrtst.',
+'Maximum channel count; 0 enables automatic recognition from sdrtst.') }}
+
+{{ value_option('g_samplerate',G.get('sample_rate',{}),'-f',
+'Sample rate','Sample rate','&lt;8000..96000&gt;',
+'Frequenza di campionamento audio.',
+'Audio sample rate.') }}
+
+{{ value_option('g_buffer',G.get('sound_buffer',{}),'-l',
+'Buffer audio','Sound buffer','&lt;16..4096&gt;',
+'Lunghezza del buffer audio.',
+'Audio buffer length.') }}
+
+{{ value_option('g_sound',G.get('sound_device',{}),'-o',
+'Dispositivo / file audio','Audio device / file','&lt;filename&gt;',
+'Dispositivo OSS, file WAV/raw oppure pipe.',
+'OSS device, WAV/raw file or pipe.') }}
+
+{{ value_option('g_debug',G.get('debug_output',{}),'-D',
+'Uscita audio raw di debug','Raw debug audio output','&lt;filename&gt;',
+'Scrive l’ingresso audio raw in un file o pipe.',
+'Writes raw audio input to a file or pipe.') }}
+
+{{ value_option('g_label',G.get('receiver_label',{}),'-L',
+'Etichetta ricevitore','Receiver label','&lt;max 4 caratteri&gt;',
+'Etichetta del dispositivo inviata a sondemod.',
+'Device label sent to sondemod.') }}
+
+{{ bool_option('g_nosdr',G.get('disable_sdr_data',{}),'-s',
+'Disabilita dati SDR','Disable SDR data',
+'Non invia frequenza, AFC, RSSI ed etichetta alle vecchie versioni di sondemod.',
+'Does not send frequency, AFC, RSSI and label to old sondemod versions.') }}
+
+</div>
+</div>
+</div>
+
+
+<div class="card">
+<div class="card-title">
+<span data-it="DFM e risparmio CPU" data-en="DFM and CPU saving">
+DFM e risparmio CPU
+</span>
+</div>
+
+<div class="card-body">
+<div class="option-list">
+
+{{ value_option('g_dfmold',G.get('dfm_old_threshold',{}),'-g',
+'Stabilità nome sostitutivo','Substitute-name stability','&lt;minuti&gt;',
+'Tempo di stabilità richiesto per il nome sostitutivo DFM.',
+'Required stability time for the DFM substitute name.') }}
+
+{{ value_option('g_dfmchg',G.get('dfm_change_threshold',{}),'-G',
+'Blocco dopo cambio nome','Block after name change','&lt;minuti&gt;',
+'Non trasmette se il nome sostitutivo DFM cambia entro questo intervallo.',
+'Suppresses transmission if the DFM substitute name changes within this interval.') }}
+
+{{ value_option('g_dfmid',G.get('dfm_id_threshold',{}),'-S',
+'Stabilità seriale DFM','DFM serial stability','&lt;retries&gt;',
+'Numero di verifiche della stabilità del seriale DFM.',
+'Number of DFM serial-number stability checks.') }}
+
+{{ value_option('g_sleep',G.get('sleep_seconds',{}),'-W',
+'Sleep decoder inattivi','Inactive decoder sleep','&lt;secondi&gt;',
+'Sospende ciclicamente i decoder inattivi per ridurre il carico CPU.',
+'Cyclically sleeps inactive decoders to reduce CPU load.') }}
+
+{{ bool_option('g_dfmswap',G.get('dfm_swap',{}),'-J',
+'DFM swap','DFM swap',
+'Abilita lo scambio DFM previsto dal decoder.',
+'Enables the DFM swap mode implemented by the decoder.') }}
+
+{{ bool_option('g_dfmoldname',G.get('dfm_old_name',{}),'-O',
+'Nome DFM esadecimale','Hexadecimal DFM name',
+'Invia DF6... con numero esadecimale invece di D... decimale.',
+'Sends DF6... with hexadecimal number instead of decimal D... name.') }}
+
+</div>
+
+
+<div class="option-row">
+<div class="option-state">
+
+<label class="switch">
+<input type="checkbox" name="g_dfmname_enabled"
+{% if G.get('dfm_name_mode',{}).get('enabled') %}checked{% endif %}>
+<span class="slider"></span>
+</label>
+
+</div>
+
+<div class="option-main">
+
+<label class="option-name">
+<span data-it="Generazione ID DFM" data-en="DFM ID generation">
+Generazione ID DFM
+</span>
+<span class="param">-N / -n</span>
+</label>
+
+<select name="g_dfmname_mode">
+<option value="N" {% if G.get('dfm_name_mode',{}).get('mode') == 'N' %}selected{% endif %}>
+-N seriale
+</option>
+<option value="n" {% if G.get('dfm_name_mode',{}).get('mode') == 'n' %}selected{% endif %}>
+-n sostitutivo
+</option>
+</select>
+
+<input name="g_dfmname_value"
+value="{{G.get('dfm_name_mode',{}).get('value','')}}">
+
+</div>
+
+<div class="option-help">
+<span data-it="Seleziona la modalità di generazione del nome DFM e il byte iniziale del seriale."
+data-en="Selects DFM naming mode and serial-number start byte.">
+Seleziona la modalità di generazione del nome DFM.
+</span>
+</div>
+</div>
+
+</div>
+</div>
+
+
+<div class="card">
+<div class="card-title">
+<span data-it="Monitor UDP" data-en="UDP monitor">Monitor UDP</span>
+</div>
+
+<div class="card-body">
+
+<div id="monitor-list">
+
+{% for value in G.get('monitor_udp',[]) %}
+<div style="display:flex;gap:10px;margin:8px 0;">
+<input name="monitor_udp" value="{{value}}" placeholder="host:port">
+<button type="button" onclick="this.parentElement.remove()">×</button>
+</div>
+{% endfor %}
+
+</div>
+
+<button type="button" onclick="addMonitor()">
+<span data-it="Aggiungi destinazione monitor" data-en="Add monitor destination">
+Aggiungi destinazione monitor
+</span>
+</button>
+
+<div class="syntax" style="margin-top:15px;">
+<code>-M &lt;ip:destport&gt;</code>
+</div>
+
+</div>
+</div>
+
+
+{% for CH in CHANNELS %}
+
+<div class="card">
+
+<div class="card-title">
+<span data-it="Canale {{CH.channel}}" data-en="Channel {{CH.channel}}">
+Canale {{CH.channel}}
+</span>
+<span class="param">-C {{CH.channel}}</span>
+</div>
+
+<div class="card-body">
+
+<div class="option-row">
+
+<div class="option-state">
+<label class="switch">
+<input type="checkbox" name="ch{{CH.channel}}_enabled"
+{% if CH.enabled %}checked{% endif %}>
+<span class="slider"></span>
+</label>
+</div>
+
+<div class="option-main">
+<strong data-it="Configura questo canale" data-en="Configure this channel">
+Configura questo canale
+</strong>
+</div>
+
+<div class="option-help">
+<span data-it="Le opzioni seguenti vengono emesse dopo -C {{CH.channel}}."
+data-en="The following options are emitted after -C {{CH.channel}}.">
+Le opzioni seguenti vengono emesse dopo la selezione del canale.
+</span>
+</div>
+
+</div>
+
+
+<div class="option-list">
+
+{{ value_option(
+'ch' ~ CH.channel ~ '_equalizer',
+CH.equalizer,'-e',
+'Equalizzatore','Equalizer','&lt;-999..999&gt;',
+'Equalizzatore del demodulatore del canale.',
+'Channel demodulator equalizer.'
+) }}
+
+{{ value_option(
+'ch' ~ CH.channel ~ '_callsign',
+CH.callsign,'-I',
+'Nominativo','Callsign','&lt;CALL-SSID&gt;',
+'Nominativo associato a questo canale.',
+'Callsign associated with this channel.'
+) }}
+
+{{ value_option(
+'ch' ~ CH.channel ~ '_afskmid',
+CH.afsk_mid,'-F',
+'Centro AFSK C34/C50','C34/C50 AFSK centre','&lt;Hz&gt;',
+'Frequenza centrale AFSK per il decoder C34/C50.',
+'AFSK centre frequency for the C34/C50 decoder.'
+) }}
+
+</div>
+
+
+<h4>UDP → sondemod <span class="param">-u</span></h4>
+
+<div id="udp-{{CH.channel}}">
+
+{% for value in CH.udp %}
+<div style="display:flex;gap:10px;margin:8px 0;">
+<input name="ch{{CH.channel}}_udp" value="{{value}}" placeholder="host:port">
+<button type="button" onclick="this.parentElement.remove()">×</button>
+</div>
+{% endfor %}
+
+</div>
+
+<button type="button" onclick="addUdp({{CH.channel}})">
+<span data-it="Aggiungi destinazione UDP" data-en="Add UDP destination">
+Aggiungi destinazione UDP
+</span>
+</button>
+
+
+<h4 style="margin-top:25px;"
+data-it="Decoder" data-en="Decoders">Decoder</h4>
+
+{% set decoder_names = [
+('m10_m20','1','M10 / M20'),
+('mrz_meisei','2','MRZ / Meisei'),
+('c34_c50','3','C34 / C50'),
+('rs41','4','RS41'),
+('dfm','6','DFM'),
+('imet','8','IMET'),
+('rs92','9','RS92')
+] %}
+
+{% for key,flag,label in decoder_names %}
+
+<div class="option-row">
+
+<div class="option-state">
+<span class="param">±{{flag}}</span>
+</div>
+
+<div class="option-main">
+
+<label class="option-name">{{label}}</label>
+
+<select name="ch{{CH.channel}}_decoder_{{key}}">
+<option value="default" {% if CH.decoders.get(key) == 'default' %}selected{% endif %}>
+Default
+</option>
+<option value="off" {% if CH.decoders.get(key) == 'off' %}selected{% endif %}>
+OFF (-{{flag}})
+</option>
+<option value="always" {% if CH.decoders.get(key) == 'always' %}selected{% endif %}>
+Always (+{{flag}})
+</option>
+</select>
+
+</div>
+
+<div class="option-help">
+<span data-it="Default: comportamento interno. OFF: decoder disabilitato. Always: escluso dallo sleep quando -W è attivo."
+data-en="Default: internal behaviour. OFF: decoder disabled. Always: excluded from sleep when -W is active.">
+Default, OFF oppure sempre attivo durante lo sleep.
+</span>
+</div>
+
+</div>
+
+{% endfor %}
+
+</div>
+</div>
+
+{% endfor %}
+
+
+<div class="card">
+<div class="card-title">
+<span data-it="Debug" data-en="Debug">Debug</span>
+</div>
+
+<div class="card-body">
+
+<label>
+<input type="checkbox" name="g_verbose"
+{% if G.get('verbose') %}checked{% endif %}>
+Verbose <span class="param">-v</span>
+</label>
+
+&nbsp;&nbsp;&nbsp;
+
+<label>
+<input type="checkbox" name="g_very_verbose"
+{% if G.get('very_verbose') %}checked{% endif %}>
+Very verbose <span class="param">-V</span>
+</label>
+
+</div>
+</div>
+
+
+<div class="card">
+<div class="card-title">
+<span data-it="Gestione configurazione" data-en="Configuration management">
+Gestione configurazione
+</span>
+</div>
+
+<div class="card-body">
+<div class="actions config-actions">
+
+<button type="submit" class="save" name="action" value="save">
+<span data-it="Salva configurazione" data-en="Save configuration">
+Salva configurazione
+</span>
+</button>
+
+<button type="submit" class="apply-config" name="action" value="apply">
+<span data-it="Applica configurazione" data-en="Apply configuration">
+Applica configurazione
+</span>
+</button>
+
+</div>
+</div>
+</div>
+
+
+<div class="card">
+<div class="card-title">
+<span data-it="Anteprima comando salvato" data-en="Saved command preview">
+Anteprima comando salvato
+</span>
+</div>
+<pre>{{command}}</pre>
+</div>
+
+<div class="card">
+<div class="card-title">
+<span data-it="Comando attivo" data-en="Active command">
+Comando attivo
+</span>
+</div>
+<pre>{{active_command}}</pre>
+</div>
+
+<div class="card">
+<div class="card-title">
+<span data-it="Ultime righe del log" data-en="Latest log lines">
+Ultime righe del log
+</span>
+</div>
+<pre>{{journal}}</pre>
+</div>
+
+</form>
+
+
+<script>
+function addMonitor() {
+    const root=document.getElementById("monitor-list");
+    const row=document.createElement("div");
+    row.style.cssText="display:flex;gap:10px;margin:8px 0;";
+    row.innerHTML='<input name="monitor_udp" placeholder="host:port"><button type="button" onclick="this.parentElement.remove()">×</button>';
+    root.appendChild(row);
+}
+
+function addUdp(ch) {
+    const root=document.getElementById("udp-"+ch);
+    const row=document.createElement("div");
+    row.style.cssText="display:flex;gap:10px;margin:8px 0;";
+    row.innerHTML='<input name="ch'+ch+'_udp" placeholder="host:port"><button type="button" onclick="this.parentElement.remove()">×</button>';
+    root.appendChild(row);
+}
+</script>
+
+{% endblock %}

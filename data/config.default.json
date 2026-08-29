@@ -5,7 +5,8 @@
   },
   "dxlaprs": {
     "binary": "",
-    "web_interface": "manager"
+    "web_interface": "manager",
+    "bin_dir": ""
   },
   "manager": {
     "listen_address": "127.0.0.1",
