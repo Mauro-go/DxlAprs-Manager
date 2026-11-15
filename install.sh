@@ -16,6 +16,7 @@ DXL_BIN="/opt/dxlaprs/bin"
 REPO_URL="https://github.com/oe5hpm/dxlAPRS.git"
 EXPECTED_DXL_COMMIT="86803526d2670fd800388036a0c6b78deae8f4af"
 
+MANAGER_VERSION="v0.7"
 EXPECTED_UDPGATE_VERSION="0.80"
 
 APACHE_PUBLIC_PORT="14501"
@@ -413,6 +414,22 @@ fi
 
 
 # ============================================================
+# INSTALLAZIONE MANUTENZIONE DATABASE
+# ============================================================
+
+if [ "$FAILED" -eq 0 ]; then
+
+    mkdir -p "$MANAGER_DIR/maintenance"
+
+    if ! cp -a "$SCRIPT_DIR/maintenance/." "$MANAGER_DIR/maintenance/"; then
+        fail "Installazione manutenzione database fallita."
+    else
+        chmod 755 "$MANAGER_DIR/maintenance/dbmaintenance.py"
+    fi
+fi
+
+
+# ============================================================
 # CONFIGURAZIONE INIZIALE
 # ============================================================
 
@@ -611,6 +628,34 @@ fi
 
 
 # ============================================================
+# LIMITI JOURNALD
+# ============================================================
+
+if [ "$FAILED" -eq 0 ]; then
+
+    JOURNAL_CONF="/etc/systemd/journald.conf.d/90-dxlaprs-limits.conf"
+
+    if mkdir -p /etc/systemd/journald.conf.d; then
+
+        if [ ! -e "$JOURNAL_CONF" ]; then
+            cat > "$JOURNAL_CONF" <<'JOURNAL'
+[Journal]
+SystemMaxUse=100M
+SystemMaxFileSize=20M
+MaxRetentionSec=7day
+JOURNAL
+            echo "Configurazione journald installata."
+        else
+            echo "Configurazione journald esistente: conservata."
+        fi
+
+    else
+        fail "Creazione directory journald fallita."
+    fi
+fi
+
+
+# ============================================================
 # INSTALLAZIONE APACHE
 # ============================================================
 
@@ -773,6 +818,20 @@ if [ "$FAILED" -eq 0 ]; then
     else
 
         fail "Frontend Apache non raggiungibile sulla porta ${APACHE_PUBLIC_PORT}."
+    fi
+fi
+
+
+# ============================================================
+# ATTIVAZIONE MANUTENZIONE DATABASE
+# ============================================================
+
+if [ "$FAILED" -eq 0 ]; then
+
+    banner "ATTIVAZIONE MANUTENZIONE DATABASE"
+
+    if ! systemctl enable --now dxlaprs-dbmaintenance.timer; then
+        fail "Attivazione timer manutenzione database fallita."
     fi
 fi
 

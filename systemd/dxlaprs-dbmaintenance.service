@@ -1,0 +1,8 @@
+[Unit]
+Description=DXLAPRS Manager SQLite database maintenance
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 -u /opt/dxlaprs-manager/maintenance/dbmaintenance.py --execute
+TimeoutStartSec=300

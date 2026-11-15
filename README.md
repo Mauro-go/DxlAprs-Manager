@@ -1,5 +1,12 @@
 # DxlAprs Manager
 
+**Current release: v0.7**
+
+Release v0.7 introduces automatic SQLite database maintenance,
+30-day monitoring data retention, scheduled cleanup on the 1st
+and 15th of each month, and systemd journal size limits.
+
+
 DxlAprs Manager is a web-based management, configuration and monitoring
 interface for the dxlAPRS toolchain.
 
@@ -235,6 +242,45 @@ repository.
 Program configuration and program boot state remain independent: enabling
 a service controls automatic startup, while Start / Stop controls its
 current runtime state.
+
+## Automatic database maintenance
+
+DxlAprs Manager includes automatic maintenance of its SQLite monitoring
+database (`/opt/dxlaprs-manager/data/monitor.db`).
+
+- Retention period: 30 days.
+- Schedule: 1st and 15th of each month at 04:30 (server local time).
+- Old records are deleted from the `events` and `packets` tables.
+- Deletion uses batches of up to 1,000 records.
+- Processing is limited to approximately 60 seconds per table.
+- The `connections` table is preserved.
+- SQLite WAL mode is retained.
+- No automatic VACUUM is performed.
+
+The installer installs and enables the systemd timer
+`dxlaprs-dbmaintenance.timer`.
+
+Check the timer status:
+
+    systemctl status dxlaprs-dbmaintenance.timer
+
+Check the next scheduled execution:
+
+    systemctl list-timers dxlaprs-dbmaintenance.timer
+
+Run a simulation without deleting records:
+
+    python3 /opt/dxlaprs-manager/maintenance/dbmaintenance.py
+
+Run maintenance manually:
+
+    python3 -u /opt/dxlaprs-manager/maintenance/dbmaintenance.py --execute
+
+The installer also creates
+`/etc/systemd/journald.conf.d/90-dxlaprs-limits.conf` if it does not
+already exist, with a 100 MB journal limit, a 20 MB per-file limit,
+and a maximum retention period of 7 days. Existing configuration
+at that path is preserved.
 
 ## Monitoring architecture
 
